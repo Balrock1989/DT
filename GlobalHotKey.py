@@ -5,8 +5,10 @@ def show(window):
     COMBINATIONS = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='!')},
         {keyboard.Key.shift_l, keyboard.Key.f1},
+        {keyboard.Key.shift_l, keyboard.KeyCode(char='1')},
         {keyboard.Key.shift_r, keyboard.KeyCode(char='!')},
         {keyboard.Key.shift_r, keyboard.Key.f1},
+        {keyboard.Key.shift_r, keyboard.KeyCode(char='1')}
     ]
 
     current = set()
@@ -28,14 +30,11 @@ def show(window):
 
     def on_press(key):
         key_name = get_key_name(key)
-        #
-        # if key == keyboard.Key.esc:
-        #     print('--- Нажата клавиша: {}'.format(key_name))
-        #     window.hide()
-        # elif key == keyboard.Key.space:
-        #     print('--- Нажата клавиша: {}'.format(key_name))
-        #     window.show()
-        if key == keyboard.Key.shift_l:
+
+        if key == keyboard.Key.esc:
+            print('--- Нажата клавиша: {}'.format(key_name))
+            window.driver.exit = True
+        elif key == keyboard.Key.shift_l:
             print('--- Нажата клавиша: {}'.format(key_name))
 
         elif (key == keyboard.KeyCode.from_char('f1')) or \
@@ -45,12 +44,11 @@ def show(window):
         else:
             print('Информационно. Вы нажали: {}'.format(key_name))
             current.clear()
-
         if any([key in COMBO for COMBO in COMBINATIONS]):
             current.add(key)
-            if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS):
-                executeShiftF1()
-                current.clear()
+        if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS):
+            executeShiftF1()
+            current.clear()
 
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
