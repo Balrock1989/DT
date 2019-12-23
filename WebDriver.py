@@ -15,6 +15,7 @@ class Add_banner:
     end_data = ''
     url = ''
     driver = None
+    exit = False
 
     def auth(self):
         options = Options()
@@ -47,6 +48,8 @@ class Add_banner:
                 now = datetime.datetime.now()
                 self.start_data = now.strftime("%d.%m.%Y")
             for link in links:
+                if self.exit:
+                    return
                 self.driver.get(link)
                 size = self.driver.find_element_by_css_selector("input[id*='geTitle']").get_attribute('value')
                 width = re.search(r'(\d+)__\d\d', size).group(1)
