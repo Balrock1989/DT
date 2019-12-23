@@ -1,7 +1,7 @@
 import os
 import shutil
-from PIL import Image
 
+from PIL import Image
 
 class Resizer:
     basewidth = 0

@@ -13,8 +13,7 @@ import GlobalHotKey
 import threading
 
 
-hiddenimports = ['CustomDesign.py', 'CustomDialog.py']
-datas = [('.chromedriver.exe', '.')]
+# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." gui.py
 
 class CustomDialog(QDialog, Ui_Dialog):
     def __init__(self, sizer, message, size):
@@ -82,6 +81,7 @@ class DoubleTrade(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.append(self.dir_name)
 
     def add_banner(self):
+        self.driver.exit = False
         self.driver.start_data = self.date_start.toPlainText()
         self.driver.end_data = self.date_end.toPlainText()
         self.driver.url = self.url.toPlainText()
