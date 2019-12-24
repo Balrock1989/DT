@@ -18,11 +18,6 @@ def show(window):
         print("\n *** Нажата комбинация клавиш: Shift + F1 \n *** Должна вызваться функция :)")
 
     def get_key_name(key):
-        """ Функцию get_key_name(), будет проверять тип ключа.
-        Для нормального ключа он вернет key.char,
-        у которого не будет дополнительных одинарных кавычек.
-        Для других ключей он напечатает имя ключа (например, Key.cmd, Key.alt, Key.ctrl ...)
-        """
         if isinstance(key, keyboard.KeyCode):
             return key.char
         else:
@@ -30,10 +25,10 @@ def show(window):
 
     def on_press(key):
         key_name = get_key_name(key)
-
         if key == keyboard.Key.esc:
             print('--- Нажата клавиша: {}'.format(key_name))
             window.driver.exit = True
+            window.sizer.exit = True
         elif key == keyboard.Key.shift_l:
             print('--- Нажата клавиша: {}'.format(key_name))
 

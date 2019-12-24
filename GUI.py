@@ -8,12 +8,12 @@ from CustomDesign import Ui_MainWindow
 from Rename_image import Rename
 from WebDriver import Add_banner
 from CustomDialog import Ui_Dialog
-from image_sizer import Resizer
+from ImageSizer import Resizer
 import GlobalHotKey
 import threading
 
 
-# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." gui.py
+# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." GUI.py
 
 class CustomDialog(QDialog, Ui_Dialog):
     def __init__(self, sizer, message, size):
@@ -97,6 +97,7 @@ class DoubleTrade(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def resizer(self):
         self.command_window.clear()
+        self.sizer.exit = False
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
     def launch_thread(self):
