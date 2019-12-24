@@ -62,9 +62,3 @@ class Resizer:
             return
         except ValueError:
             return
-
-
-# dir = filedialog.askdirectory()  # здесь будем получать значение вместо test\
-# end_data = input('введите дату окончания акции:')
-# sizer = Resizer()
-# sizer.resize_image(dir, end_data)
