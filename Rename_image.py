@@ -39,7 +39,7 @@ class Rename:
                         # С перетаскиванием в новую папку
                         if not os.path.exists(os.path.join(result, new_name)):
                             shutil.move(os.path.join(root, file), os.path.join(result, new_name))
-                            zip.write(os.path.join(result, new_name), new_name)
+                            zip.write(os.path.join(result, new_name), os.path.join(f'do_{path_end_data}', new_name))
                             i += 1
                         else:
                             gui.command_window.append(f'не могу переместить это {os.path.join(root, file)} '
