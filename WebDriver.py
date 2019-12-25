@@ -10,7 +10,7 @@ from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresen
 import auth
 
 
-class Add_banner:
+class AddBanner:
     start_data = ''
     end_data = ''
     url = ''
@@ -23,11 +23,11 @@ class Add_banner:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-notifications")
         self.driver = webdriver.Chrome(options=options)
-        self.driver.get(auth.url)
+        self.driver.get(auth.auth_url_dt)
         username = self.driver.find_element_by_id('username')
         password = self.driver.find_element_by_id('password')
-        username.send_keys(auth.username)
-        password.send_keys(auth.password)
+        username.send_keys(auth.username_dt)
+        password.send_keys(auth.password_dt)
         self.driver.find_element_by_class_name("submit").click()
 
     def add_banner(self, gui):

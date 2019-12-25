@@ -2,13 +2,14 @@ from pynput import keyboard
 
 
 def show(window):
-    COMBINATIONS = [
+    COMBINATIONS_1 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='!')},
         {keyboard.Key.shift_l, keyboard.Key.f1},
-        {keyboard.Key.shift_l, keyboard.KeyCode(char='1')},
-        {keyboard.Key.shift_r, keyboard.KeyCode(char='!')},
-        {keyboard.Key.shift_r, keyboard.Key.f1},
-        {keyboard.Key.shift_r, keyboard.KeyCode(char='1')}
+    ]
+
+    COMBINATIONS_2 = [
+        {keyboard.Key.shift_l, keyboard.KeyCode(char='@')},
+        {keyboard.Key.shift_l, keyboard.Key.f2},
     ]
 
     current = set()
@@ -16,6 +17,10 @@ def show(window):
     def executeShiftF1():
         window.add_banner()
         print("\n *** Нажата комбинация клавиш: Shift + F1 \n *** Должна вызваться функция :)")
+
+    def executeShiftF2():
+        window.parser()
+        print("\n *** Нажата комбинация клавиш: Shift + F2 \n *** Должна вызваться функция :)")
 
     def get_key_name(key):
         if isinstance(key, keyboard.KeyCode):
@@ -32,17 +37,21 @@ def show(window):
         elif key == keyboard.Key.shift_l:
             print('--- Нажата клавиша: {}'.format(key_name))
 
-        elif (key == keyboard.KeyCode.from_char('f1')) or \
-                (key == keyboard.KeyCode.from_char('1')):
+        elif (key == keyboard.KeyCode.from_char('f1')) or (key == keyboard.KeyCode.from_char('!')) \
+                or (key == keyboard.KeyCode.from_char('@')) or (key == keyboard.KeyCode.from_char('f2')):
             print('--- Нажата клавиша: {}'.format(key_name))
-
         else:
             print('Информационно. Вы нажали: {}'.format(key_name))
             current.clear()
-        if any([key in COMBO for COMBO in COMBINATIONS]):
+        if any([key in COMBO for COMBO in COMBINATIONS_1]):
             current.add(key)
-        if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS):
+        if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS_1):
             executeShiftF1()
+            current.clear()
+        if any([key in COMBO for COMBO in COMBINATIONS_2]):
+            current.add(key)
+        if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS_2):
+            executeShiftF2()
             current.clear()
 
     with keyboard.Listener(on_press=on_press) as listener:

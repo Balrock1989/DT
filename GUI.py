@@ -6,7 +6,8 @@ from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from CustomDesign import Ui_MainWindow
 from Rename_image import Rename
-from WebDriver import Add_banner
+from WebDriver import AddBanner
+from Parser import Parser
 from CustomDialog import Ui_Dialog
 from ImageSizer import Resizer
 import GlobalHotKey
@@ -39,36 +40,45 @@ class CustomDialog(QDialog, Ui_Dialog):
         self.close()
 
 
-class ProgressBarThread(QThread):
+class DTThread(QThread):
     def __init__(self, mainwindow):
-        super(ProgressBarThread, self).__init__()
+        super(DTThread, self).__init__()
         self.mainwindow = mainwindow
         self.width_resize = ''
         self.height_resize = ''
 
     def run(self):
-        self.mainwindow.driver.auth()
+        self.mainwindow.dt.auth()
 
+class ADThread(QThread):
+    def __init__(self, mainwindow):
+        super(ADThread, self).__init__()
+        self.mainwindow = mainwindow
 
-class DoubleTrade(QtWidgets.QMainWindow, Ui_MainWindow):
+    def run(self):
+        self.mainwindow.ad.auth()
+
+class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
-        self.thread = ProgressBarThread(mainwindow=self)
-        self.driver = Add_banner()
+        self.dt_thread = DTThread(mainwindow=self)
+        self.dt = AddBanner()
+        self.ad_thread = ADThread(mainwindow=self)
+        self.ad = Parser()
         self.sizer = Resizer()
         self.init_buttons()
-
 
     def init_buttons(self):
         now = datetime.datetime.now()
         self.date_start.append(now.strftime("%d.%m.%Y"))
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
-        self.run_browser_button.clicked.connect(self.launch_thread)
+        self.run_dt_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
+        self.run_ad_browser.clicked.connect(self.launch_thread_ad)
 
     def get_path(self):
         self.path_window.clear()
@@ -81,11 +91,14 @@ class DoubleTrade(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.append(self.dir_name)
 
     def add_banner(self):
-        self.driver.exit = False
-        self.driver.start_data = self.date_start.toPlainText()
-        self.driver.end_data = self.date_end.toPlainText()
-        self.driver.url = self.url.toPlainText()
-        self.driver.add_banner(self)
+        self.dt.exit = False
+        self.dt.start_data = self.date_start.toPlainText()
+        self.dt.end_data = self.date_end.toPlainText()
+        self.dt.url = self.url.toPlainText()
+        self.dt.add_banner(self)
+
+    def parser(self):
+        self.ad.parser()
 
     def rename(self):
         self.command_window.clear()
@@ -100,12 +113,16 @@ class DoubleTrade(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer.exit = False
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
-    def launch_thread(self):
+    def launch_thread_dt(self):
         self.command_window.clear()
-        self.driver.start_data = self.date_start.toPlainText()
-        self.driver.end_data = self.date_end.toPlainText()
-        self.driver.url = self.url.toPlainText()
-        self.thread.start()
+        self.dt.start_data = self.date_start.toPlainText()
+        self.dt.end_data = self.date_end.toPlainText()
+        self.dt.url = self.url.toPlainText()
+        self.dt_thread.start()
+
+    def launch_thread_ad(self):
+        self.command_window.clear()
+        self.ad_thread.start()
 
     def show_dialog_width(self):
         dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
@@ -122,7 +139,7 @@ class DoubleTrade(QtWidgets.QMainWindow, Ui_MainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    window = DoubleTrade()
+    window = DT()
     window.show()
     threading.Thread(target=GlobalHotKey.show, args=(window,), daemon=True).start()
     app.exec_()
