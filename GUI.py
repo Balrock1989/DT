@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from CustomDesign import Ui_MainWindow
 from Rename_image import Rename
 from WebDriver import AddBanner
-from Parser import Parser
 from CustomDialog import Ui_Dialog
 from ImageSizer import Resizer
 import GlobalHotKey
@@ -40,23 +39,16 @@ class CustomDialog(QDialog, Ui_Dialog):
         self.close()
 
 
-class DTThread(QThread):
+class WebThread(QThread):
     def __init__(self, mainwindow):
-        super(DTThread, self).__init__()
+        super(WebThread, self).__init__()
         self.mainwindow = mainwindow
         self.width_resize = ''
         self.height_resize = ''
 
     def run(self):
-        self.mainwindow.dt.auth()
+        self.mainwindow.web.auth()
 
-class ADThread(QThread):
-    def __init__(self, mainwindow):
-        super(ADThread, self).__init__()
-        self.mainwindow = mainwindow
-
-    def run(self):
-        self.mainwindow.ad.auth()
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -64,10 +56,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
-        self.dt_thread = DTThread(mainwindow=self)
-        self.dt = AddBanner()
-        self.ad_thread = ADThread(mainwindow=self)
-        self.ad = Parser()
+        self.web_thread = WebThread(mainwindow=self)
+        self.web = AddBanner()
         self.sizer = Resizer()
         self.init_buttons()
 
@@ -76,9 +66,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.date_start.append(now.strftime("%d.%m.%Y"))
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
-        self.run_dt_browser.clicked.connect(self.launch_thread_dt)
+        self.run_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
-        self.run_ad_browser.clicked.connect(self.launch_thread_ad)
 
     def get_path(self):
         self.path_window.clear()
@@ -91,14 +80,14 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.append(self.dir_name)
 
     def add_banner(self):
-        self.dt.exit = False
-        self.dt.start_data = self.date_start.toPlainText()
-        self.dt.end_data = self.date_end.toPlainText()
-        self.dt.url = self.url.toPlainText()
-        self.dt.add_banner(self)
+        self.web.exit = False
+        self.web.start_data = self.date_start.toPlainText()
+        self.web.end_data = self.date_end.toPlainText()
+        self.web.url = self.url.toPlainText()
+        self.web.add_banner(self)
 
     def parser(self):
-        self.ad.parser(self)
+        self.web.parser(self)
 
     def rename(self):
         self.command_window.clear()
@@ -115,14 +104,10 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def launch_thread_dt(self):
         self.command_window.clear()
-        self.dt.start_data = self.date_start.toPlainText()
-        self.dt.end_data = self.date_end.toPlainText()
-        self.dt.url = self.url.toPlainText()
-        self.dt_thread.start()
-
-    def launch_thread_ad(self):
-        self.command_window.clear()
-        self.ad_thread.start()
+        self.web.start_data = self.date_start.toPlainText()
+        self.web.end_data = self.date_end.toPlainText()
+        self.web.url = self.url.toPlainText()
+        self.web_thread.start()
 
     def show_dialog_width(self):
         dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',

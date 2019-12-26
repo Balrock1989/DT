@@ -29,11 +29,10 @@ class Parser:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-notifications")
         self.driver = webdriver.Chrome(options=options)
+
         self.driver.get(auth.auth_url_ad)
-        username = self.driver.find_element_by_name('login')
-        password = self.driver.find_element_by_name('password')
-        username.send_keys(auth.username_ad)
-        password.send_keys(auth.password_ad)
+        username_ad = self.driver.find_element_by_name('login').send_keys(auth.username_ad)
+        password_ad = self.driver.find_element_by_name('password').send_keys(auth.password_ad)
         self.driver.find_element_by_id("id_sign_in").click()
 
     def parser(self, gui):

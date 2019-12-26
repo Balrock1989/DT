@@ -1,7 +1,12 @@
 import datetime
 import re
+from collections import OrderedDict
+from pprint import pprint
 from time import sleep
+
+from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -16,6 +21,9 @@ class AddBanner:
     url = ''
     driver = None
     exit = False
+    dt_window = None
+    ad_window = None
+    actions_data = []
 
     def auth(self):
         options = Options()
@@ -24,14 +32,21 @@ class AddBanner:
         options.add_argument("--disable-notifications")
         self.driver = webdriver.Chrome(options=options)
         self.driver.get(auth.auth_url_dt)
-        username = self.driver.find_element_by_id('username')
-        password = self.driver.find_element_by_id('password')
-        username.send_keys(auth.username_dt)
-        password.send_keys(auth.password_dt)
+        self.dt_window = self.driver.current_window_handle
+        username_dt = self.driver.find_element_by_id('username').send_keys(auth.username_dt)
+        password_dt = self.driver.find_element_by_id('password').send_keys(auth.password_dt)
         self.driver.find_element_by_class_name("submit").click()
+        self.driver.execute_script("window.open('');")
+        self.ad_window = self.driver.window_handles[1]
+        self.driver.switch_to_window(self.ad_window)
+        self.driver.get(auth.auth_url_ad)
+        username_ad = self.driver.find_element_by_name('login').send_keys(auth.username_ad)
+        password_ad = self.driver.find_element_by_name('password').send_keys(auth.password_ad)
+        self.driver.find_element_by_id("id_sign_in").click()
 
     def add_banner(self, gui):
         try:
+            self.driver.switch_to_window(self.dt_window)
             wait = WebDriverWait(self.driver, 5, poll_frequency=3, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='_____']")))
             links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
@@ -86,5 +101,39 @@ class AddBanner:
         except AttributeError as exc:
             gui.command_window.append('Необходимо перейти в браузере в папку с баннерами')
 
+    def parser(self, gui):
+        try:
+            self.driver.switch_to_window(self.ad_window)
+            for window in self.driver.window_handles:
+                if window is not self.dt_window and self.ad_window:
+                    self.driver.switch_to.window(window)
+                    new_window = window
+            page = BeautifulSoup(self.driver.page_source, "lxml")
+            actions = page.findAll('div', class_="coupon")
+            for act in actions:
+                action = OrderedDict()
+                action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
+                action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
+                full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
+                temp = "".join(str(full_date.text).split())
+                action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
+                action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
+                action["Тип купона"] = re.sub(r'\s+', ' ', act.div.h3.text).strip()
+                action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() \
+                    if len(act.findAll("p", text=True)) > 1 else ""
+                self.actions_data.append(action)
+            pprint(self.actions_data)
+            self.driver.close()
+            self.driver.switch_to.window(self.ad_window)
+        except WebDriverException as exc:
+            print(f'Произошла ошибка {exc}')
+            if 'chrome not reachable' in exc.msg:
+                gui.command_window.append('Браузер закрылся')
+                return
+        except AttributeError as exc:
+            gui.command_window.append('Необходимо перейти в браузере в папку с баннерами')
+
+    def add_actions(self):
+        pass
 
 
