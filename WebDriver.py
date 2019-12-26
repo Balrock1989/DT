@@ -139,6 +139,18 @@ class AddBanner:
             gui.command_window.append('Необходимо перейти в браузере в папку с баннерами')
 
     def add_actions(self):
-        pass
-
+        header = self.driver.find_element_by_id("title")
+        code = self.driver.find_element_by_id("code")
+        vaucher_type = self.driver.find_element_by_id("voucherTypeId")
+        percentage = self.driver.find_element_by_id("isPercentage")
+        short_description = self.driver.find_element_by_name("shortDescription")
+        description = self.driver.find_element_by_id("description")
+        start_page = self.driver.find_element_by_id("landingUrl")
+        valid_from = self.driver.find_element_by_id("id_startDate")
+        valid_to = self.driver.find_element_by_id("id_endDate")
+        publish_start = self.driver.find_element_by_id("id_publishStartDate")
+        publish_end = self.driver.find_element_by_id("id_publishEndDate")
+        discount_amount = self.driver.find_element_by_id("discountAmount")
+        availability = self.driver.find_element_by_name("siteIds")
+        publisher_information = self.driver.find_element_by_id("publisherInformation")
 
