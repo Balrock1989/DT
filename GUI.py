@@ -6,7 +6,7 @@ from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from CustomDesign import Ui_MainWindow
 from Rename_image import Rename
-from WebDriver import AddBanner
+from WebDriver import WebDriver
 from CustomDialog import Ui_Dialog
 from ImageSizer import Resizer
 import GlobalHotKey
@@ -57,7 +57,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
         self.web_thread = WebThread(mainwindow=self)
-        self.web = AddBanner()
+        self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
 
@@ -86,16 +86,18 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
                             path=self.dir_name,
                             end_data=self.date_end.toPlainText(),
                             checkbox=self.rename_checbox.isChecked())
+    #
+    # def add_banner(self):
+    #     self.web.exit = False
+    #     self.web.start_data = self.date_start.toPlainText()
+    #     self.web.end_data = self.date_end.toPlainText()
+    #     self.web.url = self.url.toPlainText()
+    #     self.web.add_banner(self)
+    #
+    # def parser(self):
+    #     self.web.parser(gui=self)
+    #
 
-    def add_banner(self):
-        self.web.exit = False
-        self.web.start_data = self.date_start.toPlainText()
-        self.web.end_data = self.date_end.toPlainText()
-        self.web.url = self.url.toPlainText()
-        self.web.add_banner(self)
-
-    def parser(self):
-        self.web.parser(gui=self)
 
     def resizer(self):
         self.command_window.clear()

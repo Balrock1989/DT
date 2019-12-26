@@ -16,12 +16,17 @@ def show(window):
     current = set()
 
     def executeShiftF1():
-        window.add_banner()
+        window.web.exit = False
+        window.web.start_data = window.date_start.toPlainText()
+        window.web.end_data = window.date_end.toPlainText()
+        window.web.url = window.url.toPlainText()
+        window.web.add_banner(gui=window)
         print("\n *** Нажата комбинация клавиш: Shift + F1 \n *** Должна вызваться функция :)")
 
     def executeShiftF2():
-        window.parser()
-        print("\n *** Нажата комбинация клавиш: Shift + F2 \n *** Должна вызваться функция :)")
+        window.web.add_actions(gui=window)
+        window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
+        # print("\n *** Нажата комбинация клавиш: Shift + F2 \n *** Должна вызваться функция :)")
 
     def get_key_name(key):
         if isinstance(key, keyboard.KeyCode):

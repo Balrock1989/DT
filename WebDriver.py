@@ -7,6 +7,7 @@ from time import sleep
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -15,7 +16,7 @@ from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresen
 import auth
 
 
-class AddBanner:
+class WebDriver:
     start_data = ''
     end_data = ''
     url = ''
@@ -99,7 +100,7 @@ class AddBanner:
                 gui.command_window.append('Браузер закрылся')
                 return
         except AttributeError as exc:
-            gui.command_window.append('Необходимо перейти в браузере в папку с баннерами')
+            gui.command_window.append('Необходимо открыть папку с баннерами в браузере')
 
     def parser(self, gui):
         try:
@@ -126,31 +127,67 @@ class AddBanner:
                     gui.command_window.append("\n")
                     for key, value in act.items():
                         gui.command_window.append(f"{key}:   {value}")
-            pprint(self.actions_data)
+                        sleep(0.01)
             if self.driver.current_window_handle is not self.dt_window and self.ad_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
         except WebDriverException as exc:
             print(f'Произошла ошибка {exc}')
-            if 'chrome not reachable' in exc.msg:
-                gui.command_window.append('Браузер закрылся')
-                return
+            gui.command_window.append('Браузер закрылся')
         except AttributeError as exc:
-            gui.command_window.append('Необходимо перейти в браузере в папку с баннерами')
+            gui.command_window.append('Необходимо открыть страницу с акциями в браузере')
 
-    def add_actions(self):
-        header = self.driver.find_element_by_id("title")
-        code = self.driver.find_element_by_id("code")
-        vaucher_type = self.driver.find_element_by_id("voucherTypeId")
-        percentage = self.driver.find_element_by_id("isPercentage")
-        short_description = self.driver.find_element_by_name("shortDescription")
-        description = self.driver.find_element_by_id("description")
-        start_page = self.driver.find_element_by_id("landingUrl")
-        valid_from = self.driver.find_element_by_id("id_startDate")
-        valid_to = self.driver.find_element_by_id("id_endDate")
-        publish_start = self.driver.find_element_by_id("id_publishStartDate")
-        publish_end = self.driver.find_element_by_id("id_publishEndDate")
-        discount_amount = self.driver.find_element_by_id("discountAmount")
-        availability = self.driver.find_element_by_name("siteIds")
-        publisher_information = self.driver.find_element_by_id("publisherInformation")
+    def add_actions(self, gui):
+        try:
+            self.driver.switch_to_window(self.dt_window)
+            self.driver.switch_to_frame("ifrm")
+            for action in self.actions_data:
+                valid_from = self.driver.find_element_by_id("id_startDate")
+                valid_to = self.driver.find_element_by_id("id_endDate")
+                start_date = self.driver.find_element_by_id("id_publishStartDate")
+                end_date = self.driver.find_element_by_id("id_publishEndDate")
+                self.driver.find_element_by_name("title").send_keys(action["Название акции"])
+                valid_from.clear()
+                valid_from.send_keys(action["Дата начала"])
+                valid_to.clear()
+                valid_to.send_keys(action["Дата окончания"])
+                start_date.clear()
+                start_date.send_keys(action["Дата начала"])
+                end_date.clear()
+                end_date.send_keys(action["Дата окончания"])
+                self.driver.find_element_by_name("shortDescription").send_keys(action["Название акции"])
+                if "кидка" in action["Тип купона"]:
+                    vaucher_type = Select(self.driver.find_element_by_id("voucherTypeId"))
+                    vaucher_type.select_by_value("2")
+                    self.driver.find_element_by_id("code").send_keys("Не требуется")
+                    if "%" in action["Название акции"]:
+                        self.driver.find_element_by_id("isPercentage").click()
+                        try:
+                            percent = re.search(r'\s(\d+)%', action["Название акции"]).group(1)
+                        except AttributeError:
+                            percent = re.search(r'%(\d+)', action["Название акции"]).group(1)
+                        self.driver.find_element_by_id("discountAmount").send_keys(percent)
+                    elif "%" in action["Условия акции"]:
+                        self.driver.find_element_by_id("isPercentage").click()
+                        try:
+                            percent = re.search(r'\s(\d+)%', action["Условия акции"]).group(1)
+                        except AttributeError:
+                            percent = re.search(r'%(\d+)', action["Условия акции"]).group(1)
+                        self.driver.find_element_by_id("discountAmount").send_keys(percent)
+                    else:
+                        self.driver.find_element_by_id("discountAmount").send_keys('0')
+                if "одарок" in action["Тип купона"]:
+                    print('подарок')
+                if "упон" in action["Тип купона"]:
+                    print("купон")
+                if action["Условия акции"]:
+                    self.driver.find_element_by_id("description").send_keys(action["Условия акции"])
+                else:
+                    self.driver.find_element_by_id("description").send_keys(action["Название акции"])
+                self.driver.find_element_by_id("landingUrl").send_keys(gui.url.toPlainText())
+                sleep(10)
+            self.driver.switch_to_default_content()
 
+        except WebDriverException as exc:
+            print(f'Произошла ошибка {exc}')
+            gui.command_window.append('Браузер закрылся')
