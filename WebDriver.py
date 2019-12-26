@@ -103,11 +103,11 @@ class AddBanner:
 
     def parser(self, gui):
         try:
+            # gui.command_window.append("123")
             self.driver.switch_to_window(self.ad_window)
             for window in self.driver.window_handles:
                 if window is not self.dt_window and self.ad_window:
                     self.driver.switch_to.window(window)
-                    new_window = window
             page = BeautifulSoup(self.driver.page_source, "lxml")
             actions = page.findAll('div', class_="coupon")
             for act in actions:
@@ -122,6 +122,10 @@ class AddBanner:
                 action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() \
                     if len(act.findAll("p", text=True)) > 1 else ""
                 self.actions_data.append(action)
+                for act in self.actions_data:
+                    print()
+                    for key, value in act.items():
+                        print(f"{key}:{value}")
             pprint(self.actions_data)
             self.driver.close()
             self.driver.switch_to.window(self.ad_window)

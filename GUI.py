@@ -87,7 +87,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web.add_banner(self)
 
     def parser(self):
-        self.web.parser(self)
+        self.web.parser(gui=self)
 
     def rename(self):
         self.command_window.clear()
