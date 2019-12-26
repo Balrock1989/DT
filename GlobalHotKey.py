@@ -9,6 +9,7 @@ def show(window):
 
     COMBINATIONS_2 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='@')},
+        {keyboard.Key.shift_l, keyboard.KeyCode(char='"')},
         {keyboard.Key.shift_l, keyboard.Key.f2},
     ]
 
@@ -38,7 +39,8 @@ def show(window):
             print('--- Нажата клавиша: {}'.format(key_name))
 
         elif (key == keyboard.KeyCode.from_char('f1')) or (key == keyboard.KeyCode.from_char('!')) \
-                or (key == keyboard.KeyCode.from_char('@')) or (key == keyboard.KeyCode.from_char('f2')):
+                or (key == keyboard.KeyCode.from_char('@')) or (key == keyboard.KeyCode.from_char('f2')) \
+                or (key == keyboard.KeyCode.from_char('"')):
             print('--- Нажата клавиша: {}'.format(key_name))
         else:
             print('Информационно. Вы нажали: {}'.format(key_name))
