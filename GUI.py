@@ -47,7 +47,7 @@ class WebThread(QThread):
         self.height_resize = ''
 
     def run(self):
-        self.mainwindow.web.auth()
+        self.mainwindow.web.auth(self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -79,6 +79,14 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         ))
         self.path_window.append(self.dir_name)
 
+    def rename(self):
+        self.command_window.clear()
+        rename = Rename()
+        rename.rename_image(gui=self,
+                            path=self.dir_name,
+                            end_data=self.date_end.toPlainText(),
+                            checkbox=self.rename_checbox.isChecked())
+
     def add_banner(self):
         self.web.exit = False
         self.web.start_data = self.date_start.toPlainText()
@@ -88,14 +96,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def parser(self):
         self.web.parser(gui=self)
-
-    def rename(self):
-        self.command_window.clear()
-        rename = Rename()
-        rename.rename_image(gui=self,
-                            path=self.dir_name,
-                            end_data=self.date_end.toPlainText(),
-                            checkbox=self.rename_checbox.isChecked())
 
     def resizer(self):
         self.command_window.clear()

@@ -25,7 +25,7 @@ class AddBanner:
     ad_window = None
     actions_data = []
 
-    def auth(self):
+    def auth(self, gui):
         options = Options()
         options.add_argument("--start-maximized")
         options.add_argument("--disable-extensions")
@@ -103,7 +103,6 @@ class AddBanner:
 
     def parser(self, gui):
         try:
-            # gui.command_window.append("123")
             self.driver.switch_to_window(self.ad_window)
             for window in self.driver.window_handles:
                 if window is not self.dt_window and self.ad_window:
@@ -124,10 +123,12 @@ class AddBanner:
                 self.actions_data.append(action)
                 for act in self.actions_data:
                     print()
+                    gui.command_window.append("\n")
                     for key, value in act.items():
-                        print(f"{key}:{value}")
+                        gui.command_window.append(f"{key}:   {value}")
             pprint(self.actions_data)
-            self.driver.close()
+            if self.driver.current_window_handle is not self.dt_window and self.ad_window:
+                self.driver.close()
             self.driver.switch_to.window(self.ad_window)
         except WebDriverException as exc:
             print(f'Произошла ошибка {exc}')
