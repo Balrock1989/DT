@@ -24,6 +24,7 @@ def show(window):
         print("\n *** Нажата комбинация клавиш: Shift + F1 \n *** Должна вызваться функция :)")
 
     def executeShiftF2():
+        print(window.web.actions_data)
         window.web.add_actions(gui=window)
         window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
         # print("\n *** Нажата комбинация клавиш: Shift + F2 \n *** Должна вызваться функция :)")

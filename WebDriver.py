@@ -142,11 +142,18 @@ class WebDriver:
             self.driver.switch_to_window(self.dt_window)
             self.driver.switch_to_frame("ifrm")
             for action in self.actions_data:
+                self.driver.find_element_by_name("title").send_keys(action["Название акции"])
+                vaucher_type = Select(self.driver.find_element_by_id("voucherTypeId"))
+                checkbox = self.driver.find_element_by_id("isPercentage")
+                description = self.driver.find_element_by_id("description")
+                short_description = self.driver.find_element_by_name("shortDescription")
+                discount_amount = self.driver.find_element_by_id("discountAmount")
                 valid_from = self.driver.find_element_by_id("id_startDate")
                 valid_to = self.driver.find_element_by_id("id_endDate")
                 start_date = self.driver.find_element_by_id("id_publishStartDate")
                 end_date = self.driver.find_element_by_id("id_publishEndDate")
-                self.driver.find_element_by_name("title").send_keys(action["Название акции"])
+                code = self.driver.find_element_by_id("code")
+                landing_url = self.driver.find_element_by_id("landingUrl")
                 valid_from.clear()
                 valid_from.send_keys(action["Дата начала"])
                 valid_to.clear()
@@ -155,39 +162,46 @@ class WebDriver:
                 start_date.send_keys(action["Дата начала"])
                 end_date.clear()
                 end_date.send_keys(action["Дата окончания"])
-                self.driver.find_element_by_name("shortDescription").send_keys(action["Название акции"])
-                if "кидка" in action["Тип купона"]:
-                    vaucher_type = Select(self.driver.find_element_by_id("voucherTypeId"))
-                    vaucher_type.select_by_value("2")
-                    self.driver.find_element_by_id("code").send_keys("Не требуется")
-                    if "%" in action["Название акции"]:
-                        self.driver.find_element_by_id("isPercentage").click()
-                        try:
-                            percent = re.search(r'\s(\d+)%', action["Название акции"]).group(1)
-                        except AttributeError:
-                            percent = re.search(r'%(\d+)', action["Название акции"]).group(1)
-                        self.driver.find_element_by_id("discountAmount").send_keys(percent)
-                    elif "%" in action["Условия акции"]:
-                        self.driver.find_element_by_id("isPercentage").click()
-                        try:
-                            percent = re.search(r'\s(\d+)%', action["Условия акции"]).group(1)
-                        except AttributeError:
-                            percent = re.search(r'%(\d+)', action["Условия акции"]).group(1)
-                        self.driver.find_element_by_id("discountAmount").send_keys(percent)
-                    else:
-                        self.driver.find_element_by_id("discountAmount").send_keys('0')
-                if "одарок" in action["Тип купона"]:
-                    print('подарок')
-                if "упон" in action["Тип купона"]:
-                    print("купон")
+                short_description.send_keys(action["Название акции"])
                 if action["Условия акции"]:
-                    self.driver.find_element_by_id("description").send_keys(action["Условия акции"])
+                    description.send_keys(action["Условия акции"])
                 else:
-                    self.driver.find_element_by_id("description").send_keys(action["Название акции"])
-                self.driver.find_element_by_id("landingUrl").send_keys(gui.url.toPlainText())
+                    description.send_keys(action["Название акции"])
+                landing_url.send_keys(gui.url.toPlainText())
+
+                if "кидка" or "упон" in action["Тип купона"]:
+                    vaucher_type.select_by_value("2") if "кидка" in action["Тип купона"] \
+                        else vaucher_type.select_by_value("1")
+                    code.send_keys("Не требуется")
+                    if "%" in action["Название акции"]:
+                        checkbox.click()
+                        percent = self.get_percent(action["Название акции"])
+                        discount_amount.send_keys(percent)
+                    elif "%" in action["Условия акции"]:
+                        checkbox.click()
+                        percent = self.get_percent(action["Условия акции"])
+                        discount_amount.send_keys(percent)
+                    else:
+                        discount_amount.send_keys('0')
+
+                if "одарок" in action["Тип купона"]:
+                    vaucher_type.select_by_value("3")
+                    code.send_keys("Не требуется")
+                if "оставка" in action["Тип купона"]:
+                    vaucher_type.select_by_value("4")
+                    code.send_keys("Не требуется")
+
                 sleep(10)
-            self.driver.switch_to_default_content()
+            # self.driver.switch_to_default_content()
 
         except WebDriverException as exc:
             print(f'Произошла ошибка {exc}')
             gui.command_window.append('Браузер закрылся')
+
+    def get_percent(self, action):
+        try:
+            percent = re.search(r'\s(\d+)%', action).group(1)
+        except AttributeError:
+            percent = re.search(r'%(\d+)', action).group(1)
+        return percent
+

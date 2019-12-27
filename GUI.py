@@ -1,6 +1,8 @@
 import datetime
 import os
 import sys
+from queue import Queue
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
@@ -60,6 +62,9 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
+        self.queue = Queue()
+
+
 
     def init_buttons(self):
         now = datetime.datetime.now()
@@ -86,18 +91,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
                             path=self.dir_name,
                             end_data=self.date_end.toPlainText(),
                             checkbox=self.rename_checbox.isChecked())
-    #
-    # def add_banner(self):
-    #     self.web.exit = False
-    #     self.web.start_data = self.date_start.toPlainText()
-    #     self.web.end_data = self.date_end.toPlainText()
-    #     self.web.url = self.url.toPlainText()
-    #     self.web.add_banner(self)
-    #
-    # def parser(self):
-    #     self.web.parser(gui=self)
-    #
-
 
     def resizer(self):
         self.command_window.clear()

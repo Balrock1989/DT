@@ -16,12 +16,12 @@ class Ui_MainWindow(object):
         MainWindow.resize(869, 489)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-
         self.path_window = QtWidgets.QTextBrowser(self.centralwidget)
         self.path_window.setGeometry(QtCore.QRect(10, 30, 681, 31))
         self.path_window.setObjectName("path_window")
         self.path_buttom = QtWidgets.QPushButton(self.centralwidget)
         self.path_buttom.setGeometry(QtCore.QRect(700, 30, 140, 31))
+
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
