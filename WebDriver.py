@@ -126,7 +126,7 @@ class WebDriver:
             info = ""
             for n, a in enumerate(self.actions_data, 1):
                 gui.chat.queue.put(gui.command_window.append(info))
-                info = ""
+                info = f"---№{n}\n"
                 for key, value in a.items():
                     info += " ".join([key, ':  ', value]) + "\n"
             gui.chat.queue.put(gui.command_window.append(info))
@@ -224,8 +224,8 @@ class WebDriver:
                 result = os.path.normpath(result)
                 if os.path.exists(result):
                     shutil.rmtree(result)
-                if not os.path.exists(result):
-                    os.mkdir(result)
+                os.mkdir(result)
+                gui.chat.queue.put(gui.command_window.append(f'Всего будет скачано {len(links)} баннеров'))
                 gui.chat.queue.put(gui.command_window.append(f'Результаты здесь: {os.path.abspath(result)}'))
                 for n, link in enumerate(links, 1):
                     format = re.search(r'(\w+)$', link).group(1)
@@ -237,6 +237,7 @@ class WebDriver:
                     out.close()
                     gui.chat.queue.put(gui.command_window.append(f'{name} успешно скачан\n'))
                 self.driver.switch_to_window(self.ad_window)
+                gui.chat.queue.put(gui.command_window.append(f'Загрузка успешно завершена'))
             else:
                 gui.chat.queue.put(gui.command_window.append('Нужно зайти на страницу с баннерами'))
         except WebDriverException as exc:
