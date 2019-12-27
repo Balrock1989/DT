@@ -197,6 +197,7 @@ class WebDriver:
                 self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
                 self.driver.get("https://login.tradedoubler.com/pan/mCreateVouchers.action?programId=" + id)
             self.actions_data.clear()
+            gui.chat.queue.put(gui.command_window.append("Акции успешно добавлены"))
 
         except WebDriverException as exc:
             print(f'Произошла ошибка {exc}')
@@ -204,7 +205,7 @@ class WebDriver:
 
     def get_percent(self, action):
         try:
-            percent = re.search(r'\s(\d+)%', action).group(1)
+            percent = re.search(r'(\d+)%', action).group(1)
         except AttributeError:
             percent = re.search(r'%(\d+)', action).group(1)
         return percent
