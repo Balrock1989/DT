@@ -25,7 +25,7 @@ class WebDriver:
     dt_window = None
     ad_window = None
     actions_data = []
-    wait = WebDriverWait(driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
+
 
     def auth(self, gui):
 
@@ -50,7 +50,8 @@ class WebDriver:
     def add_banner(self, gui):
         try:
             self.driver.switch_to_window(self.dt_window)
-            links = self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='_____']")))
+            wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
+            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='_____']")))
             links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
             links = set(map(lambda x: x.get_attribute('href'), links))
             links = list(links)
