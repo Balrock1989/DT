@@ -150,6 +150,6 @@ class Ui_MainWindow(object):
         self.rename_checbox.setText(_translate("MainWindow", "В одну папку"))
         self.run_browser.setText(_translate("MainWindow", "Браузер"))
         self.run_ad_browser.setText(_translate("MainWindow", "Пусто"))
-        self.command_window.setPlaceholderText(_translate("MainWindow", "Результат выполнения программы"))
+        self.command_window.setPlaceholderText(_translate("MainWindow", ""))
         self.path_label.setText(_translate("MainWindow", "Путь до папки с баннерами:"))
         self.resize_buttom.setText(_translate("MainWindow", "Изменить размер"))

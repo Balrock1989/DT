@@ -1,6 +1,7 @@
 import datetime
 import os
 import re
+import shutil
 from collections import OrderedDict
 from pprint import pprint
 from time import sleep
@@ -219,18 +220,41 @@ class WebDriver:
         return percent
 
     def download_banners(self, gui):
-        wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
-        links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[class='banner_view']")))
-        links = set(map(lambda x: x.get_attribute('href'), links))
-        links = list(links)
-        result = os.path.join("result")
-        if not os.path.exists(result):
-            os.mkdir(result)
-        for n, link in enumerate(links):
-            format = re.search(r'\w+$', link).group(1)
-            name = str(n) + "." + format
-            path = os.path.join("result", name)
-            p = requests.get(link)
-            out = open(path, "wb")
-            out.write(p.content)
-            out.close()
+        try:
+            for window in self.driver.window_handles:
+                if window is not self.dt_window and self.ad_window:
+                    self.driver.switch_to.window(window)
+            wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
+            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[class='banner_view']")))
+            links = set(map(lambda x: x.get_attribute('href'), links))
+            links = list(links)
+            if links:
+                result = os.path.join("result")
+                if os.path.exists(result):
+                    shutil.rmtree(result)
+                if not os.path.exists(result):
+                    os.mkdir(result)
+                gui.command_window.append(f'Результаты здесь: {os.path.abspath(result)}')
+                text = ""
+                for n, link in enumerate(links, 1):
+                    print(link)
+                    format = re.search(r'(\w+)$', link).group(1)
+                    name = str(n) + "." + format
+                    path = os.path.join("result", name)
+                    p = requests.get(link)
+                    out = open(path, "wb")
+                    out.write(p.content)
+                    out.close()
+                    text += f'{name} успешно скачан\n'
+                gui.command_window.append(text)
+                self.driver.switch_to_window(self.ad_window)
+            else:
+                gui.command_window.append('Нужно зайти на страницу с баннерами')
+        except WebDriverException as exc:
+            print(f'Произошла ошибка {exc.msg}')
+            gui.command_window.append('Нужно зайти на страницу с баннерами')
+            if 'chrome not reachable' in exc.msg:
+                gui.command_window.append('Браузер закрылся')
+                return
+        except AttributeError as exc:
+            gui.command_window.append('Нужно зайти на страницу с баннерами')

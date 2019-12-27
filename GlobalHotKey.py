@@ -15,7 +15,7 @@ def show(window):
     COMBINATIONS_3 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='#')},
         {keyboard.Key.shift_l, keyboard.KeyCode(char='№')},
-        {keyboard.Key.shift_l, keyboard.Key.f2},
+        {keyboard.Key.shift_l, keyboard.Key.f3},
     ]
 
     current = set()
