@@ -2,7 +2,6 @@ import datetime
 import os
 import sys
 from queue import Queue
-from time import sleep
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDir, QThread
@@ -51,6 +50,7 @@ class WebThread(QThread):
 
     def run(self):
         self.mainwindow.web.auth(self.mainwindow)
+
 
 class Chat(QThread):
     def __init__(self, mainwindow):
