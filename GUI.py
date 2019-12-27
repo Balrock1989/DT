@@ -2,6 +2,7 @@ import datetime
 import os
 import sys
 from queue import Queue
+from time import sleep
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QDir, QThread
@@ -51,6 +52,18 @@ class WebThread(QThread):
     def run(self):
         self.mainwindow.web.auth(self.mainwindow)
 
+class Chat(QThread):
+    def __init__(self, mainwindow):
+        super(Chat, self).__init__()
+        self.mainwindow = mainwindow
+        self.width_resize = ''
+        self.height_resize = ''
+        self.queue = Queue()
+
+    def run(self):
+        while True:
+            self.queue.get()
+
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -59,10 +72,11 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
         self.web_thread = WebThread(mainwindow=self)
+        self.chat = Chat(mainwindow=self)
         self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
-        self.queue = Queue()
+
 
 
     def init_buttons(self):
