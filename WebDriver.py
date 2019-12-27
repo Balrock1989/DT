@@ -1,9 +1,10 @@
 import datetime
+import os
 import re
 from collections import OrderedDict
 from pprint import pprint
 from time import sleep
-
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -25,7 +26,6 @@ class WebDriver:
     dt_window = None
     ad_window = None
     actions_data = []
-
 
     def auth(self, gui):
 
@@ -131,7 +131,8 @@ class WebDriver:
                 for key, value in a.items():
                     info += " ".join([key, ':  ', value]) + "\n"
             gui.command_window.append(info)
-            if self.driver.current_window_handle is not self.dt_window and self.ad_window:
+            if self.driver.current_window_handle is not self.ad_window and \
+                    self.driver.current_window_handle is not self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
         except WebDriverException as exc:
@@ -203,7 +204,7 @@ class WebDriver:
                 self.driver.switch_to_default_content()
                 sleep(1)
                 self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
-                self.driver.get("https://login.tradedoubler.com/pan/mCreateVouchers.action?programId="+id)
+                self.driver.get("https://login.tradedoubler.com/pan/mCreateVouchers.action?programId=" + id)
             self.actions_data.clear()
 
         except WebDriverException as exc:
@@ -217,5 +218,19 @@ class WebDriver:
             percent = re.search(r'%(\d+)', action).group(1)
         return percent
 
-    def download_baners(self):
-        pass
+    def download_banners(self, gui):
+        wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
+        links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[class='banner_view']")))
+        links = set(map(lambda x: x.get_attribute('href'), links))
+        links = list(links)
+        result = os.path.join("result")
+        if not os.path.exists(result):
+            os.mkdir(result)
+        for n, link in enumerate(links):
+            format = re.search(r'\w+$', link).group(1)
+            name = str(n) + "." + format
+            path = os.path.join("result", name)
+            p = requests.get(link)
+            out = open(path, "wb")
+            out.write(p.content)
+            out.close()

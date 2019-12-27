@@ -12,6 +12,11 @@ def show(window):
         {keyboard.Key.shift_l, keyboard.KeyCode(char='"')},
         {keyboard.Key.shift_l, keyboard.Key.f2},
     ]
+    COMBINATIONS_3 = [
+        {keyboard.Key.shift_l, keyboard.KeyCode(char='#')},
+        {keyboard.Key.shift_l, keyboard.KeyCode(char='№')},
+        {keyboard.Key.shift_l, keyboard.Key.f2},
+    ]
 
     current = set()
 
@@ -27,6 +32,10 @@ def show(window):
         window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
         print("\n *** Нажата комбинация клавиш: Shift + F2 \n *** Должна вызваться функция :)")
 
+    def executeShiftF3():
+        window.web.download_banners(gui=window)
+        print("\n *** Нажата комбинация клавиш: Shift + F3 \n *** Должна вызваться функция :)")
+
     def get_key_name(key):
         if isinstance(key, keyboard.KeyCode):
             return key.char
@@ -41,11 +50,6 @@ def show(window):
             window.sizer.exit = True
         elif key == keyboard.Key.shift_l:
             print('--- Нажата клавиша: {}'.format(key_name))
-
-        elif (key == keyboard.KeyCode.from_char('f1')) or (key == keyboard.KeyCode.from_char('!')) \
-                or (key == keyboard.KeyCode.from_char('@')) or (key == keyboard.KeyCode.from_char('f2')) \
-                or (key == keyboard.KeyCode.from_char('"')):
-            print('--- Нажата клавиша: {}'.format(key_name))
         else:
             print('Информационно. Вы нажали: {}'.format(key_name))
             current.clear()
@@ -58,6 +62,11 @@ def show(window):
             current.add(key)
         if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS_2):
             executeShiftF2()
+            current.clear()
+        if any([key in COMBO for COMBO in COMBINATIONS_3]):
+            current.add(key)
+        if any(all(k in current for k in COMBO) for COMBO in COMBINATIONS_3):
+            executeShiftF3()
             current.clear()
 
     with keyboard.Listener(on_press=on_press) as listener:
