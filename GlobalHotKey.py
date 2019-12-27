@@ -4,18 +4,15 @@ from pynput import keyboard
 def show(window):
     COMBINATIONS_1 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='!')},
-        {keyboard.Key.shift_l, keyboard.Key.f1},
     ]
 
     COMBINATIONS_2 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='@')},
         {keyboard.Key.shift_l, keyboard.KeyCode(char='"')},
-        {keyboard.Key.shift_l, keyboard.Key.f2},
     ]
     COMBINATIONS_3 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='#')},
         {keyboard.Key.shift_l, keyboard.KeyCode(char='№')},
-        {keyboard.Key.shift_l, keyboard.Key.f3},
     ]
 
     current = set()
@@ -26,15 +23,15 @@ def show(window):
         window.web.end_data = window.date_end.toPlainText()
         window.web.url = window.url.toPlainText()
         window.web.add_banner(gui=window)
-        print("\n *** Нажата комбинация клавиш: Shift + F1 \n *** Должна вызваться функция :)")
+        print("\n *** Нажата комбинация клавиш: Shift + 1 \n *** Должна вызваться функция :)")
 
     def executeShiftF2():
         window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
-        print("\n *** Нажата комбинация клавиш: Shift + F2 \n *** Должна вызваться функция :)")
+        print("\n *** Нажата комбинация клавиш: Shift + 2 \n *** Должна вызваться функция :)")
 
     def executeShiftF3():
         window.web.download_banners(gui=window)
-        print("\n *** Нажата комбинация клавиш: Shift + F3 \n *** Должна вызваться функция :)")
+        print("\n *** Нажата комбинация клавиш: Shift + 3 \n *** Должна вызваться функция :)")
 
     def get_key_name(key):
         if isinstance(key, keyboard.KeyCode):
@@ -49,6 +46,10 @@ def show(window):
             window.driver.exit = True
             window.sizer.exit = True
         elif key == keyboard.Key.shift_l:
+            print('--- Нажата клавиша: {}'.format(key_name))
+        elif (key == keyboard.KeyCode.from_char('!')) or (key == keyboard.KeyCode.from_char('@')) or\
+             (key == keyboard.KeyCode.from_char('"')) or (key == keyboard.KeyCode.from_char('#')) or\
+             (key == keyboard.KeyCode.from_char('№')):
             print('--- Нажата клавиша: {}'.format(key_name))
         else:
             print('Информационно. Вы нажали: {}'.format(key_name))
