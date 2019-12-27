@@ -29,7 +29,6 @@ class WebDriver:
     actions_data = []
 
     def auth(self, gui):
-
         options = Options()
         options.add_argument("--start-maximized")
         options.add_argument("--disable-extensions")
@@ -105,7 +104,6 @@ class WebDriver:
             gui.chat.queue.put(gui.command_window.append('Необходимо открыть папку с баннерами в браузере'))
 
     def parser(self, gui):
-        try:
             self.driver.switch_to_window(self.ad_window)
             for window in self.driver.window_handles:
                 if window is not self.dt_window and self.ad_window:
@@ -127,21 +125,16 @@ class WebDriver:
                 self.actions_data.append(action)
             info = ""
             for n, a in enumerate(self.actions_data, 1):
-                info += f"---{n}\n"
+                gui.chat.queue.put(gui.command_window.append(info))
+                info = ""
                 for key, value in a.items():
                     info += " ".join([key, ':  ', value]) + "\n"
-            gui.command_window.append(info)
+            gui.chat.queue.put(gui.command_window.append(info))
             if self.driver.current_window_handle is not self.ad_window and \
                     self.driver.current_window_handle is not self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-        except WebDriverException as exc:
-            print(f'Произошла ошибка {exc}')
-            if 'chrome not reachable' in exc.msg:
-                gui.chat.queue.put(gui.command_window.append(f'Ошибка браузера {exc}, {exc.msg}'))
-                return
-        except AttributeError as exc:
-            gui.chat.queue.put(gui.command_window.append('Необходимо открыть страницу с акциями в браузере'))
+
 
     def add_actions(self, gui):
         try:
@@ -226,7 +219,9 @@ class WebDriver:
             links = set(map(lambda x: x.get_attribute('href'), links))
             links = list(links)
             if links:
-                result = os.path.join("result")
+                home_path = os.getenv('HOMEPATH')
+                result = os.path.join("C:\\", home_path, "Desktop", "result")
+                result = os.path.normpath(result)
                 if os.path.exists(result):
                     shutil.rmtree(result)
                 if not os.path.exists(result):
@@ -235,7 +230,7 @@ class WebDriver:
                 for n, link in enumerate(links, 1):
                     format = re.search(r'(\w+)$', link).group(1)
                     name = str(n) + "." + format
-                    path = os.path.join("result", name)
+                    path = os.path.join(result, name)
                     p = requests.get(link)
                     out = open(path, "wb")
                     out.write(p.content)
