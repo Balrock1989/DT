@@ -65,7 +65,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.queue = Queue()
 
 
-
     def init_buttons(self):
         now = datetime.datetime.now()
         self.date_start.append(now.strftime("%d.%m.%Y"))

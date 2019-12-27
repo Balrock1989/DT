@@ -25,8 +25,10 @@ class WebDriver:
     dt_window = None
     ad_window = None
     actions_data = []
+    wait = WebDriverWait(driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
 
     def auth(self, gui):
+
         options = Options()
         options.add_argument("--start-maximized")
         options.add_argument("--disable-extensions")
@@ -34,22 +36,21 @@ class WebDriver:
         self.driver = webdriver.Chrome(options=options)
         self.driver.get(auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
-        username_dt = self.driver.find_element_by_id('username').send_keys(auth.username_dt)
-        password_dt = self.driver.find_element_by_id('password').send_keys(auth.password_dt)
+        self.driver.find_element_by_id('username').send_keys(auth.username_dt)
+        self.driver.find_element_by_id('password').send_keys(auth.password_dt)
         self.driver.find_element_by_class_name("submit").click()
         self.driver.execute_script("window.open('');")
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
         self.driver.get(auth.auth_url_ad)
-        username_ad = self.driver.find_element_by_name('login').send_keys(auth.username_ad)
-        password_ad = self.driver.find_element_by_name('password').send_keys(auth.password_ad)
+        self.driver.find_element_by_name('login').send_keys(auth.username_ad)
+        self.driver.find_element_by_name('password').send_keys(auth.password_ad)
         self.driver.find_element_by_id("id_sign_in").click()
 
     def add_banner(self, gui):
         try:
             self.driver.switch_to_window(self.dt_window)
-            wait = WebDriverWait(self.driver, 5, poll_frequency=3, ignored_exceptions=UnexpectedAlertPresentException)
-            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='_____']")))
+            links = self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='_____']")))
             links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
             links = set(map(lambda x: x.get_attribute('href'), links))
             links = list(links)
@@ -103,47 +104,46 @@ class WebDriver:
             gui.command_window.append('Необходимо открыть папку с баннерами в браузере')
 
     def parser(self, gui):
-        try:
-            self.driver.switch_to_window(self.ad_window)
-            for window in self.driver.window_handles:
-                if window is not self.dt_window and self.ad_window:
-                    self.driver.switch_to.window(window)
-            page = BeautifulSoup(self.driver.page_source, "lxml")
-            actions = page.findAll('div', class_="coupon")
-            for act in actions:
-                action = OrderedDict()
-                action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
-                action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
-                full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
-                temp = "".join(str(full_date.text).split())
-                action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
-                action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
-                action["Тип купона"] = re.sub(r'\s+', ' ', act.div.h3.text).strip()
-                action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() \
-                    if len(act.findAll("p", text=True)) > 1 else ""
-                self.actions_data.append(action)
-                for act in self.actions_data:
-                    print()
-                    gui.command_window.append("\n")
-                    for key, value in act.items():
-                        gui.command_window.append(f"{key}:   {value}")
-                        sleep(0.01)
-            if self.driver.current_window_handle is not self.dt_window and self.ad_window:
-                self.driver.close()
-            self.driver.switch_to.window(self.ad_window)
-        except WebDriverException as exc:
-            print(f'Произошла ошибка {exc}')
-            gui.command_window.append('Браузер закрылся')
-        except AttributeError as exc:
-            gui.command_window.append('Необходимо открыть страницу с акциями в браузере')
+        self.driver.switch_to_window(self.ad_window)
+        for window in self.driver.window_handles:
+            if window is not self.dt_window and self.ad_window:
+                self.driver.switch_to.window(window)
+        page = BeautifulSoup(self.driver.page_source, "lxml")
+        actions = page.findAll('div', class_="coupon")
+        gui.command_window.append(f"Всего будет обработано акций {len(actions)}")
+        for act in actions:
+            action = OrderedDict()
+            action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
+            action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
+            full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
+            temp = "".join(str(full_date.text).split())
+            action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
+            action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
+            action["Тип купона"] = re.sub(r'\s+', ' ', act.findAll("td", text=True)[4].text).strip()
+            action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
+                len(act.findAll("p", text=True)) > 1 else ""
+            self.actions_data.append(action)
+        info = ""
+        for n, a in enumerate(self.actions_data, 1):
+            info += f"---{n}\n"
+            for key, value in a.items():
+                info += " ".join([key, ':  ', value]) + "\n"
+        gui.command_window.append(info)
+        if self.driver.current_window_handle is not self.dt_window and self.ad_window:
+            self.driver.close()
+        self.driver.switch_to.window(self.ad_window)
 
     def add_actions(self, gui):
         try:
-            self.driver.switch_to_window(self.dt_window)
-            self.driver.switch_to_frame("ifrm")
+
             for action in self.actions_data:
-                self.driver.find_element_by_name("title").send_keys(action["Название акции"])
+                self.driver.switch_to_window(self.dt_window)
+                url = self.driver.current_url
+                id = re.search(r'Id=(\d+)', url).group(1)
+                self.driver.switch_to_frame("ifrm")
+                header = self.driver.find_element_by_name("title")
                 vaucher_type = Select(self.driver.find_element_by_id("voucherTypeId"))
+                form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
                 checkbox = self.driver.find_element_by_id("isPercentage")
                 description = self.driver.find_element_by_id("description")
                 short_description = self.driver.find_element_by_name("shortDescription")
@@ -154,6 +154,7 @@ class WebDriver:
                 end_date = self.driver.find_element_by_id("id_publishEndDate")
                 code = self.driver.find_element_by_id("code")
                 landing_url = self.driver.find_element_by_id("landingUrl")
+                header.send_keys(action["Название акции"])
                 valid_from.clear()
                 valid_from.send_keys(action["Дата начала"])
                 valid_to.clear()
@@ -190,9 +191,11 @@ class WebDriver:
                 if "оставка" in action["Тип купона"]:
                     vaucher_type.select_by_value("4")
                     code.send_keys("Не требуется")
-
-                sleep(10)
-            # self.driver.switch_to_default_content()
+                form.submit()
+                self.driver.switch_to_default_content()
+                sleep(1)
+                self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
+                self.driver.get("https://login.tradedoubler.com/pan/mCreateVouchers.action?programId="+id)
 
         except WebDriverException as exc:
             print(f'Произошла ошибка {exc}')
@@ -204,4 +207,3 @@ class WebDriver:
         except AttributeError:
             percent = re.search(r'%(\d+)', action).group(1)
         return percent
-
