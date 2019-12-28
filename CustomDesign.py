@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("DTMainWindow")
         MainWindow.resize(869, 489)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -137,7 +137,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("DTMainWindow", "DTMainWindow"))
         self.path_window.setPlaceholderText(_translate("MainWindow", "Путь до папки с баннерами которые будут переименованы"))
         self.path_buttom.setText(_translate("MainWindow", "Выбрать папку ..."))
         self.data_start_label.setText(_translate("MainWindow", "ДАТА НАЧАЛА АКЦИИ:"))

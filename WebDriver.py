@@ -4,6 +4,7 @@ import re
 from collections import OrderedDict
 from time import sleep
 import requests
+from PyQt5 import QtCore
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -47,6 +48,10 @@ class WebDriver:
         self.driver.find_element_by_name('password').send_keys(auth.password_ad)
         self.driver.find_element_by_id("id_sign_in").click()
 
+    def chat_print(self, gui, text):
+        gui.show_process()
+        gui.chat.queue.put(gui.command_window.append(text))
+
     def add_banner(self, gui):
         try:
             self.driver.switch_to_window(self.dt_window)
@@ -58,9 +63,9 @@ class WebDriver:
             links = sorted(links, key=lambda x: re.search(r'_____(\d+).', x).group(1))
             dir_name = self.driver.find_elements_by_css_selector('tr th')[0]
             dir_name = re.search(r'Хостинг файлов: (.*)', dir_name.text).group(1)
-            gui.chat.queue.put(gui.command_window.append(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}'))
-            gui.chat.queue.put(gui.command_window.append(f'Дата начала акции:{self.start_data}, Дата окончания акции:'
-                                                         f'{self.end_data}, url: {self.url}'))
+            self.chat_print(gui, f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
+            self.chat_print(gui, f'Дата начала акции:{self.start_data}, Дата окончания акции:'
+                                 f'{self.end_data}, url: {self.url}')
             if not self.start_data:
                 now = datetime.datetime.now()
                 self.start_data = now.strftime("%d.%m.%Y")
@@ -91,17 +96,16 @@ class WebDriver:
                 self.driver.find_elements_by_css_selector("input[value='Предварительный']")[1].click()
                 WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
                     (By.CSS_SELECTOR, "input[value='Сохранить']"))).click()
-                gui.chat.queue.put(gui.command_window.append(f'файл {size} успешно загружен'))
-            gui.chat.queue.put(gui.command_window.append('#' * 60))
-            gui.chat.queue.put(gui.command_window.append('#' * 60))
-            gui.chat.queue.put(gui.command_window.append('С первой папкой закончил, жду следующую'))
+                self.chat_print(gui, f'файл {size} успешно загружен')
+            self.chat_print(gui, '#' * 60)
+            self.chat_print(gui, '#' * 60)
+            self.chat_print(gui, 'С первой папкой закончил, жду следующую')
         except WebDriverException as exc:
-            print(f'Произошла ошибка {exc}')
+            self.chat_print(gui, f'Произошла ошибка {exc}: {exc.msg}')
             if 'chrome not reachable' in exc.msg:
-                gui.chat.queue.put(gui.command_window.append(f'Ошибка браузера {exc}, {exc.msg}'))
-                return
+                self.chat_print(gui, 'Браузер закрыт')
         except AttributeError as exc:
-            gui.chat.queue.put(gui.command_window.append('Необходимо открыть папку с баннерами в браузере'))
+            self.chat_print(gui, 'Необходимо открыть папку с баннерами в браузере')
 
     def parser(self, gui):
         self.driver.switch_to_window(self.ad_window)
@@ -110,7 +114,7 @@ class WebDriver:
                 self.driver.switch_to.window(window)
         page = BeautifulSoup(self.driver.page_source, "lxml")
         actions = page.findAll('div', class_="coupon")
-        gui.chat.queue.put(gui.command_window.append(f"Всего будет обработано акций {len(actions)}"))
+        self.chat_print(gui, f"Всего будет обработано акций {len(actions)}")
         for act in actions:
             action = OrderedDict()
             action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
@@ -123,18 +127,17 @@ class WebDriver:
             action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
                 len(act.findAll("p", text=True)) > 1 else ""
             self.actions_data.append(action)
-        gui.chat.queue.put(gui.command_window.append(f"{len(actions)} акций успешно загружены в память"))
-        # info = ""
-        # for n, a in enumerate(self.actions_data, 1):
-        #     gui.chat.queue.put(gui.command_window.append(info))
-        #     info = f"---№{n}\n"
-        #     for key, value in a.items():
-        #         info += " ".join([key, ':  ', value]) + "\n"
-        # gui.chat.queue.put(gui.command_window.append(info))
-        # if self.driver.current_window_handle != self.ad_window and \
-        #         self.driver.current_window_handle != self.dt_window:
-        #     self.driver.close()
-        # self.driver.switch_to.window(self.ad_window)
+        self.chat_print(gui, f"Акции успешно загружены в память")
+        gui.show_process()
+        for n, a in enumerate(self.actions_data, 1):
+            self.chat_print(gui, f"---№{n}\n")
+            for key, value in a.items():
+                gui.chat.queue.put(gui.command_window.append("{:20}: {}".format(key, value)))
+        if self.driver.current_window_handle != self.ad_window and \
+                self.driver.current_window_handle != self.dt_window:
+            self.driver.close()
+        self.driver.switch_to.window(self.ad_window)
+        gui.show_process()
 
     def add_actions(self, gui):
         try:
@@ -173,7 +176,7 @@ class WebDriver:
                 else:
                     description.send_keys(action["Название акции"])
                 landing_url.send_keys(gui.url.toPlainText())
-                if "кидка" or "упон" in action["Тип купона"]:
+                if "скидка" or "купон" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("2") if "кидка" in action["Тип купона"] \
                         else vaucher_type.select_by_value("1")
                     code.send_keys("Не требуется")
@@ -187,10 +190,10 @@ class WebDriver:
                         discount_amount.send_keys(percent)
                     else:
                         discount_amount.send_keys('0')
-                if "одарок" in action["Тип купона"]:
+                if "подарок" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("3")
                     code.send_keys("Не требуется")
-                if "оставка" in action["Тип купона"]:
+                if "доставка" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("4")
                     code.send_keys("Не требуется")
                 form.submit()
@@ -199,13 +202,11 @@ class WebDriver:
                 self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
                 self.driver.get("https://login.tradedoubler.com/pan/mCreateVouchers.action?programId=" + id)
             self.actions_data.clear()
-            gui.chat.queue.put(gui.command_window.append("Акции успешно добавлены"))
-
+            self.chat_print(gui, "Акции успешно добавлены")
         except WebDriverException as exc:
-            print(f'Произошла ошибка {exc}')
-            gui.chat.queue.put(gui.command_window.append(f'Ошибка браузера {exc}, {exc.msg}'))
+            self.chat_print(gui, f'Ошибка браузера {exc}, {exc.msg}')
         except AttributeError as exc:
-            gui.chat.queue.put(gui.command_window.append(f'Данные об акциях очищены, нужно загрузить снова'))
+            self.chat_print(gui, f'Данные об акциях очищены, нужно загрузить снова')
             self.actions_data.clear()
 
     def get_percent(self, action):
@@ -230,8 +231,8 @@ class WebDriver:
                 result = os.path.normpath(result)
                 if not os.path.exists(result):
                     os.mkdir(result)
-                gui.chat.queue.put(gui.command_window.append(f'Всего будет скачано {len(links)} баннеров'))
-                gui.chat.queue.put(gui.command_window.append(f'Результаты здесь: {os.path.abspath(result)}'))
+                self.chat_print(gui, f'Всего будет скачано {len(links)} баннеров')
+                self.chat_print(gui, f'Результаты здесь: {os.path.abspath(result)}')
                 for link in links:
                     format = re.search(r'(\w+)$', link).group(1)
                     name = str(self.name_index) + "." + format
@@ -241,16 +242,16 @@ class WebDriver:
                     out = open(path, "wb")
                     out.write(p.content)
                     out.close()
-                    gui.chat.queue.put(gui.command_window.append(f'{name} успешно скачан\n'))
-                self.driver.switch_to_window(self.ad_window)
-                gui.chat.queue.put(gui.command_window.append(f'Загрузка успешно завершена'))
+                    self.chat_print(gui, f'{name} успешно скачан\n')
+                self.chat_print(gui, f'Загрузка успешно завершена')
             else:
-                gui.chat.queue.put(gui.command_window.append('Нужно зайти на страницу с баннерами'))
+                self.chat_print(gui, 'Нужно зайти на страницу с баннерами')
+
         except WebDriverException as exc:
-            print(f'Произошла ошибка {exc.msg}')
-            gui.chat.queue.put(gui.command_window.append('Нужно зайти на страницу с баннерами'))
+            self.chat_print(gui, f'Произошла {exc}: {exc.msg}')
             if 'chrome not reachable' in exc.msg:
-                gui.chat.queue.put(gui.command_window.append(f'Ошибка браузера {exc}, {exc.msg}'))
+                self.chat_print(gui, f'Браузер закрыт {exc}, {exc.msg}')
                 return
         except AttributeError as exc:
-            gui.chat.queue.put(gui.command_window.append('Нужно зайти на страницу с баннерами'))
+            self.chat_print(gui, 'Нужно зайти на страницу с баннерами')
+

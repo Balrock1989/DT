@@ -1,4 +1,3 @@
-from PyQt5 import QtGui
 from pynput import keyboard
 
 
@@ -15,7 +14,6 @@ def show(window):
         {keyboard.Key.shift_l, keyboard.KeyCode(char='#')},
         {keyboard.Key.shift_l, keyboard.KeyCode(char='№')},
     ]
-
     current = set()
 
     def executeShiftF1():
@@ -27,7 +25,8 @@ def show(window):
         print("\n *** Нажата комбинация клавиш: Shift + 1 \n *** Должна вызваться функция :)")
 
     def executeShiftF2():
-        window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
+        window.web.parser(gui=window)
+        # window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
         print("\n *** Нажата комбинация клавиш: Shift + 2 \n *** Должна вызваться функция :)")
 
     def executeShiftF3():

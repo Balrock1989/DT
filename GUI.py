@@ -2,8 +2,11 @@ import datetime
 import os
 import sys
 from queue import Queue
-
-from PyQt5 import QtWidgets, QtGui
+from time import sleep
+import pyautogui
+import win32con
+import win32gui
+from PyQt5 import QtWidgets, QtGui, QtCore, Qt
 from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from CustomDesign import Ui_MainWindow
@@ -76,6 +79,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
+        self.setWindowFlags(QtCore.Qt.Window)
+
 
     def init_buttons(self):
         now = datetime.datetime.now()
@@ -87,10 +92,11 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.run_ad_browser.clicked.connect(self.test)
 
     def test(self):
-        self.command_window.moveCursor(QtGui.QTextCursor.End)
-        self.command_window.clear()
-        # self.command_window.insertHtml("123131123")
-        self.command_window.moveCursor(QtGui.QTextCursor.End)
+        pass
+        # self.command_window.moveCursor(QtGui.QTextCursor.Start)##
+        # self.command_window.clear()
+        # # self.command_window.insertHtml("123131123")
+        # self.command_window.moveCursor(QtGui.QTextCursor.End)
 
     def get_path(self):
         self.path_window.clear()
@@ -134,6 +140,22 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.show()
         dialog.exec_()
 
+    def show_process(self):
+        toplist = []
+        winlist = []
+
+        def enum_callback(hwnd, results):
+            winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
+        try:
+            win32gui.EnumWindows(enum_callback, toplist)
+            dt_process = [(hwnd, title) for hwnd, title in winlist if 'DTMainWindow' in title]
+            dt_process = dt_process[0]
+            win32gui.ShowWindow(dt_process[0], win32con.SW_NORMAL)
+            pyautogui.press("alt")
+            win32gui.SetForegroundWindow(dt_process[0])
+            self.command_window.moveCursor(QtGui.QTextCursor.End)
+        except Exception as exc:
+            print(f'Произошла ошибка: {exc}')
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
