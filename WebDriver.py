@@ -123,21 +123,24 @@ class WebDriver:
             action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
                 len(act.findAll("p", text=True)) > 1 else ""
             self.actions_data.append(action)
-        info = ""
-        for n, a in enumerate(self.actions_data, 1):
-            gui.chat.queue.put(gui.command_window.append(info))
-            info = f"---№{n}\n"
-            for key, value in a.items():
-                info += " ".join([key, ':  ', value]) + "\n"
-        gui.chat.queue.put(gui.command_window.append(info))
-        if self.driver.current_window_handle != self.ad_window and \
-                self.driver.current_window_handle != self.dt_window:
-            self.driver.close()
-        self.driver.switch_to.window(self.ad_window)
+        gui.chat.queue.put(gui.command_window.append(f"{len(actions)} акций успешно загружены в память"))
+        # info = ""
+        # for n, a in enumerate(self.actions_data, 1):
+        #     gui.chat.queue.put(gui.command_window.append(info))
+        #     info = f"---№{n}\n"
+        #     for key, value in a.items():
+        #         info += " ".join([key, ':  ', value]) + "\n"
+        # gui.chat.queue.put(gui.command_window.append(info))
+        # if self.driver.current_window_handle != self.ad_window and \
+        #         self.driver.current_window_handle != self.dt_window:
+        #     self.driver.close()
+        # self.driver.switch_to.window(self.ad_window)
 
     def add_actions(self, gui):
         try:
             for action in self.actions_data:
+                if self.exit:
+                    return
                 self.driver.switch_to_window(self.dt_window)
                 url = self.driver.current_url
                 id = re.search(r'Id=(\d+)', url).group(1)

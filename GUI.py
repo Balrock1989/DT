@@ -3,7 +3,7 @@ import os
 import sys
 from queue import Queue
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from CustomDesign import Ui_MainWindow
@@ -84,6 +84,13 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
+        self.run_ad_browser.clicked.connect(self.test)
+
+    def test(self):
+        self.command_window.moveCursor(QtGui.QTextCursor.End)
+        self.command_window.clear()
+        # self.command_window.insertHtml("123131123")
+        self.command_window.moveCursor(QtGui.QTextCursor.End)
 
     def get_path(self):
         self.path_window.clear()

@@ -1,3 +1,4 @@
+from PyQt5 import QtGui
 from pynput import keyboard
 
 
