@@ -1,9 +1,7 @@
 import datetime
 import os
 import re
-import shutil
 from collections import OrderedDict
-from pprint import pprint
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
@@ -34,6 +32,7 @@ class WebDriver:
         options.add_argument("--start-maximized")
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-notifications")
+        options.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome(options=options)
         self.driver.get(auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
