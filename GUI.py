@@ -52,9 +52,9 @@ class WebThread(QThread):
         self.mainwindow.web.auth(self.mainwindow)
 
 
-class Chat(QThread):
+class ChatThread(QThread):
     def __init__(self, mainwindow):
-        super(Chat, self).__init__()
+        super(ChatThread, self).__init__()
         self.mainwindow = mainwindow
         self.width_resize = ''
         self.height_resize = ''
@@ -72,12 +72,10 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
         self.web_thread = WebThread(mainwindow=self)
-        self.chat = Chat(mainwindow=self)
+        self.chat = ChatThread(mainwindow=self)
         self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
-
-
 
     def init_buttons(self):
         now = datetime.datetime.now()

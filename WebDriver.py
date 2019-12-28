@@ -27,6 +27,7 @@ class WebDriver:
     dt_window = None
     ad_window = None
     actions_data = []
+    name_index = 1
 
     def auth(self, gui):
         options = Options()
@@ -104,37 +105,36 @@ class WebDriver:
             gui.chat.queue.put(gui.command_window.append('Необходимо открыть папку с баннерами в браузере'))
 
     def parser(self, gui):
-            self.driver.switch_to_window(self.ad_window)
-            for window in self.driver.window_handles:
-                if window is not self.dt_window and self.ad_window:
-                    self.driver.switch_to.window(window)
-            page = BeautifulSoup(self.driver.page_source, "lxml")
-            actions = page.findAll('div', class_="coupon")
-            gui.chat.queue.put(gui.command_window.append(f"Всего будет обработано акций {len(actions)}"))
-            for act in actions:
-                action = OrderedDict()
-                action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
-                action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
-                full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
-                temp = "".join(str(full_date.text).split())
-                action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
-                action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
-                action["Тип купона"] = re.sub(r'\s+', ' ', act.findAll("td", text=True)[4].text).strip()
-                action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
-                    len(act.findAll("p", text=True)) > 1 else ""
-                self.actions_data.append(action)
-            info = ""
-            for n, a in enumerate(self.actions_data, 1):
-                gui.chat.queue.put(gui.command_window.append(info))
-                info = f"---№{n}\n"
-                for key, value in a.items():
-                    info += " ".join([key, ':  ', value]) + "\n"
+        self.driver.switch_to_window(self.ad_window)
+        for window in self.driver.window_handles:
+            if window != self.dt_window and window != self.ad_window:
+                self.driver.switch_to.window(window)
+        page = BeautifulSoup(self.driver.page_source, "lxml")
+        actions = page.findAll('div', class_="coupon")
+        gui.chat.queue.put(gui.command_window.append(f"Всего будет обработано акций {len(actions)}"))
+        for act in actions:
+            action = OrderedDict()
+            action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
+            action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
+            full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
+            temp = "".join(str(full_date.text).split())
+            action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
+            action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
+            action["Тип купона"] = re.sub(r'\s+', ' ', act.findAll("td", text=True)[4].text).strip()
+            action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
+                len(act.findAll("p", text=True)) > 1 else ""
+            self.actions_data.append(action)
+        info = ""
+        for n, a in enumerate(self.actions_data, 1):
             gui.chat.queue.put(gui.command_window.append(info))
-            if self.driver.current_window_handle is not self.ad_window and \
-                    self.driver.current_window_handle is not self.dt_window:
-                self.driver.close()
-            self.driver.switch_to.window(self.ad_window)
-
+            info = f"---№{n}\n"
+            for key, value in a.items():
+                info += " ".join([key, ':  ', value]) + "\n"
+        gui.chat.queue.put(gui.command_window.append(info))
+        if self.driver.current_window_handle != self.ad_window and \
+                self.driver.current_window_handle != self.dt_window:
+            self.driver.close()
+        self.driver.switch_to.window(self.ad_window)
 
     def add_actions(self, gui):
         try:
@@ -202,6 +202,9 @@ class WebDriver:
         except WebDriverException as exc:
             print(f'Произошла ошибка {exc}')
             gui.chat.queue.put(gui.command_window.append(f'Ошибка браузера {exc}, {exc.msg}'))
+        except AttributeError as exc:
+            gui.chat.queue.put(gui.command_window.append(f'Данные об акциях очищены, нужно загрузить снова'))
+            self.actions_data.clear()
 
     def get_percent(self, action):
         try:
@@ -213,7 +216,7 @@ class WebDriver:
     def download_banners(self, gui):
         try:
             for window in self.driver.window_handles:
-                if window is not self.dt_window and self.ad_window:
+                if window != self.dt_window and window != self.ad_window:
                     self.driver.switch_to.window(window)
             wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[class='banner_view']")))
@@ -223,14 +226,14 @@ class WebDriver:
                 home_path = os.getenv('HOMEPATH')
                 result = os.path.join("C:\\", home_path, "Desktop", "result")
                 result = os.path.normpath(result)
-                if os.path.exists(result):
-                    shutil.rmtree(result)
-                os.mkdir(result)
+                if not os.path.exists(result):
+                    os.mkdir(result)
                 gui.chat.queue.put(gui.command_window.append(f'Всего будет скачано {len(links)} баннеров'))
                 gui.chat.queue.put(gui.command_window.append(f'Результаты здесь: {os.path.abspath(result)}'))
-                for n, link in enumerate(links, 1):
+                for link in links:
                     format = re.search(r'(\w+)$', link).group(1)
-                    name = str(n) + "." + format
+                    name = str(self.name_index) + "." + format
+                    self.name_index += 1
                     path = os.path.join(result, name)
                     p = requests.get(link)
                     out = open(path, "wb")
