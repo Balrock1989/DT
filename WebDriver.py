@@ -4,7 +4,7 @@ import re
 from collections import OrderedDict
 from time import sleep
 import requests
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -51,6 +51,7 @@ class WebDriver:
     def chat_print(self, gui, text):
         gui.show_process()
         gui.chat.queue.put(gui.command_window.append(text))
+        gui.command_window.moveCursor(QtGui.QTextCursor.End)
 
     def add_banner(self, gui):
         try:
@@ -204,9 +205,12 @@ class WebDriver:
             self.actions_data.clear()
             self.chat_print(gui, "Акции успешно добавлены")
         except WebDriverException as exc:
-            self.chat_print(gui, f'Ошибка браузера {exc}, {exc.msg}')
+            self.chat_print(gui, '*' * 60)
+            self.chat_print(gui, f'Данные об акциях были очищены, нужно загрузить снова')
+            self.actions_data.clear()
         except AttributeError as exc:
-            self.chat_print(gui, f'Данные об акциях очищены, нужно загрузить снова')
+            self.chat_print(gui, '*' * 60)
+            self.chat_print(gui, f'Данные об акциях были очищены, нужно загрузить снова')
             self.actions_data.clear()
 
     def get_percent(self, action):
@@ -254,4 +258,3 @@ class WebDriver:
                 return
         except AttributeError as exc:
             self.chat_print(gui, 'Нужно зайти на страницу с баннерами')
-

@@ -25,8 +25,7 @@ def show(window):
         print("\n *** Нажата комбинация клавиш: Shift + 1 \n *** Должна вызваться функция :)")
 
     def executeShiftF2():
-        window.web.parser(gui=window)
-        # window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
+        window.web.parser(gui=window) if not window.web.actions_data else window.web.add_actions(gui=window)
         print("\n *** Нажата комбинация клавиш: Shift + 2 \n *** Должна вызваться функция :)")
 
     def executeShiftF3():
@@ -47,9 +46,9 @@ def show(window):
             window.sizer.exit = True
         elif key == keyboard.Key.shift_l:
             print('--- Нажата клавиша: {}'.format(key_name))
-        elif (key == keyboard.KeyCode.from_char('!')) or (key == keyboard.KeyCode.from_char('@')) or\
-             (key == keyboard.KeyCode.from_char('"')) or (key == keyboard.KeyCode.from_char('#')) or\
-             (key == keyboard.KeyCode.from_char('№')):
+        elif (key == keyboard.KeyCode.from_char('!')) or (key == keyboard.KeyCode.from_char('@')) or \
+                (key == keyboard.KeyCode.from_char('"')) or (key == keyboard.KeyCode.from_char('#')) or \
+                (key == keyboard.KeyCode.from_char('№')):
             print('--- Нажата клавиша: {}'.format(key_name))
         else:
             print('Информационно. Вы нажали: {}'.format(key_name))
@@ -72,4 +71,3 @@ def show(window):
 
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
-

@@ -2,11 +2,10 @@ import datetime
 import os
 import sys
 from queue import Queue
-from time import sleep
 import pyautogui
 import win32con
 import win32gui
-from PyQt5 import QtWidgets, QtGui, QtCore, Qt
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from CustomDesign import Ui_MainWindow
@@ -81,7 +80,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.init_buttons()
         self.setWindowFlags(QtCore.Qt.Window)
 
-
     def init_buttons(self):
         now = datetime.datetime.now()
         self.date_start.append(now.strftime("%d.%m.%Y"))
@@ -93,10 +91,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def test(self):
         pass
-        # self.command_window.moveCursor(QtGui.QTextCursor.Start)##
-        # self.command_window.clear()
-        # # self.command_window.insertHtml("123131123")
-        # self.command_window.moveCursor(QtGui.QTextCursor.End)
 
     def get_path(self):
         self.path_window.clear()
@@ -146,6 +140,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
         def enum_callback(hwnd, results):
             winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
+
         try:
             win32gui.EnumWindows(enum_callback, toplist)
             dt_process = [(hwnd, title) for hwnd, title in winlist if 'DTMainWindow' in title]
@@ -156,6 +151,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             self.command_window.moveCursor(QtGui.QTextCursor.End)
         except Exception as exc:
             print(f'Произошла ошибка: {exc}')
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
