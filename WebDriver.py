@@ -28,9 +28,7 @@ class WebDriver:
     actions_data = []
     name_index = 1
 
-    """
-    Запуск браузера и авторизация на сайтах
-    """
+    """Запуск браузера и авторизация на сайтах"""
 
     def auth(self, gui):
         options = Options()
@@ -52,9 +50,7 @@ class WebDriver:
         self.driver.find_element_by_name('password').send_keys(auth.password_ad)
         self.driver.find_element_by_id("id_sign_in").click()
 
-    """
-    Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь
-    """
+    """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
 
     def chat_print(self, gui, text):
         gui.show_process()
@@ -116,9 +112,7 @@ class WebDriver:
         except AttributeError as exc:
             self.chat_print(gui, 'Необходимо открыть папку с баннерами в браузере')
 
-    """
-    Сбор и форамтирование информации об акциях
-    """
+    """Сбор и форамтирование информации об акциях"""
 
     def parser(self, gui):
         for window in self.driver.window_handles:
@@ -153,9 +147,7 @@ class WebDriver:
         self.driver.switch_to.window(self.ad_window)
         gui.show_process()
 
-    """
-    Добавление акций на основе полученных данных
-    """
+    """Добавление акций на основе полученных данных"""
 
     def add_actions(self, gui):
         try:
@@ -237,9 +229,7 @@ class WebDriver:
             percent = re.search(r'%(\d+)', action).group(1)
         return percent
 
-    """
-    Загрузка баннеров с сайта
-    """
+    """Загрузка баннеров с сайта"""
 
     def download_banners(self, gui):
         try:

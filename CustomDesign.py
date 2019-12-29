@@ -138,7 +138,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("DTMainWindow", "DTMainWindow"))
-        self.path_window.setPlaceholderText(_translate("MainWindow", "Путь до папки с баннерами которые будут переименованы"))
+        self.path_window.setPlaceholderText(
+            _translate("MainWindow", "Путь до папки с баннерами которые будут переименованы"))
         self.path_buttom.setText(_translate("MainWindow", "Выбрать папку ..."))
         self.data_start_label.setText(_translate("MainWindow", "ДАТА НАЧАЛА АКЦИИ:"))
         self.date_start.setPlaceholderText(_translate("MainWindow", "Пример 01.01.2019, если пусто то текущая дата"))

@@ -11,9 +11,8 @@ class Resizer:
     h = 0
     exit = False
     count = ''
-    """
-    Изменение размера изображений
-    """
+
+    """Изменение размера изображений"""
 
     def resize_image(self, gui, path, end_data):
         try:

@@ -18,9 +18,7 @@ import threading
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." GUI.py
 
-"""
-Класс для кастомизации диалогового окна
-"""
+"""Класс для кастомизации диалогового окна"""
 
 
 class CustomDialog(QDialog, Ui_Dialog):
@@ -47,9 +45,7 @@ class CustomDialog(QDialog, Ui_Dialog):
         self.close()
 
 
-"""
-Отдельный поток для работы браузера
-"""
+"""Отдельный поток для работы браузера"""
 
 
 class WebThread(QThread):
@@ -63,9 +59,7 @@ class WebThread(QThread):
         self.mainwindow.web.auth(self.mainwindow)
 
 
-"""
-Отдельный поток для работы чата
-"""
+"""Отдельный поток для работы чата"""
 
 
 class ChatThread(QThread):
@@ -81,9 +75,7 @@ class ChatThread(QThread):
             self.queue.get()
 
 
-"""
-Основной поток интерфейса
-"""
+"""Основной поток интерфейса"""
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -153,9 +145,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.show()
         dialog.exec_()
 
-    """
-    Поиск окна программы в Windows, отображение его и активация, используется для чата
-    """
+    """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
 
     def show_process(self):
         toplist = []
