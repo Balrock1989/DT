@@ -16,13 +16,12 @@ from ImageSizer import Resizer
 import GlobalHotKey
 import threading
 
-
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." GUI.py
+
+"""Класс для кастомизации диалогового окна"""
 
 
 class CustomDialog(QDialog, Ui_Dialog):
-    """Класс для кастомизации диалогового окна"""
-
     def __init__(self, sizer, message, size):
         QDialog.__init__(self)
         self.sizer = sizer
@@ -46,9 +45,10 @@ class CustomDialog(QDialog, Ui_Dialog):
         self.close()
 
 
-class WebThread(QThread):
-    """Отдельный поток для работы браузера"""
+"""Отдельный поток для работы браузера"""
 
+
+class WebThread(QThread):
     def __init__(self, mainwindow):
         super(WebThread, self).__init__()
         self.mainwindow = mainwindow
@@ -59,9 +59,10 @@ class WebThread(QThread):
         self.mainwindow.web.auth(self.mainwindow)
 
 
-class ChatThread(QThread):
-    """Отдельный поток для работы чата"""
+"""Отдельный поток для работы чата"""
 
+
+class ChatThread(QThread):
     def __init__(self, mainwindow):
         super(ChatThread, self).__init__()
         self.mainwindow = mainwindow
@@ -74,9 +75,10 @@ class ChatThread(QThread):
             self.queue.get()
 
 
-class DT(QtWidgets.QMainWindow, Ui_MainWindow):
-    """Основной поток интерфейса"""
+"""Основной поток интерфейса"""
 
+
+class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -143,8 +145,9 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.show()
         dialog.exec_()
 
+    """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
+
     def show_process(self):
-        """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
         toplist = []
         winlist = []
 
