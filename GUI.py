@@ -19,6 +19,9 @@ import threading
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." GUI.py
 
+"""
+Класс для кастомизации диалогового окна
+"""
 class CustomDialog(QDialog, Ui_Dialog):
     def __init__(self, sizer, message, size):
         QDialog.__init__(self)
@@ -43,6 +46,9 @@ class CustomDialog(QDialog, Ui_Dialog):
         self.close()
 
 
+"""
+Отдельный поток для работы браузера
+"""
 class WebThread(QThread):
     def __init__(self, mainwindow):
         super(WebThread, self).__init__()
@@ -54,6 +60,9 @@ class WebThread(QThread):
         self.mainwindow.web.auth(self.mainwindow)
 
 
+"""
+Отдельный поток для работы чата
+"""
 class ChatThread(QThread):
     def __init__(self, mainwindow):
         super(ChatThread, self).__init__()
@@ -67,6 +76,9 @@ class ChatThread(QThread):
             self.queue.get()
 
 
+"""
+Основной поток интерфейса
+"""
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -75,6 +87,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sb_num1 = QSpinBox()
         self.web_thread = WebThread(mainwindow=self)
         self.chat = ChatThread(mainwindow=self)
+        self.chat.start()
         self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
@@ -134,6 +147,9 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.show()
         dialog.exec_()
 
+    """
+    Поиск окна программы в Windows, отображение его и активация, используется для чата
+    """
     def show_process(self):
         toplist = []
         winlist = []
@@ -157,7 +173,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     window = DT()
     window.show()
-    threading.Thread(target=GlobalHotKey.show, args=(window,), daemon=True).start()
+    threading.Thread(target=GlobalHotKey.hotkey, args=(window,), daemon=True).start()
     app.exec_()
 
 

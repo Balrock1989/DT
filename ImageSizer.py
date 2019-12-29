@@ -10,7 +10,9 @@ class Resizer:
     h = 0
     exit = False
     count = ''
-
+    """
+    Изменение размера изображений
+    """
     def resize_image(self, gui, path, end_data):
         try:
             path = os.path.normpath(path)

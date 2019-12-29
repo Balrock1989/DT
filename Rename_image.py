@@ -5,6 +5,9 @@ from PIL import Image
 
 
 class Rename:
+    """
+    Обработка загруженных баннеров, форматирование имени
+    """
     def rename_image(self, gui, path, end_data, checkbox):
         i = 1
         remove = 0
