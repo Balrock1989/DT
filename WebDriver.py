@@ -121,10 +121,11 @@ class WebDriver:
     """
 
     def parser(self, gui):
-        self.driver.switch_to_window(self.ad_window)
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
+        if len(self.driver.window_handles) == 2:
+            self.driver.switch_to.window(self.ad_window)
         page = BeautifulSoup(self.driver.page_source, "lxml")
         actions = page.findAll('div', class_="coupon")
         self.chat_print(gui, f"Всего будет обработано акций {len(actions)}")
@@ -245,6 +246,8 @@ class WebDriver:
             for window in self.driver.window_handles:
                 if window != self.dt_window and window != self.ad_window:
                     self.driver.switch_to.window(window)
+            if len(self.driver.window_handles) == 2:
+                self.driver.switch_to.window(self.ad_window)
             wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[class='banner_view']")))
             links = set(map(lambda x: x.get_attribute('href'), links))
