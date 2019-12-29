@@ -194,7 +194,7 @@ class WebDriver:
                     description.send_keys(action["Название акции"])
                 landing_url.send_keys(gui.url.toPlainText())
                 if "скидка" in action["Тип купона"].lower() or "купон" in action["Тип купона"].lower():
-                    vaucher_type.select_by_value("2") if "cкидка" in action["Тип купона"].lower() \
+                    vaucher_type.select_by_value("2") if "скидка" in action["Тип купона"].lower() \
                         else vaucher_type.select_by_value("1")
                     code.send_keys("Не требуется")
                     if "%" in action["Название акции"]:
@@ -217,7 +217,7 @@ class WebDriver:
                 self.driver.switch_to_default_content()
                 sleep(1)
                 self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
-                self.driver.get("https://login.tradedoubler.com/pan/mCreateVouchers.action?programId=" + id)
+                self.driver.get(auth.coupun_url + id)
             self.actions_data.clear()
             self.chat_print(gui, "Акции успешно добавлены")
         except WebDriverException as exc:
