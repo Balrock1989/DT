@@ -133,7 +133,7 @@ class WebDriver:
         for n, a in enumerate(self.actions_data, 1):
             self.chat_print(gui, f"---№{n}\n")
             for key, value in a.items():
-                gui.chat.queue.put(gui.command_window.append("{:20}: {}".format(key, value)))
+                gui.chat.queue.put(gui.command_window.append("{:25}: {}".format(key, value)))
         if self.driver.current_window_handle != self.ad_window and \
                 self.driver.current_window_handle != self.dt_window:
             self.driver.close()
@@ -177,8 +177,8 @@ class WebDriver:
                 else:
                     description.send_keys(action["Название акции"])
                 landing_url.send_keys(gui.url.toPlainText())
-                if "скидка" or "купон" in action["Тип купона"].lower():
-                    vaucher_type.select_by_value("2") if "кидка" in action["Тип купона"] \
+                if "скидка" in action["Тип купона"].lower() or "купон" in action["Тип купона"].lower():
+                    vaucher_type.select_by_value("2") if "cкидка" in action["Тип купона"].lower() \
                         else vaucher_type.select_by_value("1")
                     code.send_keys("Не требуется")
                     if "%" in action["Название акции"]:
@@ -191,10 +191,10 @@ class WebDriver:
                         discount_amount.send_keys(percent)
                     else:
                         discount_amount.send_keys('0')
-                if "подарок" in action["Тип купона"].lower():
+                elif "подарок" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("3")
                     code.send_keys("Не требуется")
-                if "доставка" in action["Тип купона"].lower():
+                elif "доставка" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("4")
                     code.send_keys("Не требуется")
                 form.submit()
