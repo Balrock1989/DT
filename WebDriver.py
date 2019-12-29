@@ -31,6 +31,7 @@ class WebDriver:
     """
     Запуск браузера и авторизация на сайтах
     """
+
     def auth(self, gui):
         options = Options()
         options.add_argument("--start-maximized")
@@ -54,6 +55,7 @@ class WebDriver:
     """
     Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь
     """
+
     def chat_print(self, gui, text):
         gui.show_process()
         gui.chat.queue.put(gui.command_window.append(text))
@@ -113,9 +115,11 @@ class WebDriver:
                 self.chat_print(gui, 'Браузер закрыт')
         except AttributeError as exc:
             self.chat_print(gui, 'Необходимо открыть папку с баннерами в браузере')
+
     """
     Сбор и форамтирование информации об акциях
     """
+
     def parser(self, gui):
         self.driver.switch_to_window(self.ad_window)
         for window in self.driver.window_handles:
@@ -147,9 +151,11 @@ class WebDriver:
             self.driver.close()
         self.driver.switch_to.window(self.ad_window)
         gui.show_process()
+
     """
     Добавление акций на основе полученных данных
     """
+
     def add_actions(self, gui):
         try:
             for action in self.actions_data:
@@ -233,6 +239,7 @@ class WebDriver:
     """
     Загрузка баннеров с сайта
     """
+
     def download_banners(self, gui):
         try:
             for window in self.driver.window_handles:

@@ -3,6 +3,8 @@ from pynput import keyboard
 """
 Слушаем в отдельном потоке глобальный хоткей
 """
+
+
 def hotkey(window):
     COMBINATIONS_1 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='!')},
@@ -37,14 +39,17 @@ def hotkey(window):
     """
     Определяем имя нажатой клавишы
     """
+
     def get_key_name(key):
         if isinstance(key, keyboard.KeyCode):
             return key.char
         else:
             return str(key)
+
     """
     Проверка на комбинацию
     """
+
     def on_press(key):
         key_name = get_key_name(key)
         if key == keyboard.Key.esc:

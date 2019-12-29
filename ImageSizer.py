@@ -3,6 +3,7 @@ import shutil
 
 from PIL import Image
 
+
 class Resizer:
     basewidth = 0
     baseheight = 0
@@ -13,6 +14,7 @@ class Resizer:
     """
     Изменение размера изображений
     """
+
     def resize_image(self, gui, path, end_data):
         try:
             path = os.path.normpath(path)

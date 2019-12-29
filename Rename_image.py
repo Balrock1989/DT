@@ -8,6 +8,7 @@ class Rename:
     """
     Обработка загруженных баннеров, форматирование имени
     """
+
     def rename_image(self, gui, path, end_data, checkbox):
         i = 1
         remove = 0
@@ -36,7 +37,8 @@ class Rename:
                     except OSError:
                         gui.command_window.append(f'SKIPPED "Этот файл не картинка{path}')
                         continue
-                    new_name = str(im.size[0]) + '__' + str(im.size[1]) + 'xxxxx' + str(end_data) + '_____' + str(i) + path[-4:]
+                    new_name = str(im.size[0]) + '__' + str(im.size[1]) + 'xxxxx' + str(end_data) + '_____' + str(
+                        i) + path[-4:]
                     im.close()
                     if checkbox:
                         # С перетаскиванием в новую папку
@@ -58,5 +60,4 @@ class Rename:
                             gui.command_window.append(f'не могу переместить это {os.path.join(root, file)}')
                 dir_num += 1
             gui.command_window.append(f'Было удалено {remove} файлов')
-            gui.command_window.append(f'Всего обработано {i-1} файлов')
-
+            gui.command_window.append(f'Всего обработано {i - 1} файлов')
