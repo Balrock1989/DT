@@ -5,9 +5,10 @@ from PIL import Image
 
 
 class Rename:
-    """Обработка загруженных баннеров, форматирование имени"""
+
 
     def rename_image(self, gui, path, end_data, checkbox):
+        """Обработка загруженных баннеров, форматирование имени"""
         """
         :param gui:  MainWindow интерфейс
         :param path: Путь до папки из gui.path_window

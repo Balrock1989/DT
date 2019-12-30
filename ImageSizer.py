@@ -12,9 +12,10 @@ class Resizer:
     exit = False
     count = ''
 
-    """Изменение размера изображений"""
+
 
     def resize_image(self, gui, path, end_data):
+        """Изменение размера изображений"""
         try:
             path = os.path.normpath(path)
             if path == '.' or not gui.path_window.toPlainText():

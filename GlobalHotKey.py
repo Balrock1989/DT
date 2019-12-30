@@ -1,9 +1,8 @@
 from pynput import keyboard
 
-"""Слушаем в отдельном потоке глобальный хоткей"""
-
 
 def hotkey(window):
+    """Слушаем в отдельном потоке глобальный хоткей"""
     COMBINATIONS_1 = [
         {keyboard.Key.shift_l, keyboard.KeyCode(char='!')},
     ]
@@ -34,17 +33,15 @@ def hotkey(window):
         window.web.download_banners(gui=window)
         print("\n *** Нажата комбинация клавиш: Shift + 3 \n *** Должна вызваться функция :)")
 
-    """Определяем имя нажатой клавишы"""
-
     def get_key_name(key):
+        """Определяем имя нажатой клавишы"""
         if isinstance(key, keyboard.KeyCode):
             return key.char
         else:
             return str(key)
 
-    """Проверка на комбинацию"""
-
     def on_press(key):
+        """Проверка на комбинацию"""
         key_name = get_key_name(key)
         if key == keyboard.Key.esc:
             print('--- Нажата клавиша: {}'.format(key_name))

@@ -28,9 +28,8 @@ class WebDriver:
     actions_data = []
     name_index = 1
 
-    """Запуск браузера и авторизация на сайтах"""
-
-    def auth(self, gui):
+    def auth(self):
+        """Запуск браузера и авторизация на сайтах"""
         options = Options()
         options.add_argument("--start-maximized")
         options.add_argument("--disable-extensions")
@@ -50,9 +49,8 @@ class WebDriver:
         self.driver.find_element_by_name('password').send_keys(auth.password_ad)
         self.driver.find_element_by_id("id_sign_in").click()
 
-    """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
-
     def chat_print(self, gui, text):
+        """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
         gui.show_process()
         gui.chat.queue.put(gui.command_window.append(text))
         gui.command_window.moveCursor(QtGui.QTextCursor.End)
@@ -112,9 +110,8 @@ class WebDriver:
         except AttributeError as exc:
             self.chat_print(gui, 'Необходимо открыть папку с баннерами в браузере')
 
-    """Сбор и форамтирование информации об акциях"""
-
     def parser(self, gui):
+        """Сбор и форамтирование информации об акциях"""
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
@@ -147,9 +144,8 @@ class WebDriver:
         self.driver.switch_to.window(self.ad_window)
         gui.show_process()
 
-    """Добавление акций на основе полученных данных"""
-
     def add_actions(self, gui):
+        """Добавление акций на основе полученных данных"""
         try:
             for action in self.actions_data:
                 if self.exit:
@@ -229,9 +225,8 @@ class WebDriver:
             percent = re.search(r'%(\d+)', action).group(1)
         return percent
 
-    """Загрузка баннеров с сайта"""
-
     def download_banners(self, gui):
+        """Загрузка баннеров с сайта"""
         try:
             for window in self.driver.window_handles:
                 if window != self.dt_window and window != self.ad_window:
