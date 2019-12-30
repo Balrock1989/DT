@@ -8,6 +8,13 @@ class Rename:
     """Обработка загруженных баннеров, форматирование имени"""
 
     def rename_image(self, gui, path, end_data, checkbox):
+        """
+        :param gui:  MainWindow интерфейс
+        :param path: Путь до папки из gui.path_window
+        :param end_data: Дата окончания акции из gui.date_end
+        :param checkbox: Чекбокс о слиянии в одну папку gui.rename_checbox
+        :return: None
+        """
         i = 1
         remove = 0
         path = os.path.normpath(path)
