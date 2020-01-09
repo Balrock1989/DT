@@ -112,37 +112,44 @@ class WebDriver:
 
     def parser(self, gui):
         """Сбор и форамтирование информации об акциях"""
-        for window in self.driver.window_handles:
-            if window != self.dt_window and window != self.ad_window:
-                self.driver.switch_to.window(window)
-        if len(self.driver.window_handles) == 2:
+        try:
+            for window in self.driver.window_handles:
+                if window != self.dt_window and window != self.ad_window:
+                    self.driver.switch_to.window(window)
+            if len(self.driver.window_handles) == 2:
+                self.driver.switch_to.window(self.ad_window)
+            page = BeautifulSoup(self.driver.page_source, "lxml")
+            actions = page.findAll('div', class_="coupon")
+            self.chat_print(gui, f"Всего будет обработано акций {len(actions)}")
+            for act in actions:
+                action = OrderedDict()
+                action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
+                action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
+                full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
+                temp = "".join(str(full_date.text).split())
+                action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
+                action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
+                action["Тип купона"] = re.sub(r'\s+', ' ', act.findAll("td", text=True)[4].text).strip()
+                action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
+                    len(act.findAll("p", text=True)) > 1 else ""
+                self.actions_data.append(action)
+            self.chat_print(gui, f"Акции успешно загружены в память")
+            gui.show_process()
+            for n, a in enumerate(self.actions_data, 1):
+                self.chat_print(gui, f"---№{n}\n")
+                for key, value in a.items():
+                    gui.chat.queue.put(gui.command_window.append("{:25}: {}".format(key, value)))
+            if self.driver.current_window_handle != self.ad_window and \
+                    self.driver.current_window_handle != self.dt_window:
+                self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-        page = BeautifulSoup(self.driver.page_source, "lxml")
-        actions = page.findAll('div', class_="coupon")
-        self.chat_print(gui, f"Всего будет обработано акций {len(actions)}")
-        for act in actions:
-            action = OrderedDict()
-            action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
-            action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
-            full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
-            temp = "".join(str(full_date.text).split())
-            action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
-            action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
-            action["Тип купона"] = re.sub(r'\s+', ' ', act.findAll("td", text=True)[4].text).strip()
-            action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
-                len(act.findAll("p", text=True)) > 1 else ""
-            self.actions_data.append(action)
-        self.chat_print(gui, f"Акции успешно загружены в память")
-        gui.show_process()
-        for n, a in enumerate(self.actions_data, 1):
-            self.chat_print(gui, f"---№{n}\n")
-            for key, value in a.items():
-                gui.chat.queue.put(gui.command_window.append("{:25}: {}".format(key, value)))
-        if self.driver.current_window_handle != self.ad_window and \
-                self.driver.current_window_handle != self.dt_window:
-            self.driver.close()
-        self.driver.switch_to.window(self.ad_window)
-        gui.show_process()
+            gui.show_process()
+        except WebDriverException as exc:
+            self.chat_print(gui, f'Произошла {exc}: {exc.msg}')
+            if 'chrome not reachable' in exc.msg:
+                self.chat_print(gui, f'Браузер закрыт {exc}, {exc.msg}')
+        except AttributeError as exc:
+            self.chat_print(gui, 'Нужно зайти на страницу с акциями')
 
     def add_actions(self, gui):
         """Добавление акций на основе полученных данных"""
@@ -263,6 +270,5 @@ class WebDriver:
             self.chat_print(gui, f'Произошла {exc}: {exc.msg}')
             if 'chrome not reachable' in exc.msg:
                 self.chat_print(gui, f'Браузер закрыт {exc}, {exc.msg}')
-                return
         except AttributeError as exc:
             self.chat_print(gui, 'Нужно зайти на страницу с баннерами')
