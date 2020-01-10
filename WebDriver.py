@@ -136,9 +136,9 @@ class WebDriver:
             self.chat_print(gui, f"Акции успешно загружены в память")
             gui.show_process()
             for n, a in enumerate(self.actions_data, 1):
-                self.chat_print(gui, f"---№{n}\n")
+                self.chat_print(gui, f"\n---№{n}\n")
                 for key, value in a.items():
-                    gui.chat.queue.put(gui.command_window.append("{:25}: {}".format(key, value)))
+                    gui.chat.queue.put(gui.command_window.append("{:_<20}: {}".format(key, value)))
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
@@ -174,7 +174,7 @@ class WebDriver:
                 end_date = self.driver.find_element_by_id("id_publishEndDate")
                 code = self.driver.find_element_by_id("code")
                 landing_url = self.driver.find_element_by_id("landingUrl")
-                header.send_keys(action["Название акции"])
+                header.send_keys(action["Название акции"]+"!")
                 valid_from.clear()
                 valid_from.send_keys(action["Дата начала"])
                 valid_to.clear()
@@ -183,11 +183,11 @@ class WebDriver:
                 start_date.send_keys(action["Дата начала"])
                 end_date.clear()
                 end_date.send_keys(action["Дата окончания"])
-                short_description.send_keys(action["Название акции"])
+                short_description.send_keys(action["Название акции"]+"!")
                 if action["Условия акции"]:
-                    description.send_keys(action["Условия акции"])
+                    description.send_keys(action["Условия акции"]+"!")
                 else:
-                    description.send_keys(action["Название акции"])
+                    description.send_keys(action["Название акции"]+"!")
                 landing_url.send_keys(gui.url.toPlainText())
                 if "скидка" in action["Тип купона"].lower() or "купон" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("2") if "скидка" in action["Тип купона"].lower() \
@@ -215,7 +215,7 @@ class WebDriver:
                 self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
                 self.driver.get(auth.coupun_url + id)
             self.actions_data.clear()
-            self.chat_print(gui, "Акции успешно добавлены")
+            self.chat_print(gui, "Акции успешно добавлены, буфер очищен")
         except WebDriverException as exc:
             self.chat_print(gui, '*' * 60)
             self.chat_print(gui, f'Данные об акциях были очищены, нужно загрузить снова')
