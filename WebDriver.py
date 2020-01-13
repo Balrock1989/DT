@@ -7,6 +7,7 @@ import requests
 from PyQt5 import QtCore, QtGui
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from datetime import datetime
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
@@ -177,7 +178,7 @@ class WebDriver:
                 end_date = self.driver.find_element_by_id("id_publishEndDate")
                 code = self.driver.find_element_by_id("code")
                 landing_url = self.driver.find_element_by_id("landingUrl")
-                header.send_keys(action["Название акции"]+"!")
+                header.send_keys(action["Название акции"] + "!")
                 valid_from.clear()
                 valid_from.send_keys(action["Дата начала"])
                 valid_to.clear()
@@ -186,11 +187,11 @@ class WebDriver:
                 start_date.send_keys(action["Дата начала"])
                 end_date.clear()
                 end_date.send_keys(action["Дата окончания"])
-                short_description.send_keys(action["Название акции"]+"!")
+                short_description.send_keys(action["Название акции"] + "!")
                 if action["Условия акции"]:
-                    description.send_keys(action["Условия акции"]+"!")
+                    description.send_keys(action["Условия акции"] + "!")
                 else:
-                    description.send_keys(action["Название акции"]+"!")
+                    description.send_keys(action["Название акции"] + "!")
                 landing_url.send_keys(gui.url.toPlainText())
                 if "скидка" in action["Тип купона"].lower() or "купон" in action["Тип купона"].lower():
                     vaucher_type.select_by_value("2") if "скидка" in action["Тип купона"].lower() \
@@ -275,3 +276,33 @@ class WebDriver:
                 self.chat_print(gui, f'Браузер закрыт {exc}, {exc.msg}')
         except AttributeError as exc:
             self.chat_print(gui, 'Нужно зайти на страницу с баннерами')
+
+    def parser_sephora(self, gui):
+        """Сбор и форамтирование информации об акциях"""
+        try:
+            page = BeautifulSoup(self.driver.page_source, "lxml")
+            self.driver.execute_script("window.open('');")
+            for i in self.driver.window_handles:
+                self.driver.switch_to_window(i)
+                if self.driver.current_url == "about:blank":
+                    break
+
+            self.driver.get("https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0"
+                            "%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95")
+            page = BeautifulSoup(self.driver.page_source, "lxml")
+
+            div = page.find('div', class_="b-news-detailed")
+            date_start = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
+            day, month, year = date_start.split(" ")
+            if len(day) < 2:
+                day = "0" + day
+            incoming_date = day + "." + month + "." + year
+            print(incoming_date)
+            test = datetime.strftime(incoming_date, '%d.%B.%Y')
+            print(test)
+            # discription = re.findall(r'(При.*)\.', div.text)
+
+
+
+        except Exception as exc:
+            print(f'ошибка {exc}')
