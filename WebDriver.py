@@ -28,26 +28,29 @@ class WebDriver:
     actions_data = []
     name_index = 1
 
-    def auth(self):
+    def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
-        options = Options()
-        options.add_argument("--start-maximized")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-notifications")
-        options.add_argument('--disable-gpu')
-        self.driver = webdriver.Chrome(options=options)
-        self.driver.get(auth.auth_url_dt)
-        self.dt_window = self.driver.current_window_handle
-        self.driver.find_element_by_id('username').send_keys(auth.username_dt)
-        self.driver.find_element_by_id('password').send_keys(auth.password_dt)
-        self.driver.find_element_by_class_name("submit").click()
-        self.driver.execute_script("window.open('');")
-        self.ad_window = self.driver.window_handles[1]
-        self.driver.switch_to_window(self.ad_window)
-        self.driver.get(auth.auth_url_ad)
-        self.driver.find_element_by_name('login').send_keys(auth.username_ad)
-        self.driver.find_element_by_name('password').send_keys(auth.password_ad)
-        self.driver.find_element_by_id("id_sign_in").click()
+        if self.driver is None:
+            options = Options()
+            options.add_argument("--start-maximized")
+            options.add_argument("--disable-extensions")
+            options.add_argument("--disable-notifications")
+            options.add_argument('--disable-gpu')
+            self.driver = webdriver.Chrome(options=options)
+            self.driver.get(auth.auth_url_dt)
+            self.dt_window = self.driver.current_window_handle
+            self.driver.find_element_by_id('username').send_keys(auth.username_dt)
+            self.driver.find_element_by_id('password').send_keys(auth.password_dt)
+            self.driver.find_element_by_class_name("submit").click()
+            self.driver.execute_script("window.open('');")
+            self.ad_window = self.driver.window_handles[1]
+            self.driver.switch_to_window(self.ad_window)
+            self.driver.get(auth.auth_url_ad)
+            self.driver.find_element_by_name('login').send_keys(auth.username_ad)
+            self.driver.find_element_by_name('password').send_keys(auth.password_ad)
+            self.driver.find_element_by_id("id_sign_in").click()
+        else:
+            self.chat_print(gui, 'Браузер уже запущен')
 
     def chat_print(self, gui, text):
         """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""

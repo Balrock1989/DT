@@ -56,7 +56,7 @@ class WebThread(QThread):
         self.height_resize = ''
 
     def run(self):
-        self.mainwindow.web.auth()
+        self.mainwindow.web.auth(self.mainwindow)
 
 
 class ChatThread(QThread):
