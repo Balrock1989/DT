@@ -303,6 +303,7 @@ class WebDriver:
                     break
             self.driver.get("https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0"
                             "%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95")
+            # TODO переделать на request, и возможно вынести в отдельный класс
             page = BeautifulSoup(self.driver.page_source, "lxml")
             div = page.find('div', class_="b-news-detailed")
             date_start, date_end = get_date(self, div)
