@@ -1,6 +1,7 @@
 import datetime
 import os
 import re
+from calendar import monthrange
 from collections import OrderedDict
 from time import sleep
 import requests
@@ -28,7 +29,7 @@ class WebDriver:
     ad_window = None
     actions_data = []
     name_index = 1
-
+    month_name = {"01": "янв"}
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
         if self.driver is None:
@@ -279,8 +280,19 @@ class WebDriver:
 
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
+
+        def get_date_start(self, div):
+            incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
+            day, month, year = incoming_date.split(" ")
+            for num, name in self.month_name.items():
+                if name in month:
+                    month = num
+            date_start = datetime(day=int(day), month=int(month), year=int(year)).strftime("%d.%m.%Y")
+            day_on_month = monthrange(year=int(year), month=int(month))
+            end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime("%d.%m.%Y")
+            return date_start, end_data
+
         try:
-            page = BeautifulSoup(self.driver.page_source, "lxml")
             self.driver.execute_script("window.open('');")
             for i in self.driver.window_handles:
                 self.driver.switch_to_window(i)
@@ -290,19 +302,21 @@ class WebDriver:
             self.driver.get("https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0"
                             "%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95")
             page = BeautifulSoup(self.driver.page_source, "lxml")
-
             div = page.find('div', class_="b-news-detailed")
-            date_start = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
-            day, month, year = date_start.split(" ")
-            if len(day) < 2:
-                day = "0" + day
-            incoming_date = day + "." + month + "." + year
-            print(incoming_date)
-            test = datetime.strftime(incoming_date, '%d.%B.%Y')
-            print(test)
-            # discription = re.findall(r'(При.*)\.', div.text)
-
-
+            date_start, date_end = get_date_start(self, div)
+            action_name = div.h1.text
+            descriptions = re.findall(r'(При.*)\.', div.text)
+            for desc in descriptions:
+                print(f"Заголовок: {action_name}")
+                print(f"Начало акции: {date_start}")
+                print(f"Окончание акции: {date_end}")
+                print(f"Полное описание: {desc}")
+                print(f"Короткое описание: {action_name}")
+                print(f"Купон: Не требуется")
+                print(f"URL: https://sephora.ru")
 
         except Exception as exc:
             print(f'ошибка {exc}')
+
+
+
