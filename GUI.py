@@ -91,7 +91,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def init_buttons(self):
         now = datetime.datetime.now()
-        self.date_start.append(now.strftime("%d.%m.%Y"))
+        self.date_start.append(now.strftime('%d.%m.%Y'))
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)
@@ -105,7 +105,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.clear()
         self.dir_name = os.path.normpath(QFileDialog.getExistingDirectory(
             None,
-            "Open Directory",
+            'Open Directory',
             QDir.homePath(),
             QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
         ))
@@ -156,7 +156,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             dt_process = [(hwnd, title) for hwnd, title in winlist if 'DTMainWindow' in title]
             dt_process = dt_process[0]
             win32gui.ShowWindow(dt_process[0], win32con.SW_NORMAL)
-            pyautogui.press("alt")
+            pyautogui.press('alt')
             win32gui.SetForegroundWindow(dt_process[0])
             self.command_window.moveCursor(QtGui.QTextCursor.End)
         except Exception as exc:
