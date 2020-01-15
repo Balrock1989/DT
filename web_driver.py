@@ -296,15 +296,14 @@ class WebDriver:
             end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime('%d.%m.%Y')
             return date_start, end_data
         try:
-            self.driver.execute_script('window.open('');')
-            for i in self.driver.window_handles:
-                self.driver.switch_to_window(i)
-                if self.driver.current_url == 'about:blank':
-                    break
-            self.driver.get('https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0'
-                            '%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95')
-            # TODO переделать на request, и возможно вынести в отдельный класс
-            page = BeautifulSoup(self.driver.page_source, 'lxml')
+            s = requests.Session()
+            s.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
+            })
+            url = 'https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0' \
+                  '%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95'
+            request = s.get(url)
+            page = BeautifulSoup(request.text, 'lxml')
             div = page.find('div', class_='b-news-detailed')
             date_start, date_end = get_date(self, div)
             action_name = div.h1.text
