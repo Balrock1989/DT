@@ -32,15 +32,15 @@ class WebDriver:
     month_name = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
                   "05": "мая", "06": "июн", "07": "июл", "08": "авг",
                   "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
-    parser_handlers = ["parser_sephora"]
+    parser_handlers = ['parser_sephora']
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
         if self.driver is None:
             options = Options()
-            options.add_argument("--start-maximized")
-            options.add_argument("--disable-extensions")
-            options.add_argument("--disable-notifications")
+            options.add_argument('--start-maximized')
+            options.add_argument('--disable-extensions')
+            options.add_argument('--disable-notifications')
             options.add_argument('--disable-gpu')
             self.driver = webdriver.Chrome(options=options)
             self.driver.get(auth.auth_url_dt)
@@ -48,7 +48,7 @@ class WebDriver:
             self.driver.find_element_by_id('username').send_keys(auth.username_dt)
             self.driver.find_element_by_id('password').send_keys(auth.password_dt)
             self.driver.find_element_by_class_name("submit").click()
-            self.driver.execute_script("window.open('');")
+            self.driver.execute_script('window.open('');')
             self.ad_window = self.driver.window_handles[1]
             self.driver.switch_to_window(self.ad_window)
             self.driver.get(auth.auth_url_ad)
@@ -68,7 +68,7 @@ class WebDriver:
         try:
             self.driver.switch_to_window(self.dt_window)
             wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
-            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href*='_____']")))
+            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[href*="_____"]')))
             links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
             links = set(map(lambda x: x.get_attribute('href'), links))
             links = list(links)
@@ -80,22 +80,22 @@ class WebDriver:
                                  f'{self.end_data}, url: {self.url}')
             if not self.start_data:
                 now = datetime.datetime.now()
-                self.start_data = now.strftime("%d.%m.%Y")
+                self.start_data = now.strftime('%d.%m.%Y')
             for link in links:
                 if self.exit:
                     return
                 self.driver.get(link)
-                size = self.driver.find_element_by_css_selector("input[id*='geTitle']").get_attribute('value')
+                size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
                 width = re.search(r'(\d+)__\d\d', size).group(1)
                 height = re.search(r'__(\d+)x', size).group(1)
                 width_field = self.driver.find_element_by_name('width')
                 height_field = self.driver.find_element_by_name('height')
                 start_data_field = self.driver.find_element_by_css_selector(
-                    "input[name='graphicalElementTransport.startDate']")
+                    'input[name="graphicalElementTransport.startDate"]')
                 end_data_field = self.driver.find_element_by_css_selector(
-                    "input[name='graphicalElementTransport.endDate']")
+                    'input[name="graphicalElementTransport.endDate"]')
                 url_field = self.driver.find_element_by_css_selector(
-                    "textarea[name='graphicalElementTransport.description']")
+                    'textarea[name="graphicalElementTransport.description"]')
                 width_field.clear()
                 height_field.clear()
                 width_field.send_keys(width)
@@ -105,9 +105,9 @@ class WebDriver:
                 end_data_field.send_keys(self.end_data)
                 url_field.send_keys(self.url)
                 sleep(1)
-                self.driver.find_elements_by_css_selector("input[value='Предварительный']")[1].click()
+                self.driver.find_elements_by_css_selector('input[value="Предварительный"]')[1].click()
                 WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, "input[value='Сохранить']"))).click()
+                    (By.CSS_SELECTOR, 'input[value="Сохранить"]'))).click()
                 self.chat_print(gui, f'файл {size} успешно загружен')
             self.chat_print(gui, '#' * 60)
             self.chat_print(gui, '#' * 60)
@@ -127,27 +127,27 @@ class WebDriver:
                     self.driver.switch_to.window(window)
             if len(self.driver.window_handles) == 2:
                 self.driver.switch_to.window(self.ad_window)
-            page = BeautifulSoup(self.driver.page_source, "lxml")
-            actions = page.findAll('div', class_="coupon")
-            self.chat_print(gui, f"Всего будет обработано акций {len(actions)}")
+            page = BeautifulSoup(self.driver.page_source, 'lxml')
+            actions = page.findAll('div', class_='coupon')
+            self.chat_print(gui, f'Всего будет обработано акций {len(actions)}')
             for act in actions:
                 action = OrderedDict()
-                action["Имя партнера"] = act.findAll("b", text=True)[1].text.strip()
-                action["Название акции"] = act.find("p", {"class": "h3-name"}).text.strip()
+                action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
+                action['Название акции'] = act.find('p', {'class': 'h3-name'}).text.strip()
                 full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
-                temp = "".join(str(full_date.text).split())
-                action["Дата начала"] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
-                action["Дата окончания"] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
-                action["Тип купона"] = re.sub(r'\s+', ' ', act.findAll("td", text=True)[4].text).strip()
-                action["Условия акции"] = act.findAll("p", text=True)[1].text.strip() if \
-                    len(act.findAll("p", text=True)) > 1 else ""
+                temp = ''.join(str(full_date.text).split())
+                action['Дата начала'] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
+                action['Дата окончания'] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
+                action['Тип купона'] = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()
+                action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
+                    len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-            self.chat_print(gui, f"Акции успешно загружены в память")
+            self.chat_print(gui, f'Акции успешно загружены в память')
             gui.show_process()
             for n, a in enumerate(self.actions_data, 1):
-                self.chat_print(gui, f"\n---№{n}\n")
+                self.chat_print(gui, f'\n---№{n}\n')
                 for key, value in a.items():
-                    gui.chat.queue.put(gui.command_window.append("{:_<20}: {}".format(key, value)))
+                    gui.chat.queue.put(gui.command_window.append('{:_<20}: {}'.format(key, value)))
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
@@ -169,62 +169,62 @@ class WebDriver:
                 self.driver.switch_to_window(self.dt_window)
                 url = self.driver.current_url
                 id = re.search(r'Id=(\d+)', url).group(1)
-                self.driver.switch_to_frame("ifrm")
-                header = self.driver.find_element_by_name("title")
-                vaucher_type = Select(self.driver.find_element_by_id("voucherTypeId"))
+                self.driver.switch_to_frame('ifrm')
+                header = self.driver.find_element_by_name('title')
+                vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
                 form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
-                checkbox = self.driver.find_element_by_id("isPercentage")
-                description = self.driver.find_element_by_id("description")
-                short_description = self.driver.find_element_by_name("shortDescription")
-                discount_amount = self.driver.find_element_by_id("discountAmount")
-                valid_from = self.driver.find_element_by_id("id_startDate")
-                valid_to = self.driver.find_element_by_id("id_endDate")
-                start_date = self.driver.find_element_by_id("id_publishStartDate")
-                end_date = self.driver.find_element_by_id("id_publishEndDate")
-                code = self.driver.find_element_by_id("code")
-                landing_url = self.driver.find_element_by_id("landingUrl")
-                header.send_keys(action["Название акции"] + "!")
+                checkbox = self.driver.find_element_by_id('isPercentage')
+                description = self.driver.find_element_by_id('description')
+                short_description = self.driver.find_element_by_name('shortDescription')
+                discount_amount = self.driver.find_element_by_id('discountAmount')
+                valid_from = self.driver.find_element_by_id('id_startDate')
+                valid_to = self.driver.find_element_by_id('id_endDate')
+                start_date = self.driver.find_element_by_id('id_publishStartDate')
+                end_date = self.driver.find_element_by_id('id_publishEndDate')
+                code = self.driver.find_element_by_id('code')
+                landing_url = self.driver.find_element_by_id('landingUrl')
+                header.send_keys(action['Название акции'] + '!')
                 valid_from.clear()
-                valid_from.send_keys(action["Дата начала"])
+                valid_from.send_keys(action['Дата начала'])
                 valid_to.clear()
-                valid_to.send_keys(action["Дата окончания"])
+                valid_to.send_keys(action['Дата окончания'])
                 start_date.clear()
-                start_date.send_keys(action["Дата начала"])
+                start_date.send_keys(action['Дата начала'])
                 end_date.clear()
-                end_date.send_keys(action["Дата окончания"])
-                short_description.send_keys(action["Название акции"] + "!")
-                if action["Условия акции"]:
-                    description.send_keys(action["Условия акции"] + "!")
+                end_date.send_keys(action['Дата окончания'])
+                short_description.send_keys(action['Название акции'] + '!')
+                if action['Условия акции']:
+                    description.send_keys(action['Условия акции'] + '!')
                 else:
-                    description.send_keys(action["Название акции"] + "!")
+                    description.send_keys(action['Название акции'] + '!')
                 landing_url.send_keys(gui.url.toPlainText())
-                if "скидка" in action["Тип купона"].lower() or "купон" in action["Тип купона"].lower():
-                    vaucher_type.select_by_value("2") if "скидка" in action["Тип купона"].lower() \
-                        else vaucher_type.select_by_value("1")
-                    code.send_keys("Не требуется")
-                    if "%" in action["Название акции"]:
+                if 'скидка' in action['Тип купона'].lower() or 'купон' in action['Тип купона'].lower():
+                    vaucher_type.select_by_value('2') if 'скидка' in action['Тип купона'].lower() \
+                        else vaucher_type.select_by_value('1')
+                    code.send_keys('Не требуется')
+                    if '%' in action['Название акции']:
                         checkbox.click()
-                        percent = self.get_percent(action["Название акции"])
+                        percent = self.get_percent(action['Название акции'])
                         discount_amount.send_keys(percent)
-                    elif "%" in action["Условия акции"]:
+                    elif '%' in action['Условия акции']:
                         checkbox.click()
-                        percent = self.get_percent(action["Условия акции"])
+                        percent = self.get_percent(action['Условия акции'])
                         discount_amount.send_keys(percent)
                     else:
                         discount_amount.send_keys('0')
-                elif "подарок" in action["Тип купона"].lower():
-                    vaucher_type.select_by_value("3")
-                    code.send_keys("Не требуется")
-                elif "доставка" in action["Тип купона"].lower():
-                    vaucher_type.select_by_value("4")
-                    code.send_keys("Не требуется")
+                elif 'подарок' in action['Тип купона'].lower():
+                    vaucher_type.select_by_value('3')
+                    code.send_keys('Не требуется')
+                elif 'доставка' in action['Тип купона'].lower():
+                    vaucher_type.select_by_value('4')
+                    code.send_keys('Не требуется')
                 form.submit()
                 self.driver.switch_to_default_content()
                 sleep(1)
-                self.driver.find_element_by_id("VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE").click()
+                self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                 self.driver.get(auth.coupun_url + id)
             self.actions_data.clear()
-            self.chat_print(gui, "Акции успешно добавлены, буфер очищен")
+            self.chat_print(gui, 'Акции успешно добавлены, буфер очищен')
         except WebDriverException as exc:
             self.chat_print(gui, '*' * 60)
             self.chat_print(gui, f'Данные об акциях были очищены, нужно загрузить снова')
@@ -250,12 +250,12 @@ class WebDriver:
             if len(self.driver.window_handles) == 2:
                 self.driver.switch_to.window(self.ad_window)
             wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
-            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[class='banner_view']")))
+            links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[class="banner_view"]')))
             links = set(map(lambda x: x.get_attribute('href'), links))
             links = list(links)
             if links:
                 home_path = os.getenv('HOMEPATH')
-                result = os.path.join("C:\\", home_path, "Desktop", "result")
+                result = os.path.join('C:\\', home_path, 'Desktop', 'result')
                 result = os.path.normpath(result)
                 if not os.path.exists(result):
                     os.mkdir(result)
@@ -267,7 +267,7 @@ class WebDriver:
                     self.name_index += 1
                     path = os.path.join(result, name)
                     p = requests.get(link)
-                    out = open(path, "wb")
+                    out = open(path, 'wb')
                     out.write(p.content)
                     out.close()
                     self.chat_print(gui, f'{name} успешно скачан\n')
@@ -291,32 +291,32 @@ class WebDriver:
             for num, name in self.month_name.items():
                 if name in month.lower():
                     month = num
-            date_start = datetime(day=int(day), month=int(month), year=int(year)).strftime("%d.%m.%Y")
+            date_start = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
             day_on_month = monthrange(year=int(year), month=int(month))
-            end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime("%d.%m.%Y")
+            end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime('%d.%m.%Y')
             return date_start, end_data
         try:
-            self.driver.execute_script("window.open('');")
+            self.driver.execute_script('window.open('');')
             for i in self.driver.window_handles:
                 self.driver.switch_to_window(i)
-                if self.driver.current_url == "about:blank":
+                if self.driver.current_url == 'about:blank':
                     break
-            self.driver.get("https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0"
-                            "%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95")
+            self.driver.get('https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0'
+                            '%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95')
             # TODO переделать на request, и возможно вынести в отдельный класс
-            page = BeautifulSoup(self.driver.page_source, "lxml")
-            div = page.find('div', class_="b-news-detailed")
+            page = BeautifulSoup(self.driver.page_source, 'lxml')
+            div = page.find('div', class_='b-news-detailed')
             date_start, date_end = get_date(self, div)
             action_name = div.h1.text
             descriptions = re.findall(r'(При.*)\.', div.text)
             for desc in descriptions:
-                print(f"Заголовок: {action_name}")
-                print(f"Начало акции: {date_start}")
-                print(f"Окончание акции: {date_end}")
-                print(f"Полное описание: {desc}")
-                print(f"Короткое описание: {action_name}")
-                print(f"Купон: Не требуется")
-                print(f"URL: https://sephora.ru")
+                print(f'Заголовок: {action_name}')
+                print(f'Начало акции: {date_start}')
+                print(f'Окончание акции: {date_end}')
+                print(f'Полное описание: {desc}')
+                print(f'Короткое описание: {action_name}')
+                print(f'Купон: Не требуется')
+                print(f'URL: https://sephora.ru')
         # TODO подготовить вывод результатов для запись в таблицу csv
         except Exception as exc:
             print(f'ошибка {exc}')
