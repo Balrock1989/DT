@@ -8,16 +8,16 @@ import win32gui
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QDir, QThread
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
-from CustomDesign import Ui_MainWindow
-from Rename_image import Rename
-from WebDriver import WebDriver
-from CustomDialog import Ui_Dialog
-from ImageSizer import Resizer
-import GlobalHotKey
+from custom_design import Ui_MainWindow
+from rename_image import Rename
+from web_driver import WebDriver
+from custom_dialog import Ui_Dialog
+from image_sizer import Resizer
+import global_hotkey
 import threading
 
 
-# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." GUI.py
+# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
 
 
 class CustomDialog(QDialog, Ui_Dialog):
@@ -167,7 +167,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     window = DT()
     window.show()
-    threading.Thread(target=GlobalHotKey.hotkey, args=(window,), daemon=True).start()
+    threading.Thread(target=global_hotkey.hotkey, args=(window,), daemon=True).start()
     app.exec_()
 
 
