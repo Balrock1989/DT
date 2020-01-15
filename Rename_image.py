@@ -53,8 +53,8 @@ class Rename:
                             zip.write(os.path.join(result, new_name), os.path.join(f'do_{path_end_data}', new_name))
                             i += 1
                         else:
-                            gui.command_window.append(f'не могу переместить это {os.path.join(root, file)} '
-                                                      f'сюда с таким именем {os.path.join(result, new_name)}')
+                            gui.command_window.append(f'не могу переместить это -> {os.path.join(root, file)} '
+                                                      f'сюда ->  {os.path.join(result, new_name)}')
                             i += 1
                     else:
                         # Только переименовать
