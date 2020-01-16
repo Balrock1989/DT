@@ -295,30 +295,40 @@ class WebDriver:
             day_on_month = monthrange(year=int(year), month=int(month))
             end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime('%d.%m.%Y')
             return date_start, end_data
-        try:
-            s = requests.Session()
-            s.headers.update({
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
-            })
-            url = 'https://sephora.ru/actions/2020/1/1/2436/#%D0%A1%D0%A3%D0%9F%D0%95%D0%A0-%D0%9F%D0%9E%D0' \
-                  '%94%D0%90%D0%A0%D0%9A%D0%98_%D0%9F%D0%A0%D0%98_%D0%9F%D0%9E%D0%9A%D0%A3%D0%9F%D0%9A%D0%95'
-            request = s.get(url)
+
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
+        })
+        main_url = 'https://sephora.ru/news/'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        links = page.find_all("a", class_='b-news-thumb__title')
+        for link in links:
+            link = main_url[:-5] + link['href'][1:]
+            request = s.get(link)
             page = BeautifulSoup(request.text, 'lxml')
             div = page.find('div', class_='b-news-detailed')
-            date_start, date_end = get_date(self, div)
-            action_name = div.h1.text
-            descriptions = re.findall(r'(При.*)\.', div.text)
-            for desc in descriptions:
-                print(f'Заголовок: {action_name}')
-                print(f'Начало акции: {date_start}')
-                print(f'Окончание акции: {date_end}')
-                print(f'Полное описание: {desc}')
-                print(f'Короткое описание: {action_name}')
-                print(f'Купон: Не требуется')
-                print(f'URL: https://sephora.ru')
+            if div:
+                try:
+                    date_start, date_end = get_date(self, div)
+                except TypeError as exc:
+                    gui.log.info('Не найдена дата проведения акции')
+                    continue
+                action_name = div.h1.text
+                paragraphs = div.findAll('p')
+                descriptions = []
+                for p in paragraphs:
+                    text = p.text.strip()
+                    if 'При' in text:
+                        descriptions.append(text)
+                for desc in descriptions:
+
+                    print(f'Заголовок: {action_name}')
+                    print(f'Начало акции: {date_start}')
+                    print(f'Окончание акции: {date_end}')
+                    print(f'Полное описание: {desc}')
+                    print(f'Короткое описание: {action_name}')
+                    print(f'Купон: Не требуется')
+                    print(f'URL: https://sephora.ru')
         # TODO подготовить вывод результатов для запись в таблицу csv
-        except Exception as exc:
-            print(f'ошибка {exc}')
-
-
-

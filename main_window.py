@@ -15,10 +15,10 @@ from custom_dialog import Ui_Dialog
 from image_sizer import Resizer
 import global_hotkey
 import threading
+import logger
 
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
-
 
 class CustomDialog(QDialog, Ui_Dialog):
     """Класс для кастомизации диалогового окна"""
@@ -88,6 +88,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web = WebDriver()
         self.sizer = Resizer()
         self.init_buttons()
+        self.log = logger.log
 
     def init_buttons(self):
         now = datetime.datetime.now()
@@ -164,6 +165,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 def main():
+    logger.configure_logging()
     app = QtWidgets.QApplication(sys.argv)
     window = DT()
     window.show()
