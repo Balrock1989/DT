@@ -26,7 +26,7 @@ def hotkey(window):
         window.log.info('\n *** Нажата комбинация клавиш: space + 3 \n *** Должна вызваться функция :)')
 
     def execute_space4():
-        window.web.parser_sephora(gui=window)
+        # window.web.parser_sephora(gui=window)
         window.log.info('\n *** Нажата комбинация клавиш: space + 4 \n *** Должна вызваться функция :)')
 
     def get_key_name(key):

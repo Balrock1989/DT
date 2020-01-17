@@ -23,7 +23,7 @@ class Rename:
         result = os.path.join(path, f'do_{path_end_data}')
         if path == '.' or not gui.path_window.toPlainText():
             gui.log.error('Необходимо указать путь до папки')
-            gui.command_window.append('Необходимо указать путь до папки')
+            gui.chat_print('Необходимо указать путь до папки')
             return
         if not os.path.exists(result) and checkbox:
             os.mkdir(result)
@@ -42,7 +42,7 @@ class Rename:
                             continue
                     except OSError:
                         gui.log.exception(f'SKIPPED Этот файл не картинка {path}')
-                        gui.command_window.append(f'SKIPPED "Этот файл не картинка {path}')
+                        gui.chat_print(f'SKIPPED "Этот файл не картинка {path}')
                         continue
                     new_name = str(im.size[0]) + '__' + str(im.size[1]) + 'xxxxx' + str(end_data) + '_____' + str(
                         i) + path[-4:]
@@ -55,7 +55,7 @@ class Rename:
                             i += 1
                         else:
                             gui.log.error(f'не могу переместить этот файл -> {os.path.join(root, file)}')
-                            gui.command_window.append(f'не могу переместить этот файл -> {os.path.join(root, file)}')
+                            gui.chat_print(f'не могу переместить этот файл -> {os.path.join(root, file)}')
                             i += 1
                     else:
                         # Только переименовать
@@ -64,8 +64,8 @@ class Rename:
                             zip.write(os.path.join(root, new_name), os.path.join(str(dir_num), new_name))
                             i += 1
                         else:
-                            gui.command_window.append(f'не могу переместить это {os.path.join(root, file)}')
+                            gui.chat_print(f'не могу переместить это {os.path.join(root, file)}')
                 dir_num += 1
             gui.log.info(f'Было удалено {remove} файлов, всего файлов обработано {i - 1}')
-            gui.command_window.append(f'Процесс успешно завершен. Было удалено {remove} файлов')
-            gui.command_window.append(f'Всего было обработано {i - 1} файлов')
+            gui.chat_print(f'Процесс успешно завершен. Было удалено {remove} файлов')
+            gui.chat_print(f'Всего было обработано {i - 1} файлов')

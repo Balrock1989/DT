@@ -21,19 +21,17 @@ import auth
 
 
 class WebDriver:
-    start_data = ''
-    end_data = ''
-    url = ''
-    driver = None
-    exit = False
-    dt_window = None
-    ad_window = None
-    actions_data = []
-    name_index = 1
-    month_name = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
-                  "05": "мая", "06": "июн", "07": "июл", "08": "авг",
-                  "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
-    parser_handlers = ['parser_sephora']
+    def __init__(self):
+        self.start_data = ''
+        self.end_data = ''
+        self.url = ''
+        self.driver = None
+        self.exit = False
+        self.dt_window = None
+        self.ad_window = None
+        self.actions_data = []
+        self.name_index = 1
+
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
@@ -57,27 +55,21 @@ class WebDriver:
             self.driver.find_element_by_name('password').send_keys(auth.password_ad)
             self.driver.find_element_by_id("id_sign_in").click()
         else:
-            self.chat_print(gui, 'Браузер уже запущен')
-
-    def chat_print(self, gui, text):
-        """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
-        gui.show_process()
-        gui.chat.queue.put(gui.command_window.append(text))
-        gui.command_window.moveCursor(QtGui.QTextCursor.End)
+            gui.chat_print('Браузер уже запущен')
 
     def add_banner(self, gui):
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
         else:
             gui.log.error('Браузер закрыт')
-            self.chat_print(gui, 'Браузер закрыт')
+            gui.chat_print('Браузер закрыт')
             return
         try:
             wait = WebDriverWait(self.driver, 1, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[href*="_____"]')))
         except TimeoutException:
             gui.log.exception('Нужно зайти на страницу с баннерами')
-            self.chat_print(gui, 'Нужно зайти на страницу с баннерами')
+            gui.chat_print('Нужно зайти на страницу с баннерами')
             return
         links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
         links = set(map(lambda x: x.get_attribute('href'), links))
@@ -85,15 +77,14 @@ class WebDriver:
         links = sorted(links, key=lambda x: re.search(r'_____(\d+).', x).group(1))
         dir_name = self.driver.find_elements_by_css_selector('tr th')[0]
         dir_name = re.search(r'Хостинг файлов: (.*)', dir_name.text).group(1)
-        self.chat_print(gui, f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
-        self.chat_print(gui, f'Дата начала акции:{self.start_data}, Дата окончания акции:'
-                             f'{self.end_data}, url: {self.url}')
+        gui.chat_print(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
+        gui.chat_print(f'Дата начала акции:{self.start_data}, Дата окончания акции:{self.end_data}, url: {self.url}')
         if not self.start_data:
             now = datetime.datetime.now()
             self.start_data = now.strftime('%d.%m.%Y')
         for link in links:
             if self.exit:
-                self.chat_print(gui, f'Загрузка прервана пользователем')
+                gui.chat_print(f'Загрузка прервана пользователем')
                 return
             self.driver.get(link)
             size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
@@ -119,10 +110,10 @@ class WebDriver:
             self.driver.find_elements_by_css_selector('input[value="Предварительный"]')[1].click()
             WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, 'input[value="Сохранить"]'))).click()
-            self.chat_print(gui, f'файл {size} успешно загружен')
-        self.chat_print(gui, '#' * 60)
-        self.chat_print(gui, '#' * 60)
-        self.chat_print(gui, 'С первой папкой закончил, жду следующую')
+            gui.chat_print(f'файл {size} успешно загружен')
+        gui.chat_print('#' * 60)
+        gui.chat_print('#' * 60)
+        gui.chat_print('С первой папкой закончил, жду следующую')
 
     def parser(self, gui):
         """Сбор и форамтирование информации об акциях"""
@@ -130,7 +121,7 @@ class WebDriver:
             self.driver.switch_to_window(self.dt_window)
         else:
             gui.log.error('Браузер закрыт')
-            self.chat_print(gui, 'Браузер закрыт')
+            gui.chat_print('Браузер закрыт')
             return
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
@@ -139,7 +130,7 @@ class WebDriver:
             self.driver.switch_to.window(self.ad_window)
         page = BeautifulSoup(self.driver.page_source, 'lxml')
         actions = page.findAll('div', class_='coupon')
-        self.chat_print(gui, f'\nВсего будет обработано акций {len(actions)}')
+        gui.chat_print(f'\nВсего будет обработано акций {len(actions)}')
         if actions:
             for act in actions:
                 action = OrderedDict()
@@ -153,16 +144,17 @@ class WebDriver:
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-            gui.show_process()
             for n, a in enumerate(self.actions_data, 1):
-                self.chat_print(gui, f'\n---№{n}\n')
+                gui.chat_print(f'\n---№{n}\n')
+                action = ''
                 for key, value in a.items():
-                    gui.chat.queue.put(gui.command_window.append('{:_<20}: {}'.format(key, value)))
+                    action = action + "".join('{:_<20}: {}\n'.format(key, value))
+                gui.chat_print(action)
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-            self.chat_print(gui, '\n\nАкции успешно загружены в память, необходимо выгрузить их в DT')
+            gui.chat_print('\n\nАкции успешно загружены в память, необходимо выгрузить их в DT')
 
     def add_actions(self, gui):
         """Добавление акций на основе полученных данных"""
@@ -170,7 +162,7 @@ class WebDriver:
             self.driver.switch_to_window(self.dt_window)
         else:
             gui.log.error('Браузер закрыт')
-            self.chat_print(gui, 'Браузер закрыт')
+            gui.chat_print('Браузер закрыт')
             return
         for action in self.actions_data:
             if self.exit:
@@ -182,8 +174,8 @@ class WebDriver:
                 self.driver.switch_to_frame('ifrm')
             except (NoSuchFrameException, AttributeError):
                 gui.log.exception('Парсер  AD запущен не на той странице')
-                self.chat_print(gui, '*' * 60)
-                self.chat_print(gui, f'Данные об акциях были очищены, нужно загрузить снова')
+                gui.chat_print('*' * 60)
+                gui.chat_print(f'Данные об акциях были очищены, нужно загрузить снова')
                 self.actions_data.clear()
                 return
             header = self.driver.find_element_by_name('title')
@@ -240,7 +232,7 @@ class WebDriver:
             self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
             self.driver.get(auth.coupun_url + id)
         self.actions_data.clear()
-        self.chat_print(gui, 'Акции успешно добавлены, буфер очищен')
+        gui.chat_print('Акции успешно добавлены, буфер очищен')
 
     def get_percent(self, action):
         try:
@@ -255,7 +247,7 @@ class WebDriver:
             self.driver.switch_to_window(self.dt_window)
         else:
             gui.log.error('Браузер закрыт')
-            self.chat_print(gui, 'Браузер закрыт')
+            gui.chat_print('Браузер закрыт')
             return
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
@@ -267,7 +259,7 @@ class WebDriver:
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[class="banner_view"]')))
         except TimeoutException:
             gui.log.exception('Нужно зайти на страницу с баннерами')
-            self.chat_print(gui, '\nНужно зайти на страницу с баннерами')
+            gui.chat_print('\nНужно зайти на страницу с баннерами')
             return
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
@@ -277,8 +269,8 @@ class WebDriver:
             result = os.path.normpath(result)
             if not os.path.exists(result):
                 os.mkdir(result)
-            self.chat_print(gui, f'Всего будет скачано {len(links)} баннеров')
-            self.chat_print(gui, f'Результаты здесь: {os.path.abspath(result)}')
+            gui.chat_print(f'Всего будет скачано {len(links)} баннеров')
+            gui.chat_print(f'Результаты здесь: {os.path.abspath(result)}')
             for link in links:
                 format = re.search(r'(\w+)$', link).group(1)
                 name = str(self.name_index) + "." + format
@@ -288,57 +280,9 @@ class WebDriver:
                 out = open(path, 'wb')
                 out.write(p.content)
                 out.close()
-                self.chat_print(gui, f'{name} успешно скачан\n')
-            self.chat_print(gui, f'Загрузка успешно завершена')
+                gui.chat_print(f'{name} успешно скачан\n')
+            gui.chat_print(f'Загрузка успешно завершена')
         else:
-            self.chat_print(gui, 'Баннеры не найдены на этой странице 3')
+            gui.chat_print('Баннеры не найдены на этой странице 3')
 
-    def parser_sephora(self, gui):
-        """Сбор и форамтирование информации об акциях"""
 
-        def get_date(self, div):
-            incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
-            day, month, year = incoming_date.split(" ")
-            for num, name in self.month_name.items():
-                if name in month.lower():
-                    month = num
-            date_start = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
-            day_on_month = monthrange(year=int(year), month=int(month))
-            end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime('%d.%m.%Y')
-            return date_start, end_data
-
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
-        })
-        main_url = 'https://sephora.ru/news/'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
-        links = page.find_all("a", class_='b-news-thumb__title')
-        for link in links:
-            link = main_url[:-5] + link['href'][1:]
-            request = s.get(link)
-            page = BeautifulSoup(request.text, 'lxml')
-            div = page.find('div', class_='b-news-detailed')
-            if div:
-                try:
-                    date_start, date_end = get_date(self, div)
-                except TypeError:
-                    gui.log.exception('Не найдена дата проведения акции')
-                    continue
-                action_name = div.h1.text
-                paragraphs = div.findAll('p')
-                descriptions = []
-                for p in paragraphs:
-                    text = p.text.strip()
-                    if 'При' in text:
-                        descriptions.append(text)
-                for desc in descriptions:
-                    print(f'Заголовок: {action_name}')
-                    print(f'Начало акции: {date_start}')
-                    print(f'Окончание акции: {date_end}')
-                    print(f'Полное описание: {desc}')
-                    print(f'Короткое описание: {action_name}')
-                    print(f'Купон: Не требуется')
-                    print(f'URL: https://sephora.ru')
-        # TODO подготовить вывод результатов для запись в таблицу csv

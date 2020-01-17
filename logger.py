@@ -11,5 +11,5 @@ def configure_logging():
     log.addHandler(stream_handler)
     file_handler = logging.FileHandler(filename="gui.log", encoding="utf-8")
     file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s", datefmt="%d-%m-%Y,%H:%M"))
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.ERROR)
     log.addHandler(file_handler)

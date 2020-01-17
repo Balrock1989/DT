@@ -16,6 +16,7 @@ from image_sizer import Resizer
 import global_hotkey
 import threading
 import logger
+import parsers
 
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
@@ -87,6 +88,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.chat.start()
         self.web = WebDriver()
         self.sizer = Resizer()
+        self.parser = parsers.Parsers()
         self.init_buttons()
         self.log = logger.log
 
@@ -97,7 +99,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
-        self.run_ad_browser.clicked.connect(self.test)
+        self.parser_button.clicked.connect(self.parsers)
 
     def test(self):
         pass
@@ -124,6 +126,9 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.command_window.clear()
         self.sizer.exit = False
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
+
+    def parsers(self):
+        self.parser.parser_sephora(gui=self)
 
     def launch_thread_dt(self):
         self.command_window.clear()
@@ -162,6 +167,12 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             self.command_window.moveCursor(QtGui.QTextCursor.End)
         except Exception:
             self.log.exception(f'Произошла неизвестная ошибка')
+
+    def chat_print(self, text):
+        """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
+        self.show_process()
+        self.chat.queue.put(self.command_window.append(text))
+        self.command_window.moveCursor(QtGui.QTextCursor.End)
 
 
 def main():
