@@ -160,8 +160,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             pyautogui.press('alt')
             win32gui.SetForegroundWindow(dt_process[0])
             self.command_window.moveCursor(QtGui.QTextCursor.End)
-        except Exception as exc:
-            print(f'Произошла ошибка: {exc}')
+        except Exception:
+            self.log.exception(f'Произошла неизвестная ошибка')
 
 
 def main():

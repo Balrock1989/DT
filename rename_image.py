@@ -6,7 +6,6 @@ from PIL import Image
 
 class Rename:
 
-
     def rename_image(self, gui, path, end_data, checkbox):
         """Обработка загруженных баннеров, форматирование имени"""
         """
@@ -23,6 +22,7 @@ class Rename:
         zip_target = os.path.join(path, f'do_{path_end_data}.zip')
         result = os.path.join(path, f'do_{path_end_data}')
         if path == '.' or not gui.path_window.toPlainText():
+            gui.log.error('Необходимо указать путь до папки')
             gui.command_window.append('Необходимо указать путь до папки')
             return
         if not os.path.exists(result) and checkbox:
@@ -41,7 +41,8 @@ class Rename:
                             remove += 1
                             continue
                     except OSError:
-                        gui.command_window.append(f'SKIPPED "Этот файл не картинка{path}')
+                        gui.log.exception(f'SKIPPED Этот файл не картинка {path}')
+                        gui.command_window.append(f'SKIPPED "Этот файл не картинка {path}')
                         continue
                     new_name = str(im.size[0]) + '__' + str(im.size[1]) + 'xxxxx' + str(end_data) + '_____' + str(
                         i) + path[-4:]
@@ -53,8 +54,8 @@ class Rename:
                             zip.write(os.path.join(result, new_name), os.path.join(f'do_{path_end_data}', new_name))
                             i += 1
                         else:
-                            gui.command_window.append(f'не могу переместить это -> {os.path.join(root, file)} '
-                                                      f'сюда ->  {os.path.join(result, new_name)}')
+                            gui.log.error(f'не могу переместить этот файл -> {os.path.join(root, file)}')
+                            gui.command_window.append(f'не могу переместить этот файл -> {os.path.join(root, file)}')
                             i += 1
                     else:
                         # Только переименовать
@@ -65,5 +66,6 @@ class Rename:
                         else:
                             gui.command_window.append(f'не могу переместить это {os.path.join(root, file)}')
                 dir_num += 1
-            gui.command_window.append(f'Было удалено {remove} файлов')
-            gui.command_window.append(f'Всего обработано {i - 1} файлов')
+            gui.log.info(f'Было удалено {remove} файлов, всего файлов обработано {i - 1}')
+            gui.command_window.append(f'Процесс успешно завершен. Было удалено {remove} файлов')
+            gui.command_window.append(f'Всего было обработано {i - 1} файлов')
