@@ -75,6 +75,18 @@ class ChatThread(QThread):
             self.queue.get()
 
 
+class ParserThread(QThread):
+    """Отдельный поток для работы чата"""
+
+    def __init__(self, mainwindow):
+        super(ParserThread, self).__init__()
+        self.mainwindow = mainwindow
+        self.parser = parsers.Parsers()
+
+    def run(self):
+        self.parser.parser_sephora(gui=self.mainwindow)
+
+
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     """Основной поток интерфейса"""
 
@@ -85,10 +97,10 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sb_num1 = QSpinBox()
         self.web_thread = WebThread(mainwindow=self)
         self.chat = ChatThread(mainwindow=self)
+        self.parser_thread = None
         self.chat.start()
         self.web = WebDriver()
         self.sizer = Resizer()
-        self.parser = parsers.Parsers()
         self.init_buttons()
         self.log = logger.log
 
@@ -100,9 +112,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.run_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
         self.parser_button.clicked.connect(self.parsers)
-
-    def test(self):
-        pass
 
     def get_path(self):
         self.path_window.clear()
@@ -128,7 +137,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
     def parsers(self):
-        self.parser.parser_sephora(gui=self)
+        self.parser_thread = ParserThread(mainwindow=self)
+        self.parser_thread.start()
 
     def launch_thread_dt(self):
         self.command_window.clear()

@@ -32,7 +32,6 @@ class WebDriver:
         self.actions_data = []
         self.name_index = 1
 
-
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
         if self.driver is None:
@@ -284,5 +283,3 @@ class WebDriver:
             gui.chat_print(f'Загрузка успешно завершена')
         else:
             gui.chat_print('Баннеры не найдены на этой странице 3')
-
-
