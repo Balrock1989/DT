@@ -11,12 +11,13 @@ from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from custom_design import Ui_MainWindow
 from rename_image import Rename
 from web_driver import WebDriver
+from parsers import Parsers
 from custom_dialog import Ui_Dialog
 from image_sizer import Resizer
 import global_hotkey
 import threading
 import logger
-import parsers
+
 
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
@@ -53,11 +54,13 @@ class WebThread(QThread):
     def __init__(self, mainwindow):
         super(WebThread, self).__init__()
         self.mainwindow = mainwindow
-        self.width_resize = ''
-        self.height_resize = ''
+        self.web = WebDriver()
+        self.web.start_data = self.mainwindow.date_start.toPlainText()
+        self.web.end_data = self.mainwindow.date_end.toPlainText()
+        self.web.url = self.mainwindow.url.toPlainText()
 
     def run(self):
-        self.mainwindow.web.auth(self.mainwindow)
+        self.web.auth(gui=self.mainwindow)
 
 
 class ChatThread(QThread):
@@ -81,7 +84,7 @@ class ParserThread(QThread):
     def __init__(self, mainwindow):
         super(ParserThread, self).__init__()
         self.mainwindow = mainwindow
-        self.parser = parsers.Parsers()
+        self.parser = Parsers()
 
     def run(self):
         self.parser.parser_sephora(gui=self.mainwindow)
@@ -95,12 +98,11 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
-        self.web_thread = WebThread(mainwindow=self)
+        self.web_thread = None
         self.chat = ChatThread(mainwindow=self)
         self.parser_thread = None
         self.chat.start()
-        self.web = WebDriver()
-        self.sizer = Resizer()
+        self.sizer = None
         self.init_buttons()
         self.log = logger.log
 
@@ -124,7 +126,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.append(self.dir_name)
 
     def rename(self):
-        self.command_window.clear()
         rename = Rename()
         rename.rename_image(gui=self,
                             path=self.dir_name,
@@ -132,7 +133,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
                             checkbox=self.rename_checbox.isChecked())
 
     def resizer(self):
-        self.command_window.clear()
+        self.sizer = Resizer()
         self.sizer.exit = False
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
@@ -141,10 +142,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.parser_thread.start()
 
     def launch_thread_dt(self):
-        self.command_window.clear()
-        self.web.start_data = self.date_start.toPlainText()
-        self.web.end_data = self.date_end.toPlainText()
-        self.web.url = self.url.toPlainText()
+        self.web_thread = WebThread(mainwindow=self)
         self.web_thread.start()
 
     def show_dialog_width(self):

@@ -37,6 +37,7 @@ class Resizer:
                 if self.w >= self.h:
                     gui.show_dialog_width()
                     if self.exit:
+                        gui.chat_print('Процесс был прерван пользователем.')
                         return
                     ratio = (self.basewidth / float(self.w))
                     height = int((float(self.h) * float(ratio)))
@@ -49,6 +50,7 @@ class Resizer:
                 else:
                     gui.show_dialog_heigth()
                     if self.exit:
+                        gui.chat_print('Процесс был прерван пользователем.')
                         return
                     ratio = (self.baseheight / float(self.h))
                     width = int((float(self.w) * float(ratio)))

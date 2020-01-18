@@ -1,11 +1,9 @@
 import datetime
 import os
 import re
-from calendar import monthrange
 from collections import OrderedDict
 from time import sleep
 import requests
-from PyQt5 import QtCore, QtGui
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from datetime import datetime
