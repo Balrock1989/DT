@@ -52,6 +52,7 @@ class Parsers:
                     if 'При' in text:
                         descriptions.append(text)
                 for desc in descriptions:
+                    print('Имя партнера: Sephora')
                     print(f'Заголовок: {action_name}')
                     print(f'Начало акции: {date_start}')
                     print(f'Окончание акции: {date_end}')

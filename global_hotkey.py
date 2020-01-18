@@ -10,19 +10,20 @@ def hotkey(gui):
     current = set()
 
     def execute_space1():
-        gui.web.exit = False
-        gui.web.start_data = gui.date_start.toPlainText()
-        gui.web.end_data = gui.date_end.toPlainText()
-        gui.web.url = gui.url.toPlainText()
-        gui.web.add_banner(gui=gui)
+        gui.web_thread.web.exit = False
+        gui.web_thread.web.start_data = gui.date_start.toPlainText()
+        gui.web_thread.web.end_data = gui.date_end.toPlainText()
+        gui.web_thread.web.url = gui.url.toPlainText()
+        gui.web_thread.web.add_banner(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: space + 1 \n *** Должна вызваться функция :)')
 
     def execute_space2():
-        gui.web.parser(gui=gui) if not gui.web.actions_data else gui.web.add_actions(gui=gui)
+        gui.web_thread.web.parser(gui=gui) if not gui.web_thread.web.actions_data\
+            else gui.web_thread.web.add_actions(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: space + 2 \n *** Должна вызваться функция :)')
 
     def execute_space3():
-        gui.web.download_banners(gui=gui)
+        gui.web_thread.web.download_banners(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: space + 3 \n *** Должна вызваться функция :)')
 
     def execute_space4():

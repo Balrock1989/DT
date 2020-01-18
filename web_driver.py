@@ -55,6 +55,7 @@ class WebDriver:
             gui.chat_print('Браузер уже запущен')
 
     def add_banner(self, gui):
+        """Загрузка баннеров на сервер"""
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
         else:
