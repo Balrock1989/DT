@@ -262,6 +262,9 @@ class WebDriver:
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
         if links:
+            if self.exit:
+                gui.chat_print(f'Загрузка прервана пользователем')
+                return
             home_path = os.getenv('HOMEPATH')
             result = os.path.join('C:\\', home_path, 'Desktop', 'result')
             result = os.path.normpath(result)

@@ -18,11 +18,13 @@ def hotkey(gui):
         gui.log.info('\n *** Нажата комбинация клавиш: space + 1 \n *** Должна вызваться функция :)')
 
     def execute_space2():
-        gui.web_thread.web.parser(gui=gui) if not gui.web_thread.web.actions_data\
+        gui.web_thread.web.exit = False
+        gui.web_thread.web.parser(gui=gui) if not gui.web_thread.web.actions_data \
             else gui.web_thread.web.add_actions(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: space + 2 \n *** Должна вызваться функция :)')
 
     def execute_space3():
+        gui.web_thread.web.exit = False
         gui.web_thread.web.download_banners(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: space + 3 \n *** Должна вызваться функция :)')
 
@@ -41,14 +43,10 @@ def hotkey(gui):
         key_name = get_key_name(key)
         if key == keyboard.Key.esc:
             gui.log.info(f'--- Нажата клавиша: {key_name}')
-            try:
+            if gui.web_thread:
                 gui.web_thread.web.exit = True
-            except AttributeError:
-                gui.log.exception('Объект web_thread еще не был создан')
-            try:
+            if gui.sizer:
                 gui.sizer.exit = True
-            except AttributeError:
-                gui.log.exception('Объект sizer еще не был создан')
         elif key == keyboard.Key.space:
             current.add(key)
             gui.log.info(f'--- Нажата клавиша: {key_name}')
