@@ -18,6 +18,7 @@ from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresen
 import auth
 
 
+
 class WebDriver:
     def __init__(self):
         self.start_data = ''
@@ -134,6 +135,7 @@ class WebDriver:
                 action = OrderedDict()
                 action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
                 action['Название акции'] = act.find('p', {'class': 'h3-name'}).text.strip()
+                #TODO Обработать формат даты "Неограничен"
                 full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
                 temp = ''.join(str(full_date.text).split())
                 action['Дата начала'] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
