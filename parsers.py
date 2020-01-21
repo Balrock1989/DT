@@ -45,6 +45,7 @@ class Parsers:
         links = page.find_all("a", class_='b-news-thumb__title')
         with open("result.csv", "a", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
+            #TODO Добавить потоки на обработку каждой ссылки
             for link in links:
                 link = main_url[:-5] + link['href'][1:]
                 gui.log.info(f'{link}')
@@ -71,4 +72,4 @@ class Parsers:
                                   'Дата окончания': date_end, 'Полное описание': desc, 'Короткое описание': action_name,
                                   'Купон': code, 'URL': 'https://sephora.ru', 'Тип акции': action_type}
                         writer.writerow(action)
-        gui.chat_print('\nДанные об акциях успешно загружены')
+                    gui.chat_print(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')
