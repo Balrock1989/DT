@@ -161,6 +161,16 @@ class WebDriver:
 
     def add_actions(self, gui):
         """Добавление акций на основе полученных данных"""
+        def get_percent(action):
+            if "%" in action:
+                try:
+                    percent = re.search(r'(\d+)%', action).group(1)
+                except AttributeError:
+                    percent = re.search(r'%(\d+)', action).group(1)
+            else:
+                percent = re.search(r'(\d+?\s\d+)', action).group(1).replace(' ', '')
+            return percent
+
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
         else:
@@ -215,11 +225,14 @@ class WebDriver:
                 code.send_keys('Не требуется')
                 if '%' in action['Название акции']:
                     checkbox.click()
-                    percent = self.get_percent(action['Название акции'])
+                    percent = get_percent(action['Название акции'])
                     discount_amount.send_keys(percent)
                 elif '%' in action['Условия акции']:
                     checkbox.click()
-                    percent = self.get_percent(action['Условия акции'])
+                    percent = get_percent(action['Условия акции'])
+                    discount_amount.send_keys(percent)
+                elif any([i.isdigit() for i in action['Название акции']]):
+                    percent = get_percent(action['Название акции'])
                     discount_amount.send_keys(percent)
                 else:
                     discount_amount.send_keys('0')
@@ -236,13 +249,6 @@ class WebDriver:
             self.driver.get(auth.coupun_url + id)
         self.actions_data.clear()
         gui.chat_print('Акции успешно добавлены, буфер очищен')
-
-    def get_percent(self, action):
-        try:
-            percent = re.search(r'(\d+)%', action).group(1)
-        except AttributeError:
-            percent = re.search(r'%(\d+)', action).group(1)
-        return percent
 
     def download_banners(self, gui):
         """Загрузка баннеров с сайта"""
