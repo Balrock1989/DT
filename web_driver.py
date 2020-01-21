@@ -1,3 +1,4 @@
+import csv
 import os
 import re
 from collections import OrderedDict
@@ -28,6 +29,8 @@ class WebDriver:
         self.ad_window = None
         self.actions_data = []
         self.name_index = 1
+        self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
+                        'Полное описание', 'Короткое описание', 'Купон', 'URL', 'Тип акции']
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
@@ -112,8 +115,14 @@ class WebDriver:
         gui.chat_print('#' * 60)
         gui.chat_print('С первой папкой закончил, жду следующую')
 
+    def generate_csv(self):
+        with open("result.csv", "w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            writer.writerow(self.headers)
+
     def parser(self, gui):
         """Сбор и форамтирование информации об акциях"""
+        self.generate_csv()
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
         else:
@@ -130,6 +139,7 @@ class WebDriver:
         gui.chat_print(f'\nВсего будет обработано акций {len(actions)}')
         if actions:
             for act in actions:
+                # TODO добавить данные в таблицу csv и делать выгрузку из нее
                 action = OrderedDict()
                 action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
                 action['Название акции'] = act.find('p', {'class': 'h3-name'}).text.strip()
