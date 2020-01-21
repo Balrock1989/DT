@@ -13,6 +13,14 @@ class Parsers:
         self.month_name = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
                            "05": "мая", "06": "июн", "07": "июл", "08": "авг",
                            "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
+        self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
+                        'Полное описание', 'Короткое описание', 'Купон', 'URL', 'Тип акции']
+        self.generate_csv()
+
+    def generate_csv(self):
+        with open("result.csv", "w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            writer.writerow(self.headers)
 
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
@@ -35,12 +43,8 @@ class Parsers:
         request = s.get(main_url)
         page = BeautifulSoup(request.text, 'lxml')
         links = page.find_all("a", class_='b-news-thumb__title')
-        headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-                   'Полное описание', 'Короткое описание', 'Купон', 'URL', 'Тип акции']
-        with open("result.csv", "w", newline="", encoding="utf-8") as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
-            #TODO Разобраться с заголовками.
-            # writer.writerow(headers)
+        with open("result.csv", "a", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
             for link in links:
                 link = main_url[:-5] + link['href'][1:]
                 gui.log.info(f'{link}')
@@ -67,13 +71,4 @@ class Parsers:
                                   'Дата окончания': date_end, 'Полное описание': desc, 'Короткое описание': action_name,
                                   'Купон': code, 'URL': 'https://sephora.ru', 'Тип акции': action_type}
                         writer.writerow(action)
-                        print('Имя партнера: Sephora')
-                        print(f'Заголовок: {action_name}')
-                        print(f'Начало акции: {date_start}')
-                        print(f'Окончание акции: {date_end}')
-                        print(f'Полное описание: {desc}')
-                        print(f'Короткое описание: {action_name}')
-                        print(f'Купон: {code}')
-                        print(f'URL: https://sephora.ru')
-                        print(f'Тип акции: {action_type}')
         gui.chat_print('\nДанные об акциях успешно загружены')
