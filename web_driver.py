@@ -1,4 +1,3 @@
-import datetime
 import os
 import re
 from collections import OrderedDict
@@ -16,7 +15,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException
 import auth
-
 
 
 class WebDriver:
@@ -79,7 +77,7 @@ class WebDriver:
         gui.chat_print(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
         gui.chat_print(f'Дата начала акции:{self.start_data}, Дата окончания акции:{self.end_data}, url: {self.url}')
         if not self.start_data:
-            now = datetime.datetime.now()
+            now = datetime.now()
             self.start_data = now.strftime('%d.%m.%Y')
         for link in links:
             if self.exit:
@@ -135,9 +133,14 @@ class WebDriver:
                 action = OrderedDict()
                 action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
                 action['Название акции'] = act.find('p', {'class': 'h3-name'}).text.strip()
-                #TODO Обработать формат даты "Неограничен"
-                full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)'))
-                temp = ''.join(str(full_date.text).split())
+                try:
+                    full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)')).text.strip()
+                except AttributeError:
+                    gui.log.exception('Неизвестный формат даты')
+                    now = datetime.now()
+                    full_date = str(now.strftime('%d.%m.%Y')) + "-" + datetime(
+                        day=now.day, month=now.month + 6, year=now.year).strftime('%d.%m.%Y')
+                temp = ''.join(str(full_date).split())
                 action['Дата начала'] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
                 action['Дата окончания'] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
                 action['Тип купона'] = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()

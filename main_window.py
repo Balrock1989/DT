@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import os
 import sys
 from queue import Queue
@@ -107,7 +107,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.log = logger.log
 
     def init_buttons(self):
-        now = datetime.datetime.now()
+        now = datetime.now()
         self.date_start.append(now.strftime('%d.%m.%Y'))
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
