@@ -168,7 +168,8 @@ class WebDriver:
                 except AttributeError:
                     percent = re.search(r'%(\d+)', action).group(1)
             else:
-                percent = re.search(r'(\d+?\s\d+)', action).group(1).replace(' ', '')
+                percent = re.search(r'(\d+\s?\d+)', action).group(1).replace(' ', '')
+                print(percent)
             return percent
 
         if self.driver:

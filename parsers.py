@@ -77,4 +77,3 @@ class Parsers:
                         print(f'URL: https://sephora.ru')
                         print(f'Тип акции: {action_type}')
         gui.chat_print('\nДанные об акциях успешно загружены')
-        # TODO подготовить вывод результатов для запись в таблицу csv
