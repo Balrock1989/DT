@@ -9,35 +9,39 @@ def hotkey(gui):
     COMBO_4 = [keyboard.Key.tab, keyboard.KeyCode(char='4')]
     current = set()
 
+    def browser_checker(func):
+        def check(*args, **kwargs):
+            if gui.web_thread:
+                func(*args, **kwargs)
+            else:
+                gui.chat_print('Браузер закрыт')
+
+        return check
+
+    @browser_checker
     def execute_tab1():
-        if gui.web_thread:
-            gui.web_thread.web.exit = False
-            gui.web_thread.web.start_data = gui.date_start.toPlainText()
-            gui.web_thread.web.end_data = gui.date_end.toPlainText()
-            gui.web_thread.web.url = gui.url.toPlainText()
-            gui.web_thread.web.add_banner(gui=gui)
-            gui.log.info('\n *** Нажата комбинация клавиш: tab + 1 \n *** Должна вызваться функция :)')
-        else:
-            gui.chat_print('Браузер закрыт')
+        gui.web_thread.web.exit = False
+        gui.web_thread.web.start_data = gui.date_start.toPlainText()
+        gui.web_thread.web.end_data = gui.date_end.toPlainText()
+        gui.web_thread.web.url = gui.url.toPlainText()
+        gui.web_thread.web.add_banner(gui=gui)
+        gui.log.info('\n *** Нажата комбинация клавиш: tab + 1 \n *** Должна вызваться функция :)')
 
+    @browser_checker
     def execute_tab2():
-        if gui.web_thread:
-            gui.web_thread.web.exit = False
-            gui.web_thread.web.parser(gui=gui) if not gui.web_thread.web.actions_data \
-                else gui.web_thread.web.add_actions(gui=gui)
-            gui.log.info('\n *** Нажата комбинация клавиш: tab + 2 \n *** Должна вызваться функция :)')
-        else:
-            gui.chat_print('Браузер закрыт')
+        gui.web_thread.web.exit = False
+        gui.web_thread.web.parser(gui=gui)
+        gui.log.info('\n *** Нажата комбинация клавиш: tab + 2 \n *** Должна вызваться функция :)')
 
+    @browser_checker
     def execute_tab3():
-        if gui.web_thread:
-            gui.web_thread.web.exit = False
-            gui.web_thread.web.download_banners(gui=gui)
-            gui.log.info('\n *** Нажата комбинация клавиш: tab + 3 \n *** Должна вызваться функция :)')
-        else:
-            gui.chat_print('Браузер закрыт')
+        gui.web_thread.web.exit = False
+        gui.web_thread.web.download_banners(gui=gui)
+        gui.log.info('\n *** Нажата комбинация клавиш: tab + 3 \n *** Должна вызваться функция :)')
 
+    @browser_checker
     def execute_tab4():
+        gui.web_thread.web.add_actions(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 4 \n *** Должна вызваться функция :)')
 
     def get_key_name(key):
