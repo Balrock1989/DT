@@ -41,7 +41,6 @@ class WebDriver:
             options.add_argument('--disable-notifications')
             options.add_argument('--disable-gpu')
             self.driver = webdriver.Chrome(options=options)
-            gui.show_process()
             gui.hide_chrome_console()
             self.driver.get(auth.auth_url_dt)
             self.dt_window = self.driver.current_window_handle

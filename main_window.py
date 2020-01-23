@@ -181,6 +181,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.command_window.moveCursor(QtGui.QTextCursor.End)
 
     def hide_chrome_console(self):
+        self.show_process()
         if self.chromedriver_process:
             win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
 
