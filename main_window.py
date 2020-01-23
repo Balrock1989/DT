@@ -100,7 +100,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sb_num1 = QSpinBox()
         self.web_thread = None
         self.chat = ChatThread(mainwindow=self)
-        self.parser_thread = None
+        self.parser_thread = ParserThread(mainwindow=self)
         self.chat.start()
         self.sizer = None
         self.init_buttons()
@@ -138,7 +138,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
     def parsers(self):
-        self.parser_thread = ParserThread(mainwindow=self)
         self.parser_thread.start()
 
     def launch_thread_dt(self):

@@ -115,14 +115,8 @@ class WebDriver:
         gui.chat_print('#' * 60)
         gui.chat_print('С первой папкой закончил, жду следующую')
 
-    def generate_csv(self):
-        with open("result.csv", "w", newline="", encoding="utf-8") as csv_file:
-            writer = csv.writer(csv_file, delimiter=";")
-            writer.writerow(self.headers)
-
     def parser(self, gui):
         """Сбор и форамтирование информации об акциях"""
-        self.generate_csv()
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
         else:

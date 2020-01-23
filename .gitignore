@@ -1,8 +1,8 @@
 /gui.log
 /auth.py
 .json
-/my-project-dt-265715-2903a1a8a3f5.json
 /main_window.spec
 /gui.spec
-/gui.log
+.log
 /result.csv
+/google.py

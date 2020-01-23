@@ -18,7 +18,7 @@ class Parsers:
         self.generate_csv()
 
     def generate_csv(self):
-        with open("result.csv", "w", newline="", encoding="utf-8") as csv_file:
+        with open("actions.csv", "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
             writer.writerow(self.headers)
 
@@ -43,7 +43,7 @@ class Parsers:
         request = s.get(main_url)
         page = BeautifulSoup(request.text, 'lxml')
         links = page.find_all("a", class_='b-news-thumb__title')
-        with open("result.csv", "a", newline="", encoding="utf-8") as csv_file:
+        with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
             #TODO Добавить потоки на обработку каждой ссылки
             for link in links:
