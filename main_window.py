@@ -2,6 +2,8 @@ from datetime import datetime
 import os
 import sys
 from queue import Queue
+from time import sleep
+
 import pyautogui
 import win32con
 import win32gui
@@ -17,7 +19,6 @@ from image_sizer import Resizer
 import global_hotkey
 import threading
 import logger
-
 
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
@@ -105,6 +106,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer = None
         self.init_buttons()
         self.log = logger.log
+        self.chromedriver_process = None
+        self.dt_process = None
 
     def init_buttons(self):
         now = datetime.now()
@@ -156,6 +159,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.show()
         dialog.exec_()
 
+    # TODO Найти процесс с именем chromedriver.exe и попробовать его скрыть
     def show_process(self):
         """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
         toplist = []
@@ -164,16 +168,21 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         def enum_callback(hwnd, results):
             winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
 
-        try:
-            win32gui.EnumWindows(enum_callback, toplist)
-            dt_process = [(hwnd, title) for hwnd, title in winlist if 'DTMainWindow' in title]
-            dt_process = dt_process[0]
-            win32gui.ShowWindow(dt_process[0], win32con.SW_NORMAL)
-            pyautogui.press('alt')
-            win32gui.SetForegroundWindow(dt_process[0])
-            self.command_window.moveCursor(QtGui.QTextCursor.End)
-        except Exception:
-            self.log.exception(f'Произошла неизвестная ошибка')
+        win32gui.EnumWindows(enum_callback, toplist)
+        if self.dt_process is None or self.chromedriver_process is None:
+            for hwnd, title in winlist:
+                if 'DTMainWindow' in title:
+                    self.dt_process = hwnd
+                if 'chromedriver' in title:
+                    self.chromedriver_process = hwnd
+        win32gui.ShowWindow(self.dt_process, win32con.SW_NORMAL)
+        pyautogui.press('alt')
+        win32gui.SetForegroundWindow(self.dt_process)
+        self.command_window.moveCursor(QtGui.QTextCursor.End)
+
+    def hide_chrome_console(self):
+        if self.chromedriver_process:
+            win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
 
     def chat_print(self, text):
         """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""

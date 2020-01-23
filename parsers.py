@@ -43,33 +43,34 @@ class Parsers:
         request = s.get(main_url)
         page = BeautifulSoup(request.text, 'lxml')
         links = page.find_all("a", class_='b-news-thumb__title')
-        with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
-            #TODO Добавить потоки на обработку каждой ссылки
-            for link in links:
-                link = main_url[:-5] + link['href'][1:]
-                gui.log.info(f'{link}')
-                request = s.get(link)
-                page = BeautifulSoup(request.text, 'lxml')
-                div = page.find('div', class_='b-news-detailed')
-                if div:
-                    try:
-                        date_start, date_end = get_date(self, div)
-                    except TypeError:
-                        gui.log.info('Не найдена дата проведения акции')
-                        continue
-                    code = "Не требуется"
-                    action_type = 'подарок'
-                    action_name = div.h1.text
-                    paragraphs = div.findAll('p')
-                    descriptions = []
-                    for p in paragraphs:
-                        text = p.text.strip()
-                        if 'При' in text:
-                            descriptions.append(text)
-                    for desc in descriptions:
-                        action = {'Имя партнера': 'Sephora', 'Название акции': action_name, 'Дата начала': date_start,
-                                  'Дата окончания': date_end, 'Полное описание': desc, 'Короткое описание': action_name,
-                                  'Купон': code, 'URL': 'https://sephora.ru', 'Тип акции': action_type}
-                        writer.writerow(action)
-                    gui.chat_print(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')
+
+        #TODO Добавить потоки на обработку каждой ссылки
+        for link in links:
+            link = main_url[:-5] + link['href'][1:]
+            gui.log.info(f'{link}')
+            request = s.get(link)
+            page = BeautifulSoup(request.text, 'lxml')
+            div = page.find('div', class_='b-news-detailed')
+            if div:
+                try:
+                    date_start, date_end = get_date(self, div)
+                except TypeError:
+                    gui.log.info('Не найдена дата проведения акции')
+                    continue
+                code = "Не требуется"
+                action_type = 'подарок'
+                action_name = div.h1.text
+                paragraphs = div.findAll('p')
+                descriptions = []
+                for p in paragraphs:
+                    text = p.text.strip()
+                    if 'При' in text:
+                        descriptions.append(text)
+                for desc in descriptions:
+                    action = {'Имя партнера': 'Sephora', 'Название акции': action_name, 'Дата начала': date_start,
+                              'Дата окончания': date_end, 'Полное описание': desc, 'Короткое описание': action_name,
+                              'Купон': code, 'URL': 'https://sephora.ru', 'Тип акции': action_type}
+                with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                    writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
+                    writer.writerow(action)
+                gui.chat_print(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')
