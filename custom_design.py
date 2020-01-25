@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName('DTMainWindow')
-        MainWindow.resize(869, 489)
+        MainWindow.resize(869, 500)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName('centralwidget')
         self.path_window = QtWidgets.QTextBrowser(self.centralwidget)
@@ -76,6 +76,26 @@ class Ui_MainWindow(object):
         self.url_label.setFont(font)
         self.url_label.setAlignment(QtCore.Qt.AlignCenter)
         self.url_label.setObjectName('url_label')
+
+        self.hint_hotkey_1 = QtWidgets.QLabel(self.centralwidget)
+        self.hint_hotkey_1.setGeometry(QtCore.QRect(10, 465, 130, 16))
+        self.hint_hotkey_1.setAlignment(QtCore.Qt.AlignCenter)
+        self.hint_hotkey_1.setObjectName('hint_hotkey_1')
+
+        self.hint_hotkey_2 = QtWidgets.QLabel(self.centralwidget)
+        self.hint_hotkey_2.setGeometry(QtCore.QRect(140, 465, 130, 16))
+        self.hint_hotkey_2.setAlignment(QtCore.Qt.AlignCenter)
+        self.hint_hotkey_2.setObjectName('hint_hotkey_2')
+
+        self.hint_hotkey_3 = QtWidgets.QLabel(self.centralwidget)
+        self.hint_hotkey_3.setGeometry(QtCore.QRect(270, 465, 130, 16))
+        self.hint_hotkey_3.setAlignment(QtCore.Qt.AlignCenter)
+        self.hint_hotkey_3.setObjectName('hint_hotkey_3')
+
+        self.hint_hotkey_4 = QtWidgets.QLabel(self.centralwidget)
+        self.hint_hotkey_4.setGeometry(QtCore.QRect(400, 465, 130, 16))
+        self.hint_hotkey_4.setAlignment(QtCore.Qt.AlignCenter)
+        self.hint_hotkey_4.setObjectName('hint_hotkey_4')
 
         self.rename_button = QtWidgets.QPushButton(self.centralwidget)
         self.rename_button.setGeometry(QtCore.QRect(580, 400, 131, 51))
@@ -154,6 +174,10 @@ class Ui_MainWindow(object):
         self.data_end_label.setText(_translate('MainWindow', 'ДАТА ОКОНЧАНИЯ АКЦИИ:'))
         self.url_label.setText(_translate('MainWindow', 'ССЫЛКА НА АКЦИЮ:'))
         self.url.setPlaceholderText(_translate('MainWindow', 'URL акции если есть'))
+        self.hint_hotkey_1.setText(_translate('MainWindow', '1 - Загрузить баннеры'))
+        self.hint_hotkey_2.setText(_translate('MainWindow', '2 - Скачать акции'))
+        self.hint_hotkey_3.setText(_translate('MainWindow', '3 - Скачать баннеры'))
+        self.hint_hotkey_4.setText(_translate('MainWindow', '4 - Загрузить акции'))
         self.rename_button.setText(_translate('MainWindow', 'Переименовать'))
         self.rename_checbox.setText(_translate('MainWindow', 'В одну папку'))
         self.run_browser.setText(_translate('MainWindow', 'Браузер'))
