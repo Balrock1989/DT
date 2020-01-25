@@ -125,7 +125,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.parser_button.setFont(font)
-        self.parser_button.setObjectName('парсер')
+        self.parser_button.setObjectName('Парсер')
         self.parser_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
         self.command_window = QtWidgets.QTextBrowser(self.centralwidget)

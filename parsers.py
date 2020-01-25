@@ -14,7 +14,7 @@ class Parsers:
                            "05": "мая", "06": "июн", "07": "июл", "08": "авг",
                            "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
         self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-                        'Полное описание', 'Короткое описание', 'Купон', 'URL', 'Тип акции']
+                        'Условия акции', 'Купон', 'URL', 'Тип купона']
         self.generate_csv()
 
     def generate_csv(self):
@@ -68,9 +68,9 @@ class Parsers:
                         descriptions.append(text)
                 for desc in descriptions:
                     action = {'Имя партнера': 'Sephora', 'Название акции': action_name, 'Дата начала': date_start,
-                              'Дата окончания': date_end, 'Полное описание': desc, 'Короткое описание': action_name,
-                              'Купон': code, 'URL': 'https://sephora.ru', 'Тип акции': action_type}
-                with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
-                    writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
-                    writer.writerow(action)
+                              'Дата окончания': date_end, 'Условия акции': desc,
+                              'Купон': code, 'URL': 'https://sephora.ru', 'Тип купона': action_type}
+                    with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                        writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
+                        writer.writerow(action)
                 gui.chat_print(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')

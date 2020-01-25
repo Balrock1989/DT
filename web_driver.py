@@ -30,7 +30,7 @@ class WebDriver:
         self.actions_data = []
         self.name_index = 1
         self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-                        'Полное описание', 'Короткое описание', 'Купон', 'URL', 'Тип акции']
+                        'Условия акции', 'Купон', 'URL', 'Тип купона']
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
@@ -134,7 +134,6 @@ class WebDriver:
         gui.chat_print(f'\nВсего будет обработано акций {len(actions)}')
         if actions:
             for act in actions:
-                # TODO добавить данные в таблицу csv и делать выгрузку из нее
                 action = OrderedDict()
                 action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
                 action['Название акции'] = act.find('p', {'class': 'h3-name'}).text.strip()
@@ -152,6 +151,10 @@ class WebDriver:
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
+                gui.partner_name.append(action['Имя партнера'])
+                with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                    writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
+                    writer.writerow(action)
             for n, a in enumerate(self.actions_data, 1):
                 gui.chat_print(f'\n---№{n}\n')
                 action = ''
