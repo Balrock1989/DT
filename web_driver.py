@@ -6,7 +6,7 @@ from time import sleep
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from datetime import datetime
+from datetime import datetime, timedelta
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
@@ -132,29 +132,37 @@ class WebDriver:
         page = BeautifulSoup(self.driver.page_source, 'lxml')
         actions = page.findAll('div', class_='coupon')
         gui.chat_print(f'\nВсего будет обработано акций {len(actions)}')
+        partner_name = ''
         if actions:
             for act in actions:
                 action = OrderedDict()
                 action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
+                partner_name = action['Имя партнера']
                 action['Название акции'] = act.find('p', {'class': 'h3-name'}).text.strip()
+                now = datetime.now()
                 try:
                     full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)')).text.strip()
                 except AttributeError:
                     gui.log.exception('Неизвестный формат даты')
-                    now = datetime.now()
-                    full_date = str(now.strftime('%d.%m.%Y')) + "-" + datetime(
-                        day=now.day, month=now.month + 6, year=now.year).strftime('%d.%m.%Y')
+                    date_end = now + timedelta(days=180)
+                    full_date = str(now.strftime('%d.%m.%Y')) + "-" + date_end.strftime('%d.%m.%Y')
                 temp = ''.join(str(full_date).split())
                 action['Дата начала'] = re.search(r'^(\d+.\d+.\d{4})', temp).group(1)
                 action['Дата окончания'] = re.search(r'-(\d+.\d+.\d{4})', temp).group(1)
+                date_start = datetime.strptime(action['Дата начала'], '%d.%m.%Y')
+                date_end = datetime.strptime(action['Дата окончания'], '%d.%m.%Y')
+                diff_date = date_end - date_start
+                if diff_date.days > 180:
+                    action['Дата окончания'] = date_start + timedelta(days=180)
                 action['Тип купона'] = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-                gui.partner_name.append(action['Имя партнера'])
                 with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
                     writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
                     writer.writerow(action)
+            # TODO Придумать как очистить поле перед добавлением новой записи
+            gui.partner_name.append(partner_name)
             for n, a in enumerate(self.actions_data, 1):
                 gui.chat_print(f'\n---№{n}\n')
                 action = ''
@@ -177,7 +185,6 @@ class WebDriver:
                     percent = re.search(r'%(\d+)', action).group(1)
             else:
                 percent = re.search(r'(\d+\s?\d+)', action).group(1).replace(' ', '')
-                print(percent)
             return percent
 
         if self.driver:
@@ -186,76 +193,82 @@ class WebDriver:
             gui.log.error('Браузер закрыт')
             gui.chat_print('Браузер закрыт')
             return
-        for action in self.actions_data:
-            if self.exit:
-                return
-            self.driver.switch_to_window(self.dt_window)
-            url = self.driver.current_url
-            try:
-                id = re.search(r'Id=(\d+)', url).group(1)
-                self.driver.switch_to_frame('ifrm')
-            except (NoSuchFrameException, AttributeError):
-                gui.log.exception('Парсер  AD запущен не на той странице')
-                gui.chat_print('*' * 60)
-                gui.chat_print(f'Данные об акциях были очищены, нужно загрузить снова')
-                self.actions_data.clear()
-                return
-            header = self.driver.find_element_by_name('title')
-            vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
-            form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
-            checkbox = self.driver.find_element_by_id('isPercentage')
-            description = self.driver.find_element_by_id('description')
-            short_description = self.driver.find_element_by_name('shortDescription')
-            discount_amount = self.driver.find_element_by_id('discountAmount')
-            valid_from = self.driver.find_element_by_id('id_startDate')
-            valid_to = self.driver.find_element_by_id('id_endDate')
-            start_date = self.driver.find_element_by_id('id_publishStartDate')
-            end_date = self.driver.find_element_by_id('id_publishEndDate')
-            code = self.driver.find_element_by_id('code')
-            landing_url = self.driver.find_element_by_id('landingUrl')
-            header.send_keys(action['Название акции'] + '!')
-            valid_from.clear()
-            valid_from.send_keys(action['Дата начала'])
-            valid_to.clear()
-            valid_to.send_keys(action['Дата окончания'])
-            start_date.clear()
-            start_date.send_keys(action['Дата начала'])
-            end_date.clear()
-            end_date.send_keys(action['Дата окончания'])
-            short_description.send_keys(action['Название акции'] + '!')
-            if action['Условия акции']:
-                description.send_keys(action['Условия акции'] + '!')
-            else:
-                description.send_keys(action['Название акции'] + '!')
-            landing_url.send_keys(gui.url.toPlainText())
-            if 'скидка' in action['Тип купона'].lower() or 'купон' in action['Тип купона'].lower():
-                vaucher_type.select_by_value('2') if 'скидка' in action['Тип купона'].lower() \
-                    else vaucher_type.select_by_value('1')
-                code.send_keys('Не требуется')
-                if '%' in action['Название акции']:
-                    checkbox.click()
-                    percent = get_percent(action['Название акции'])
-                    discount_amount.send_keys(percent)
-                elif '%' in action['Условия акции']:
-                    checkbox.click()
-                    percent = get_percent(action['Условия акции'])
-                    discount_amount.send_keys(percent)
-                elif any([i.isdigit() for i in action['Название акции']]):
-                    percent = get_percent(action['Название акции'])
-                    discount_amount.send_keys(percent)
+        with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
+            csv_data = csv.DictReader(csv_file, delimiter=';')
+            for action in csv_data:
+                # TODO Не срабатывает хоткей во время цикла
+                if self.exit:
+                    return
+                self.driver.switch_to_window(self.dt_window)
+                url = self.driver.current_url
+                try:
+                    id = re.search(r'Id=(\d+)', url).group(1)
+                    self.driver.switch_to_frame('ifrm')
+                except (NoSuchFrameException, AttributeError):
+                    gui.log.exception('Парсер  AD запущен не на той странице')
+                    gui.chat_print('*' * 60)
+                    gui.chat_print(f'Данные об акциях были очищены, нужно загрузить снова')
+                    self.actions_data.clear()
+                    return
+                if action['Имя партнера'] != gui.partner_name.toPlainText():
+                    continue
+                header = self.driver.find_element_by_name('title')
+                vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
+                form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
+                checkbox = self.driver.find_element_by_id('isPercentage')
+                description = self.driver.find_element_by_id('description')
+                short_description = self.driver.find_element_by_name('shortDescription')
+                discount_amount = self.driver.find_element_by_id('discountAmount')
+                valid_from = self.driver.find_element_by_id('id_startDate')
+                valid_to = self.driver.find_element_by_id('id_endDate')
+                start_date = self.driver.find_element_by_id('id_publishStartDate')
+                end_date = self.driver.find_element_by_id('id_publishEndDate')
+                code = self.driver.find_element_by_id('code')
+                landing_url = self.driver.find_element_by_id('landingUrl')
+                header.send_keys(action['Название акции'] + '!')
+                valid_from.clear()
+                valid_from.send_keys(action['Дата начала'])
+                valid_to.clear()
+                valid_to.send_keys(action['Дата окончания'])
+                start_date.clear()
+                start_date.send_keys(action['Дата начала'])
+                end_date.clear()
+                end_date.send_keys(action['Дата окончания'])
+                short_description.send_keys(action['Название акции'] + '!')
+                if action['Условия акции']:
+                    description.send_keys(action['Условия акции'] + '!')
                 else:
-                    discount_amount.send_keys('0')
-            elif 'подарок' in action['Тип купона'].lower():
-                vaucher_type.select_by_value('3')
-                code.send_keys('Не требуется')
-            elif 'доставка' in action['Тип купона'].lower():
-                vaucher_type.select_by_value('4')
-                code.send_keys('Не требуется')
-            form.submit()
-            self.driver.switch_to_default_content()
-            sleep(1)
-            self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
-            self.driver.get(auth.coupun_url + id)
+                    description.send_keys(action['Название акции'] + '!')
+                landing_url.send_keys(gui.url.toPlainText()) if \
+                    gui.url.toPlainText() else landing_url.send_keys(action['URL'])
+                if 'скидка' in action['Тип купона'].lower() or 'купон' in action['Тип купона'].lower():
+                    vaucher_type.select_by_value('2') if 'скидка' in action['Тип купона'].lower() \
+                        else vaucher_type.select_by_value('1')
+                    code.send_keys('Не требуется')
+                    if '%' in action['Название акции']:
+                        checkbox.click()
+                        percent = get_percent(action['Название акции'])
+                        discount_amount.send_keys(percent)
+                    elif '%' in action['Условия акции']:
+                        checkbox.click()
+                        percent = get_percent(action['Условия акции'])
+                        discount_amount.send_keys(percent)
+                    elif any([i.isdigit() for i in action['Название акции']]):
+                        percent = get_percent(action['Название акции'])
+                        discount_amount.send_keys(percent)
+                    else:
+                        discount_amount.send_keys('0')
+                elif 'подарок' in action['Тип купона'].lower():
+                    vaucher_type.select_by_value('3')
+                    code.send_keys('Не требуется')
+                elif 'доставка' in action['Тип купона'].lower():
+                    vaucher_type.select_by_value('4')
+                    code.send_keys('Не требуется')
+                form.submit()
+                self.driver.switch_to_default_content()
+                sleep(1)
+                self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
+                self.driver.get(auth.coupun_url + id)
         self.actions_data.clear()
         gui.chat_print('Акции успешно добавлены, буфер очищен')
 

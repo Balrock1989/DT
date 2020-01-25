@@ -12,6 +12,7 @@ def hotkey(gui):
     def browser_checker(func):
         def check(*args, **kwargs):
             if gui.web_thread:
+                gui.web_thread.web.exit = False
                 func(*args, **kwargs)
             else:
                 gui.chat_print('Браузер закрыт')
@@ -20,7 +21,7 @@ def hotkey(gui):
 
     @browser_checker
     def execute_tab1():
-        gui.web_thread.web.exit = False
+        print('слышуслышуслышу')
         gui.web_thread.web.start_data = gui.date_start.toPlainText()
         gui.web_thread.web.end_data = gui.date_end.toPlainText()
         gui.web_thread.web.url = gui.url.toPlainText()
@@ -29,13 +30,11 @@ def hotkey(gui):
 
     @browser_checker
     def execute_tab2():
-        gui.web_thread.web.exit = False
         gui.web_thread.web.parser(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 2 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab3():
-        gui.web_thread.web.exit = False
         gui.web_thread.web.download_banners(gui=gui)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 3 \n *** Должна вызваться функция :)')
 
@@ -57,8 +56,10 @@ def hotkey(gui):
         if key == keyboard.Key.esc:
             gui.log.info(f'--- Нажата клавиша: {key_name}')
             if gui.web_thread:
+                gui.chat_print(f'Загрузка прервана пользователем')
                 gui.web_thread.web.exit = True
             if gui.sizer:
+                gui.chat_print(f'Обработка была прервана пользователем')
                 gui.sizer.exit = True
         elif key == keyboard.Key.tab:
             current.add(key)
