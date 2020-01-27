@@ -161,7 +161,7 @@ class WebDriver:
                 with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
                     writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
                     writer.writerow(action)
-            # TODO Придумать как очистить поле перед добавлением новой записи
+            # TODO разобраться с потоками MoveToThread
             gui.partner_name.append(partner_name)
             for n, a in enumerate(self.actions_data, 1):
                 gui.chat_print(f'\n---№{n}\n')

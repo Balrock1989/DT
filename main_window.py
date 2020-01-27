@@ -8,7 +8,7 @@ import pyautogui
 import win32con
 import win32gui
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QDir, QThread
+from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from custom_design import Ui_MainWindow
 from rename_image import Rename
@@ -129,6 +129,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.append(self.dir_name)
 
     def rename(self):
+        self.partner_name.setText('')
         rename = Rename()
         rename.rename_image(gui=self,
                             path=self.dir_name,
@@ -147,6 +148,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web_thread = WebThread(mainwindow=self)
         self.web_thread.start()
 
+
     def show_dialog_width(self):
         dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
                               size=f'{self.sizer.w} x {self.sizer.h}')
@@ -159,7 +161,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.show()
         dialog.exec_()
 
-    # TODO Найти процесс с именем chromedriver.exe и попробовать его скрыть
     def show_process(self):
         """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
         toplist = []

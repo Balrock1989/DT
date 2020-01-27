@@ -21,7 +21,6 @@ def hotkey(gui):
 
     @browser_checker
     def execute_tab1():
-        print('слышуслышуслышу')
         gui.web_thread.web.start_data = gui.date_start.toPlainText()
         gui.web_thread.web.end_data = gui.date_end.toPlainText()
         gui.web_thread.web.url = gui.url.toPlainText()
