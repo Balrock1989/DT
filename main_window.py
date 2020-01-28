@@ -8,7 +8,7 @@ import pyautogui
 import win32con
 import win32gui
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex
+from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from custom_design import Ui_MainWindow
 from rename_image import Rename
@@ -79,6 +79,17 @@ class ChatThread(QThread):
             self.queue.get()
 
 
+class global_hot_key(QThread):
+    """Отдельный поток для работы чата"""
+
+    def __init__(self, mainwindow):
+        super(global_hot_key, self).__init__()
+        self.mainwindow = mainwindow
+
+    def run(self):
+        global_hotkey.hotkey(self.mainwindow)
+
+
 class ParserThread(QThread):
     """Отдельный поток для работы чата"""
 
@@ -108,6 +119,17 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.log = logger.log
         self.chromedriver_process = None
         self.dt_process = None
+        self.ghk = global_hot_key(self)
+        self.ghk.start()
+        self.moveToThread(self.ghk)
+        self.set_partner_name_signal.connect(self.set_partner_name)
+        self.moveToThread(self.ghk)
+
+    set_partner_name_signal = pyqtSignal(str)
+
+    def set_partner_name(self, text):
+        print('clear_partner_name', threading.get_ident(), text)
+        self.partner_name.setText(text)
 
     def init_buttons(self):
         now = datetime.now()
@@ -146,8 +168,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def launch_thread_dt(self):
         self.web_thread = WebThread(mainwindow=self)
+        self.moveToThread(self.web_thread)
         self.web_thread.start()
-
 
     def show_dialog_width(self):
         dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
@@ -196,9 +218,9 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 def main():
     logger.configure_logging()
     app = QtWidgets.QApplication(sys.argv)
+    print('main', threading.get_ident())
     window = DT()
     window.show()
-    threading.Thread(target=global_hotkey.hotkey, args=(window,), daemon=True).start()
     app.exec_()
 
 
