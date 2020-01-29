@@ -63,27 +63,12 @@ class WebThread(QThread):
     def run(self):
         self.web.auth(gui=self.mainwindow)
 
-# TODO удалить поток для чата
-class ChatThread(QThread):
+
+class GlobalHotKey(QThread):
     """Отдельный поток для работы чата"""
 
     def __init__(self, mainwindow):
-        super(ChatThread, self).__init__()
-        self.mainwindow = mainwindow
-        self.width_resize = ''
-        self.height_resize = ''
-        self.queue = Queue()
-
-    def run(self):
-        while True:
-            self.queue.get()
-
-# TODO Переименовать класс
-class global_hot_key(QThread):
-    """Отдельный поток для работы чата"""
-
-    def __init__(self, mainwindow):
-        super(global_hot_key, self).__init__()
+        super(GlobalHotKey, self).__init__()
         self.mainwindow = mainwindow
 
     def run(self):
@@ -110,26 +95,53 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.dir_name = ''
         self.sb_num1 = QSpinBox()
-        self.web_thread = None
-        self.chat = ChatThread(mainwindow=self)
-        self.parser_thread = ParserThread(mainwindow=self)
-        self.chat.start()
-        self.sizer = None
-        self.init_buttons()
         self.log = logger.log
-        self.chromedriver_process = None
+        self.web_thread = None
         self.dt_process = None
-        self.ghk = global_hot_key(self)
+        self.sizer = None
+        self.chromedriver_process = None
+        self.parser_thread = ParserThread(mainwindow=self)
+        self.ghk = GlobalHotKey(self)
         self.ghk.start()
-        self.moveToThread(self.ghk)
-        self.set_partner_name_signal.connect(self.set_partner_name)
-        self.moveToThread(self.ghk)
+        self.init_buttons()
+        self.init_signals()
 
     set_partner_name_signal = pyqtSignal(str)
+    chat_print_signal = pyqtSignal(str)
+    set_exit_signal = pyqtSignal()
+    hide_chrome_console_signal = pyqtSignal()
 
-    def set_partner_name(self, text):
-        print('clear_partner_name', threading.get_ident(), text)
+    @pyqtSlot(str)
+    def set_partner_name_slot(self, text):
         self.partner_name.setText(text)
+
+    @pyqtSlot(str)
+    def chat_print_slot(self, text):
+        """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
+        self.command_window.append('\n' + text)
+        self.command_window.moveCursor(QtGui.QTextCursor.End)
+        self.log.info(text)
+
+    @pyqtSlot()
+    def set_exit_slot(self):
+        if self.web_thread:
+            self.web_thread.web.exit = True
+        if self.sizer:
+            self.sizer.exit = True
+
+    @pyqtSlot()
+    def hide_chrome_console_slot(self):
+        if self.chromedriver_process:
+            win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
+
+    def init_signals(self):
+        self.moveToThread(self.parser_thread)
+        self.moveToThread(self.ghk)
+        self.moveToThread(self.ghk)
+        self.set_partner_name_signal.connect(self.set_partner_name_slot)
+        self.chat_print_signal.connect(self.chat_print_slot)
+        self.set_exit_signal.connect(self.set_exit_slot)
+        self.hide_chrome_console_signal.connect(self.hide_chrome_console_slot)
 
     def init_buttons(self):
         now = datetime.now()
@@ -192,9 +204,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
 
         win32gui.EnumWindows(enum_callback, toplist)
-        # TODO переделать условие
-        # if self.dt_process is None or (self.web_thread and self.chromedriver_process is None):
-        if self.dt_process is None or self.chromedriver_process is None:
+        # if self.dt_process is None or self.chromedriver_process is None:
+        if self.dt_process is None or (self.web_thread and self.chromedriver_process is None):
             for hwnd, title in winlist:
                 if 'DTMainWindow' in title:
                     self.dt_process = hwnd
@@ -203,21 +214,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         win32gui.ShowWindow(self.dt_process, win32con.SW_NORMAL)
         pyautogui.press('alt')
         win32gui.SetForegroundWindow(self.dt_process)
-        self.command_window.moveCursor(QtGui.QTextCursor.End)
-
-    def hide_chrome_console(self):
-        # TODO убрать show_process, переделать метод на сигнал
-        self.show_process()
-        if self.chromedriver_process:
-            win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
-
-    def chat_print(self, text):
-        """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
-        # TODO убрать show_process из чата, переделать этот метов на слот, и создать к нему сигнал
-        # TODO Убрать поток для чата
-        # TODO добавить в чат логирование INFO, чтобы избежать дублирования кода на выводе сообщений
-        self.show_process()
-        self.chat.queue.put(self.command_window.append(text))
         self.command_window.moveCursor(QtGui.QTextCursor.End)
 
 

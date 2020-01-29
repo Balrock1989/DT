@@ -7,23 +7,26 @@ from time import sleep
 import requests
 from bs4 import BeautifulSoup
 
+headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
+           'Условия акции', 'Купон', 'URL', 'Тип купона']
+
 
 class Parsers:
     def __init__(self):
         self.month_name = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
                            "05": "мая", "06": "июн", "07": "июл", "08": "авг",
                            "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
-        self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-                        'Условия акции', 'Купон', 'URL', 'Тип купона']
+
         self.generate_csv()
 
     def generate_csv(self):
         with open("actions.csv", "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
-            writer.writerow(self.headers)
+            writer.writerow(headers)
 
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
+        gui.show_process()
 
         def get_date(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
@@ -44,10 +47,10 @@ class Parsers:
         page = BeautifulSoup(request.text, 'lxml')
         links = page.find_all("a", class_='b-news-thumb__title')
 
-        #TODO Добавить потоки на обработку каждой ссылки
+        # TODO Добавить потоки на обработку каждой ссылки
         for link in links:
             link = main_url[:-5] + link['href'][1:]
-            gui.log.info(f'{link}')
+            gui.chat_print_signal.emit(f'{link}')
             request = s.get(link)
             page = BeautifulSoup(request.text, 'lxml')
             div = page.find('div', class_='b-news-detailed')
@@ -71,6 +74,8 @@ class Parsers:
                               'Дата окончания': date_end, 'Условия акции': desc,
                               'Купон': code, 'URL': 'https://sephora.ru', 'Тип купона': action_type}
                     with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
-                        writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
+                        writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
-                gui.chat_print(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')
+                gui.chat_print_signal.emit(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')
+                gui.set_partner_name_signal.emit('Sephora')
+        gui.show_process()

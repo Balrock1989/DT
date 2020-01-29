@@ -16,6 +16,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException
 import auth
+from parsers import headers
 
 
 class WebDriver:
@@ -29,9 +30,6 @@ class WebDriver:
         self.ad_window = None
         self.actions_data = []
         self.name_index = 1
-        # TODO можно брать headers из модуля parsers
-        self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-                        'Условия акции', 'Купон', 'URL', 'Тип купона']
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
@@ -42,7 +40,7 @@ class WebDriver:
             options.add_argument('--disable-notifications')
             options.add_argument('--disable-gpu')
             self.driver = webdriver.Chrome(options=options)
-            gui.hide_chrome_console()
+            gui.hide_chrome_console_signal.emit()
             self.driver.get(auth.auth_url_dt)
             self.dt_window = self.driver.current_window_handle
             self.driver.find_element_by_id('username').send_keys(auth.username_dt)
@@ -56,22 +54,17 @@ class WebDriver:
             self.driver.find_element_by_name('password').send_keys(auth.password_ad)
             self.driver.find_element_by_id("id_sign_in").click()
         else:
-            gui.chat_print('Браузер уже запущен')
+            gui.chat_print_signal.emit('Браузер уже запущен')
 
     def add_banner(self, gui):
         """Загрузка баннеров на сервер"""
-        if self.driver:
-            self.driver.switch_to_window(self.dt_window)
-        else:
-            gui.log.error('Браузер закрыт')
-            gui.chat_print('Браузер закрыт')
-            return
+        gui.show_process()
+        self.driver.switch_to_window(self.dt_window)
         try:
             wait = WebDriverWait(self.driver, 1, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[href*="_____"]')))
         except TimeoutException:
-            gui.log.exception('Нужно зайти на страницу с баннерами')
-            gui.chat_print('Нужно зайти на страницу с баннерами')
+            gui.chat_print_signal.emit('Нужно зайти на страницу с баннерами')
             return
         links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
         links = set(map(lambda x: x.get_attribute('href'), links))
@@ -79,14 +72,15 @@ class WebDriver:
         links = sorted(links, key=lambda x: re.search(r'_____(\d+).', x).group(1))
         dir_name = self.driver.find_elements_by_css_selector('tr th')[0]
         dir_name = re.search(r'Хостинг файлов: (.*)', dir_name.text).group(1)
-        gui.chat_print(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
-        gui.chat_print(f'Дата начала акции:{self.start_data}, Дата окончания акции:{self.end_data}, url: {self.url}')
+        gui.chat_print_signal.emit(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
+        gui.chat_print_signal.emit(f'Дата начала акции:{self.start_data},'
+                                   f' Дата окончания акции:{self.end_data}, url: {self.url}')
         if not self.start_data:
             now = datetime.now()
             self.start_data = now.strftime('%d.%m.%Y')
         for link in links:
             if self.exit:
-                gui.chat_print(f'Загрузка прервана пользователем')
+                gui.chat_print_signal.emit(f'Загрузка прервана пользователем')
                 return
             self.driver.get(link)
             size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
@@ -108,23 +102,18 @@ class WebDriver:
             start_data_field.send_keys(self.start_data)
             end_data_field.send_keys(self.end_data)
             url_field.send_keys(self.url)
-            sleep(1)
             self.driver.find_elements_by_css_selector('input[value="Предварительный"]')[1].click()
             WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, 'input[value="Сохранить"]'))).click()
-            gui.chat_print(f'файл {size} успешно загружен')
-        gui.chat_print('#' * 60)
-        gui.chat_print('#' * 60)
-        gui.chat_print('С первой папкой закончил, жду следующую')
+            gui.chat_print_signal.emit(f'файл {size} успешно загружен')
+        gui.chat_print_signal.emit('#' * 60)
+        gui.chat_print_signal.emit('С первой папкой закончил, жду следующую')
+        gui.show_process()
 
     def parser(self, gui):
         """Сбор и форамтирование информации об акциях"""
-        if self.driver:
-            self.driver.switch_to_window(self.dt_window)
-        else:
-            gui.log.error('Браузер закрыт')
-            gui.chat_print('Браузер закрыт')
-            return
+        gui.show_process()
+        self.driver.switch_to_window(self.dt_window)
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
@@ -132,7 +121,7 @@ class WebDriver:
             self.driver.switch_to.window(self.ad_window)
         page = BeautifulSoup(self.driver.page_source, 'lxml')
         actions = page.findAll('div', class_='coupon')
-        gui.chat_print(f'\nВсего будет обработано акций {len(actions)}')
+        gui.chat_print_signal.emit(f'Всего будет обработано акций {len(actions)}')
         partner_name = ''
         if actions:
             for act in actions:
@@ -160,26 +149,28 @@ class WebDriver:
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
                 with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
-                    writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
+                    writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                     writer.writerow(action)
-            # TODO выводить имя партнера прямо в цикле, через сигнал
             gui.set_partner_name_signal.emit(partner_name)
             for n, a in enumerate(self.actions_data, 1):
-                gui.chat_print(f'\n---№{n}\n')
+                gui.chat_print_signal.emit(f'---№{n}\n')
                 action = ''
                 for key, value in a.items():
                     action = action + "".join('{:_<20}: {}\n'.format(key, value))
-                gui.chat_print(action)
+                gui.chat_print_signal.emit(action)
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-            gui.chat_print('\n\nАкции успешно загружены в память, необходимо выгрузить их в DT')
+            gui.chat_print_signal.emit('Акции успешно загружены в память, необходимо выгрузить их в DT')
+        else:
+            gui.chat_print_signal.emit('Нужно зайти на страницу с акциями')
+        gui.show_process()
 
     def add_actions(self, gui):
         """Добавление акций на основе полученных данных"""
-        # TODO добавить проверку поля parthner_name, если пустое, или с ошибкой, то выводить сообщение
-        # TODO перебрать таблицу actions.csv по action['Имя партнера'] и сверить с тем что было введено
+        gui.show_process()
+
         def get_percent(action):
             if "%" in action:
                 try:
@@ -193,14 +184,14 @@ class WebDriver:
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
         else:
-            gui.log.error('Браузер закрыт')
-            gui.chat_print('Браузер закрыт')
+            gui.chat_print_signal.emit('Браузер закрыт')
             return
         with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
             csv_data = csv.DictReader(csv_file, delimiter=';')
             for action in csv_data:
                 # TODO Не срабатывает хоткей во время цикла
                 if self.exit:
+                    gui.chat_print_signal.emit('Процесс был прерван пользователем.')
                     return
                 self.driver.switch_to_window(self.dt_window)
                 url = self.driver.current_url
@@ -208,12 +199,8 @@ class WebDriver:
                     id = re.search(r'Id=(\d+)', url).group(1)
                     self.driver.switch_to_frame('ifrm')
                 except (NoSuchFrameException, AttributeError):
-                    # TODO self.actions_data не нужно очищать в этом методе, нужно убрать его из атриботов объекта
-                    # TODO поменять сообщения до и после. Оповещение о том что нужно ввести имя партнера
-                    gui.log.exception('Парсер  AD запущен не на той странице')
-                    gui.chat_print('*' * 60)
-                    gui.chat_print(f'Данные об акциях были очищены, нужно загрузить снова')
-                    self.actions_data.clear()
+                    gui.chat_print_signal.emit('*' * 60)
+                    gui.chat_print_signal.emit(f'Парсер  AD запущен не на той странице')
                     return
                 if action['Имя партнера'] != gui.partner_name.toPlainText():
                     continue
@@ -274,18 +261,14 @@ class WebDriver:
                 sleep(1)
                 self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                 self.driver.get(auth.coupun_url + id)
-        self.actions_data.clear()
-        gui.chat_print('Акции успешно добавлены, буфер очищен')
+        # TODO удалять добавленные акции из файла
+        gui.chat_print_signal.emit('Акции успешно добавлены, буфер очищен')
+        gui.show_process()
 
     def download_banners(self, gui):
-
         """Загрузка баннеров с сайта"""
-        if self.driver:
-            self.driver.switch_to_window(self.dt_window)
-        else:
-            gui.log.error('Браузер закрыт')
-            gui.chat_print('Браузер закрыт')
-            return
+        gui.show_process()
+        self.driver.switch_to_window(self.dt_window)
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
@@ -295,23 +278,21 @@ class WebDriver:
             wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[class="banner_view"]')))
         except TimeoutException:
-            gui.log.exception('Нужно зайти на страницу с баннерами')
-            gui.chat_print('\nНужно зайти на страницу с баннерами')
+            gui.chat_print_signal.emit('Нужно зайти на страницу с баннерами')
             return
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
         if links:
-            # TODO добавить отдельный класс для выгрузки баннеров в многопоточном режиме
             if self.exit:
-                gui.chat_print(f'Загрузка прервана пользователем')
+                gui.chat_print_signal.emit('Процесс был прерван пользователем.')
                 return
             home_path = os.getenv('HOMEPATH')
             result = os.path.join('C:\\', home_path, 'Desktop', 'result')
             result = os.path.normpath(result)
             if not os.path.exists(result):
                 os.mkdir(result)
-            gui.chat_print(f'Всего будет скачано {len(links)} баннеров')
-            gui.chat_print(f'Результаты здесь: {os.path.abspath(result)}')
+            gui.chat_print_signal.emit(f'Всего будет скачано {len(links)} баннеров')
+            gui.chat_print_signal.emit(f'Результаты здесь: {os.path.abspath(result)}')
             for link in links:
                 format = re.search(r'(\w+)$', link).group(1)
                 name = str(self.name_index) + "." + format
@@ -321,7 +302,8 @@ class WebDriver:
                 out = open(path, 'wb')
                 out.write(p.content)
                 out.close()
-                gui.chat_print(f'{name} успешно скачан\n')
-            gui.chat_print(f'Загрузка успешно завершена')
+                gui.chat_print_signal.emit(f'{name} успешно скачан')
+            gui.chat_print_signal.emit(f'Загрузка успешно завершена')
         else:
-            gui.chat_print('Баннеры не найдены на этой странице 3')
+            gui.chat_print_signal.emit('Баннеры не найдены на этой странице')
+        gui.show_process()
