@@ -99,6 +99,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web_thread = None
         self.dt_process = None
         self.sizer = None
+        self.web_thread_run = False
         self.chromedriver_process = None
         self.parser_thread = ParserThread(mainwindow=self)
         self.ghk = GlobalHotKey(self)

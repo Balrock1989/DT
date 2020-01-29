@@ -33,7 +33,8 @@ class WebDriver:
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
-        if self.driver is None:
+        if not gui.web_thread_run:
+            gui.web_thread_run = True
             options = Options()
             options.add_argument('--start-maximized')
             options.add_argument('--disable-extensions')
