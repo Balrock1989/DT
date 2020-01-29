@@ -29,6 +29,7 @@ class WebDriver:
         self.ad_window = None
         self.actions_data = []
         self.name_index = 1
+        # TODO можно брать headers из модуля parsers
         self.headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
                         'Условия акции', 'Купон', 'URL', 'Тип купона']
 
@@ -161,6 +162,7 @@ class WebDriver:
                 with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
                     writer = csv.DictWriter(csv_file, fieldnames=self.headers, delimiter=";")
                     writer.writerow(action)
+            # TODO выводить имя партнера прямо в цикле, через сигнал
             gui.set_partner_name_signal.emit(partner_name)
             for n, a in enumerate(self.actions_data, 1):
                 gui.chat_print(f'\n---№{n}\n')
@@ -176,6 +178,8 @@ class WebDriver:
 
     def add_actions(self, gui):
         """Добавление акций на основе полученных данных"""
+        # TODO добавить проверку поля parthner_name, если пустое, или с ошибкой, то выводить сообщение
+        # TODO перебрать таблицу actions.csv по action['Имя партнера'] и сверить с тем что было введено
         def get_percent(action):
             if "%" in action:
                 try:
@@ -204,6 +208,8 @@ class WebDriver:
                     id = re.search(r'Id=(\d+)', url).group(1)
                     self.driver.switch_to_frame('ifrm')
                 except (NoSuchFrameException, AttributeError):
+                    # TODO self.actions_data не нужно очищать в этом методе, нужно убрать его из атриботов объекта
+                    # TODO поменять сообщения до и после. Оповещение о том что нужно ввести имя партнера
                     gui.log.exception('Парсер  AD запущен не на той странице')
                     gui.chat_print('*' * 60)
                     gui.chat_print(f'Данные об акциях были очищены, нужно загрузить снова')
@@ -272,6 +278,7 @@ class WebDriver:
         gui.chat_print('Акции успешно добавлены, буфер очищен')
 
     def download_banners(self, gui):
+
         """Загрузка баннеров с сайта"""
         if self.driver:
             self.driver.switch_to_window(self.dt_window)
@@ -294,6 +301,7 @@ class WebDriver:
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
         if links:
+            # TODO добавить отдельный класс для выгрузки баннеров в многопоточном режиме
             if self.exit:
                 gui.chat_print(f'Загрузка прервана пользователем')
                 return

@@ -54,6 +54,7 @@ def hotkey(gui):
         key_name = get_key_name(key)
         if key == keyboard.Key.esc:
             gui.log.info(f'--- Нажата клавиша: {key_name}')
+            # TODO сделать в main_window сигнал/слот на обработку этого события
             if gui.web_thread:
                 gui.chat_print(f'Загрузка прервана пользователем')
                 gui.web_thread.web.exit = True

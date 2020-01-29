@@ -63,7 +63,7 @@ class WebThread(QThread):
     def run(self):
         self.web.auth(gui=self.mainwindow)
 
-
+# TODO удалить поток для чата
 class ChatThread(QThread):
     """Отдельный поток для работы чата"""
 
@@ -78,7 +78,7 @@ class ChatThread(QThread):
         while True:
             self.queue.get()
 
-
+# TODO Переименовать класс
 class global_hot_key(QThread):
     """Отдельный поток для работы чата"""
 
@@ -192,6 +192,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
 
         win32gui.EnumWindows(enum_callback, toplist)
+        # TODO переделать условие
+        # if self.dt_process is None or (self.web_thread and self.chromedriver_process is None):
         if self.dt_process is None or self.chromedriver_process is None:
             for hwnd, title in winlist:
                 if 'DTMainWindow' in title:
@@ -204,12 +206,16 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.command_window.moveCursor(QtGui.QTextCursor.End)
 
     def hide_chrome_console(self):
+        # TODO убрать show_process, переделать метод на сигнал
         self.show_process()
         if self.chromedriver_process:
             win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
 
     def chat_print(self, text):
         """Функция для вывода информации на экран. Активировать окно и добавить вывод через очередь"""
+        # TODO убрать show_process из чата, переделать этот метов на слот, и создать к нему сигнал
+        # TODO Убрать поток для чата
+        # TODO добавить в чат логирование INFO, чтобы избежать дублирования кода на выводе сообщений
         self.show_process()
         self.chat.queue.put(self.command_window.append(text))
         self.command_window.moveCursor(QtGui.QTextCursor.End)
