@@ -124,8 +124,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def set_exit_slot(self):
-        if self.web_thread:
-            self.web_thread.web.exit = True
+        # if self.web_thread:
+        #     self.web_thread.web.exit = True
         if self.sizer:
             self.sizer.exit = True
 
