@@ -50,7 +50,7 @@ class Parsers:
         # TODO Добавить потоки на обработку каждой ссылки
         for link in links:
             link = main_url[:-5] + link['href'][1:]
-            gui.chat_print_signal.emit(f'{link}')
+            gui.log.info(f'{link}')
             request = s.get(link)
             page = BeautifulSoup(request.text, 'lxml')
             div = page.find('div', class_='b-news-detailed')
@@ -58,7 +58,7 @@ class Parsers:
                 try:
                     date_start, date_end = get_date(self, div)
                 except TypeError:
-                    gui.log.info('Не найдена дата проведения акции')
+                    gui.chat_print_signal.emit('Не найдена дата проведения акции')
                     continue
                 code = "Не требуется"
                 action_type = 'подарок'
@@ -76,6 +76,8 @@ class Parsers:
                     with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
-                gui.chat_print_signal.emit(f'\nИмя партнера: Sephora, загружено акций: {len(descriptions)}')
+                gui.chat_print_signal.emit('*' * 60)
+                gui.chat_print_signal.emit(f'Имя партнера: Sephora, загружено акций: {len(descriptions)}')
+                gui.chat_print_signal.emit('*' * 60)
                 gui.set_partner_name_signal.emit('Sephora')
         gui.show_process()

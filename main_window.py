@@ -8,7 +8,7 @@ import pyautogui
 import win32con
 import win32gui
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject
+from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject, Qt
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from custom_design import Ui_MainWindow
 from rename_image import Rename
@@ -137,7 +137,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def init_signals(self):
         self.moveToThread(self.parser_thread)
         self.moveToThread(self.ghk)
-        self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
@@ -151,6 +150,11 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.run_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
         self.parser_button.clicked.connect(self.parsers)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Escape:
+            if self.web_thread:
+                self.web_thread.web.exit = True
 
     def get_path(self):
         self.path_window.clear()
@@ -220,7 +224,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 def main():
     logger.configure_logging()
     app = QtWidgets.QApplication(sys.argv)
-    print('main', threading.get_ident())
     window = DT()
     window.show()
     app.exec_()

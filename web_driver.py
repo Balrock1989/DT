@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
-    NoSuchFrameException
+    NoSuchFrameException, NoSuchElementException
 import auth
 from parsers import headers
 
@@ -181,30 +181,29 @@ class WebDriver:
                 percent = re.search(r'(\d+\s?\d+)', action).group(1).replace(' ', '')
             return percent
 
-        if self.driver:
-            self.driver.switch_to_window(self.dt_window)
-        else:
-            gui.chat_print_signal.emit('Браузер закрыт')
-            return
+        gui.show_process()
+        self.driver.switch_to_window(self.dt_window)
         with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
             csv_data = csv.DictReader(csv_file, delimiter=';')
             for action in csv_data:
                 # TODO Не срабатывает хоткей во время цикла
                 if self.exit:
                     gui.chat_print_signal.emit('Процесс был прерван пользователем.')
+                    gui.show_process()
                     return
                 self.driver.switch_to_window(self.dt_window)
                 url = self.driver.current_url
                 try:
                     id = re.search(r'Id=(\d+)', url).group(1)
                     self.driver.switch_to_frame('ifrm')
-                except (NoSuchFrameException, AttributeError):
+                    header = self.driver.find_element_by_name('title')
+                except (NoSuchFrameException, NoSuchElementException, AttributeError):
                     gui.chat_print_signal.emit('*' * 60)
                     gui.chat_print_signal.emit(f'Парсер  AD запущен не на той странице')
+                    gui.show_process()
                     return
                 if action['Имя партнера'] != gui.partner_name.toPlainText():
                     continue
-                header = self.driver.find_element_by_name('title')
                 vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
                 form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
                 checkbox = self.driver.find_element_by_id('isPercentage')
