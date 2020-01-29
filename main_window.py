@@ -131,6 +131,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def hide_chrome_console_slot(self):
+        self.show_process()
         if self.chromedriver_process:
             win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
 
