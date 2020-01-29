@@ -65,6 +65,7 @@ class WebDriver:
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[href*="_____"]')))
         except TimeoutException:
             gui.chat_print_signal.emit('Нужно зайти на страницу с баннерами')
+            gui.show_process()
             return
         links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
         links = set(map(lambda x: x.get_attribute('href'), links))
@@ -81,6 +82,7 @@ class WebDriver:
         for link in links:
             if self.exit:
                 gui.chat_print_signal.emit(f'Загрузка прервана пользователем')
+                gui.show_process()
                 return
             self.driver.get(link)
             size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
@@ -284,6 +286,7 @@ class WebDriver:
         if links:
             if self.exit:
                 gui.chat_print_signal.emit('Процесс был прерван пользователем.')
+                gui.show_process()
                 return
             home_path = os.getenv('HOMEPATH')
             result = os.path.join('C:\\', home_path, 'Desktop', 'result')
