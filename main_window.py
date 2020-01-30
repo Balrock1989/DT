@@ -128,8 +128,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def set_exit_slot(self):
-        # if self.web_thread:
-        #     self.web_thread.web.exit = True
+        if self.web_thread:
+            self.web_thread.web.exit = True
         if self.sizer:
             self.sizer.exit = True
 
@@ -156,10 +156,10 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.resize_buttom.clicked.connect(self.resizer)
         self.parser_button.clicked.connect(self.parsers)
 
-    def keyPressEvent(self, e):
-        if e.key() == Qt.Key_Escape:
-            if self.web_thread:
-                self.web_thread.web.exit = True
+    # def keyPressEvent(self, e):
+    #     if e.key() == Qt.Key_Escape:
+    #         if self.web_thread:
+    #             self.web_thread.web.exit = True
 
     def get_path(self):
         self.path_window.clear()
