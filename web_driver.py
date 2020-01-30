@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import threading
 from collections import OrderedDict
 from time import sleep
 import requests
@@ -17,10 +18,10 @@ from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresen
     NoSuchFrameException, NoSuchElementException
 import auth
 from parsers import headers
-# from main_window import show_window
 
 
 class WebDriver:
+
     def __init__(self):
         self.start_data = ''
         self.end_data = ''
@@ -34,32 +35,26 @@ class WebDriver:
 
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
-        if not gui.web_thread_run:
-            # TODO найти способ отслеживать открытый браузер, при закрытии можно было еще раз открыть
-            gui.web_thread_run = True
-            options = Options()
-            options.add_argument('--start-maximized')
-            options.add_argument('--disable-extensions')
-            options.add_argument('--disable-notifications')
-            options.add_argument('--disable-gpu')
-            self.driver = webdriver.Chrome(options=options)
-            gui.hide_chrome_console_signal.emit()
-            self.driver.get(auth.auth_url_dt)
-            self.dt_window = self.driver.current_window_handle
-            self.driver.find_element_by_id('username').send_keys(auth.username_dt)
-            self.driver.find_element_by_id('password').send_keys(auth.password_dt)
-            self.driver.find_element_by_class_name("submit").click()
-            self.driver.execute_script('window.open('');')
-            self.ad_window = self.driver.window_handles[1]
-            self.driver.switch_to_window(self.ad_window)
-            self.driver.get(auth.auth_url_ad)
-            self.driver.find_element_by_name('login').send_keys(auth.username_ad)
-            self.driver.find_element_by_name('password').send_keys(auth.password_ad)
-            self.driver.find_element_by_id("id_sign_in").click()
-        else:
-            gui.chat_print_signal.emit('Браузер уже запущен')
+        options = Options()
+        options.add_argument('--start-maximized')
+        options.add_argument('--disable-extensions')
+        options.add_argument('--disable-notifications')
+        options.add_argument('--disable-gpu')
+        self.driver = webdriver.Chrome(options=options)
+        gui.hide_chrome_console_signal.emit()
+        self.driver.get(auth.auth_url_dt)
+        self.dt_window = self.driver.current_window_handle
+        self.driver.find_element_by_id('username').send_keys(auth.username_dt)
+        self.driver.find_element_by_id('password').send_keys(auth.password_dt)
+        self.driver.find_element_by_class_name("submit").click()
+        self.driver.execute_script('window.open('');')
+        self.ad_window = self.driver.window_handles[1]
+        self.driver.switch_to_window(self.ad_window)
+        self.driver.get(auth.auth_url_ad)
+        self.driver.find_element_by_name('login').send_keys(auth.username_ad)
+        self.driver.find_element_by_name('password').send_keys(auth.password_ad)
+        self.driver.find_element_by_id("id_sign_in").click()
 
-    # @show_window()
     def add_banner(self, gui):
         """Загрузка баннеров на сервер"""
         gui.show_process()
@@ -191,9 +186,10 @@ class WebDriver:
         self.driver.switch_to_window(self.dt_window)
         with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
             csv_data = csv.DictReader(csv_file, delimiter=';')
+            # threading.Thread(target=GlobalHotKey.show, args=(window,), daemon=True).start()
+            # TODO Не срабатывает хоткей во время цикла
+            # TODO Создать отдельный функциональный поток для выполнения добавления акций
             for action in csv_data:
-                # TODO Не срабатывает хоткей во время цикла
-                # TODO Создать отдельный функциональный поток для выполнения добавления акций
                 if self.exit:
                     gui.chat_print_signal.emit('Процесс был прерван пользователем.')
                     gui.show_process()

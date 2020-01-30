@@ -56,6 +56,7 @@ class WebThread(QThread):
         super(WebThread, self).__init__()
         self.mainwindow = mainwindow
         self.web = WebDriver()
+        mainwindow.browser = self.web
         self.web.start_data = self.mainwindow.date_start.toPlainText()
         self.web.end_data = self.mainwindow.date_end.toPlainText()
         self.web.url = self.mainwindow.url.toPlainText()
@@ -106,6 +107,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ghk.start()
         self.init_buttons()
         self.init_signals()
+        self.try_start_browser = 0
+        self.browser = None
 
     set_partner_name_signal = pyqtSignal(str)
     chat_print_signal = pyqtSignal(str)
@@ -185,9 +188,22 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.parser_thread.start()
 
     def launch_thread_dt(self):
-        self.web_thread = WebThread(mainwindow=self)
-        self.moveToThread(self.web_thread)
-        self.web_thread.start()
+        if self.web_thread is None:
+            self.web_thread = WebThread(mainwindow=self)
+            self.moveToThread(self.web_thread)
+            self.web_thread.start()
+        else:
+            self.try_start_browser += 1
+            if self.try_start_browser >= 3:
+                self.web_thread = None
+                try:
+                    self.browser.driver.quit()
+                except Exception as exc:
+                    self.chat_print_signal.emit(f'Неизвестная ошибка {exc}')
+                self.chat_print_signal.emit('Теперь браузер можно запускать')
+                self.try_start_browser = 0
+            else:
+                self.chat_print_signal.emit(f'Браузер уже запущен, попытка {self.try_start_browser}')
 
     def show_dialog_width(self):
         dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
@@ -222,28 +238,12 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.command_window.moveCursor(QtGui.QTextCursor.End)
 
 
-window = None
-
-
 def main():
     logger.configure_logging()
     app = QtWidgets.QApplication(sys.argv)
-    global window
     window = DT()
     window.show()
     app.exec_()
-
-
-# def show_window(gui=window):
-#     def show(func):
-#         def start(*args, **kwargs):
-#             gui.show_process()
-#             func(*args, **kwargs)
-#             gui.show_process()
-#
-#         return start
-#
-#     return show
 
 
 if __name__ == '__main__':
