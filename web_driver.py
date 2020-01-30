@@ -17,6 +17,7 @@ from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresen
     NoSuchFrameException, NoSuchElementException
 import auth
 from parsers import headers
+# from main_window import show_window
 
 
 class WebDriver:
@@ -34,6 +35,7 @@ class WebDriver:
     def auth(self, gui):
         """Запуск браузера и авторизация на сайтах"""
         if not gui.web_thread_run:
+            # TODO найти способ отслеживать открытый браузер, при закрытии можно было еще раз открыть
             gui.web_thread_run = True
             options = Options()
             options.add_argument('--start-maximized')
@@ -57,6 +59,7 @@ class WebDriver:
         else:
             gui.chat_print_signal.emit('Браузер уже запущен')
 
+    # @show_window()
     def add_banner(self, gui):
         """Загрузка баннеров на сервер"""
         gui.show_process()
@@ -190,6 +193,7 @@ class WebDriver:
             csv_data = csv.DictReader(csv_file, delimiter=';')
             for action in csv_data:
                 # TODO Не срабатывает хоткей во время цикла
+                # TODO Создать отдельный функциональный поток для выполнения добавления акций
                 if self.exit:
                     gui.chat_print_signal.emit('Процесс был прерван пользователем.')
                     gui.show_process()

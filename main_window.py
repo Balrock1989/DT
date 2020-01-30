@@ -210,7 +210,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
 
         win32gui.EnumWindows(enum_callback, toplist)
-        # if self.dt_process is None or self.chromedriver_process is None:
         if self.dt_process is None or (self.web_thread and self.chromedriver_process is None):
             for hwnd, title in winlist:
                 if 'DTMainWindow' in title:
@@ -223,12 +222,28 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.command_window.moveCursor(QtGui.QTextCursor.End)
 
 
+window = None
+
+
 def main():
     logger.configure_logging()
     app = QtWidgets.QApplication(sys.argv)
+    global window
     window = DT()
     window.show()
     app.exec_()
+
+
+# def show_window(gui=window):
+#     def show(func):
+#         def start(*args, **kwargs):
+#             gui.show_process()
+#             func(*args, **kwargs)
+#             gui.show_process()
+#
+#         return start
+#
+#     return show
 
 
 if __name__ == '__main__':
