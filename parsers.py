@@ -18,6 +18,7 @@ class Parsers:
                            "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
 
         self.generate_csv()
+        self.actions_data = []
 
     def generate_csv(self):
         with open("actions.csv", "w", newline="", encoding="utf-8") as csv_file:
@@ -58,7 +59,7 @@ class Parsers:
                 try:
                     date_start, date_end = get_date(self, div)
                 except TypeError:
-                    gui.chat_print_signal.emit('Не найдена дата проведения акции')
+                    gui.log.info('Не найдена дата проведения акции')
                     continue
                 code = "Не требуется"
                 action_type = 'подарок'
@@ -73,9 +74,17 @@ class Parsers:
                     action = {'Имя партнера': 'Sephora', 'Название акции': action_name, 'Дата начала': date_start,
                               'Дата окончания': date_end, 'Условия акции': desc,
                               'Купон': code, 'URL': 'https://sephora.ru', 'Тип купона': action_type}
+                    self.actions_data.append(action)
                     with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
+                for n, a in enumerate(self.actions_data, 1):
+                    gui.chat_print_signal.emit(f'---№{n}\n')
+                    action = ''
+                    for key, value in a.items():
+                        action = action + "".join('{:_<20}: {}\n'.format(key, value))
+                    gui.chat_print_signal.emit(action)
+                self.actions_data.clear()
                 gui.chat_print_signal.emit('*' * 60)
                 gui.chat_print_signal.emit(f'Имя партнера: Sephora, загружено акций: {len(descriptions)}')
                 gui.chat_print_signal.emit('*' * 60)
