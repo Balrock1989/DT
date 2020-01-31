@@ -35,9 +35,9 @@ class Ui_MainWindow(object):
         font.setUnderline(True)
         font.setWeight(50)
 
-        self.partner_name = QtWidgets.QTextEdit(self.centralwidget)
+        self.partner_name = QtWidgets.QComboBox(self.centralwidget)
         self.partner_name.setGeometry(QtCore.QRect(580, 160, 261, 25))
-        self.partner_name.setObjectName('date_start')
+        self.partner_name.setObjectName('partner_name')
 
         self.partner_name_label = QtWidgets.QLabel(self.centralwidget)
         self.partner_name_label.setGeometry(QtCore.QRect(610, 140, 201, 16))
@@ -166,8 +166,7 @@ class Ui_MainWindow(object):
         self.path_window.setPlaceholderText(
             _translate('MainWindow', 'Путь до папки с баннерами которые будут переименованы'))
         self.path_buttom.setText(_translate('MainWindow', 'Выбрать папку ...'))
-        self.partner_name_label.setText(_translate('MainWindow', 'ИМЯ ПАРТНЕРА:'))
-        self.partner_name.setPlaceholderText(_translate('MainWindow', 'Для загрузки данных из таблицы'))
+        self.partner_name_label.setText(_translate('MainWindow', 'Акции партнеров:'))
         self.data_start_label.setText(_translate('MainWindow', 'ДАТА НАЧАЛА АКЦИИ:'))
         self.date_start.setPlaceholderText(_translate('MainWindow', 'Пример 01.01.2019, если пусто то текущая дата'))
         self.date_end.setPlaceholderText(_translate('MainWindow', 'Пример 31.12.2019, если есть'))

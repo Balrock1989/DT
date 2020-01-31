@@ -103,11 +103,19 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     set_partner_name_signal = pyqtSignal(str)
     chat_print_signal = pyqtSignal(str)
+    del_partner_name_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
+
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
-        self.partner_name.setText(text)
+        self.partner_name.addItem(text)
+        self.partner_name.setCurrentText(text)
+
+    @pyqtSlot(str)
+    def del_partner_name_slot(self, text):
+        index_items = self.partner_name.findText(text)
+        self.partner_name.removeItem(index_items)
 
     @pyqtSlot(str)
     def chat_print_slot(self, text):
@@ -127,6 +135,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.moveToThread(self.parser_thread)
         self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
+        self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
 

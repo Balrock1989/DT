@@ -185,6 +185,7 @@ class WebDriver:
             return percent
 
         def add():
+            partner_name = ''
             with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
@@ -203,11 +204,12 @@ class WebDriver:
                         gui.chat_print_signal.emit(f'Парсер  AD запущен не на той странице')
                         win32.show_process()
                         return
-                    if action['Имя партнера'] != gui.partner_name.toPlainText():
+                    if action['Имя партнера'] != gui.partner_name.currentText():
                         with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
                             writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                             writer.writerow(action)
                         continue
+                    partner_name = action['Имя партнера']
                     vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
                     form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
                     checkbox = self.driver.find_element_by_id('isPercentage')
@@ -266,7 +268,9 @@ class WebDriver:
                     self.driver.get(auth.coupun_url + id)
             os.remove('actions.csv')
             shutil.move('actions_temp.csv', 'actions.csv')
+            gui.del_partner_name_signal.emit(partner_name)
             gui.chat_print_signal.emit('Акции успешно добавлены')
+            win32.show_process()
 
         with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
