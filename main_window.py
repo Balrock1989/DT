@@ -1,12 +1,6 @@
 from datetime import datetime
 import os
 import sys
-from queue import Queue
-from time import sleep
-
-import pyautogui
-import win32con
-import win32gui
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject, Qt
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
@@ -17,7 +11,6 @@ from parsers import Parsers
 from custom_dialog import Ui_Dialog
 from image_sizer import Resizer
 import global_hotkey
-import threading
 import logger
 
 
@@ -98,10 +91,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sb_num1 = QSpinBox()
         self.log = logger.log
         self.web_thread = None
-        self.dt_process = None
         self.sizer = None
         self.web_thread_run = False
-        self.chromedriver_process = None
         self.parser_thread = ParserThread(mainwindow=self)
         self.ghk = GlobalHotKey(self)
         self.ghk.start()
@@ -113,7 +104,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     set_partner_name_signal = pyqtSignal(str)
     chat_print_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
-    hide_chrome_console_signal = pyqtSignal()
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
@@ -133,19 +123,12 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sizer:
             self.sizer.exit = True
 
-    @pyqtSlot()
-    def hide_chrome_console_slot(self):
-        self.show_process()
-        if self.chromedriver_process:
-            win32gui.ShowWindow(self.chromedriver_process, win32con.SW_HIDE)
-
     def init_signals(self):
         self.moveToThread(self.parser_thread)
         self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
-        self.hide_chrome_console_signal.connect(self.hide_chrome_console_slot)
 
     def init_buttons(self):
         now = datetime.now()
@@ -216,26 +199,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
                               size=f'{self.sizer.w} x {self.sizer.h}')
         dialog.show()
         dialog.exec_()
-
-    def show_process(self):
-        """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
-        toplist = []
-        winlist = []
-
-        def enum_callback(hwnd, results):
-            winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
-
-        win32gui.EnumWindows(enum_callback, toplist)
-        if self.dt_process is None or (self.web_thread and self.chromedriver_process is None):
-            for hwnd, title in winlist:
-                if 'DTMainWindow' in title:
-                    self.dt_process = hwnd
-                if 'chromedriver' in title:
-                    self.chromedriver_process = hwnd
-        win32gui.ShowWindow(self.dt_process, win32con.SW_NORMAL)
-        pyautogui.press('alt')
-        win32gui.SetForegroundWindow(self.dt_process)
-        self.command_window.moveCursor(QtGui.QTextCursor.End)
 
 
 def main():

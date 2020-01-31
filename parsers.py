@@ -3,7 +3,7 @@ import re
 import threading
 from calendar import monthrange
 from datetime import datetime
-from time import sleep
+import win32
 
 import requests
 from bs4 import BeautifulSoup
@@ -26,9 +26,9 @@ class Parsers:
             writer = csv.writer(csv_file, delimiter=";")
             writer.writerow(headers)
 
+    @win32.show_window
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
-        gui.show_process()
 
         def get_date(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
@@ -92,4 +92,4 @@ class Parsers:
 
         for link in links:
             threading.Thread(target=run, args=(link,), daemon=True).start()
-        gui.show_process()
+
