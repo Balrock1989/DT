@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import shutil
 import threading
 from collections import OrderedDict
 from time import sleep
@@ -163,16 +164,13 @@ class WebDriver:
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-            gui.chat_print_signal.emit('Акции успешно загружены в память, необходимо выгрузить их в DT')
+            gui.chat_print_signal.emit('Акции успешно загружены в память')
         else:
             gui.chat_print_signal.emit('Нужно зайти на страницу с акциями')
         gui.show_process()
 
     def add_actions(self, gui):
         """Добавление акций на основе полученных данных"""
-        empty_row = {'Имя партнера': '', 'Название акции': '', 'Дата начала': '',
-                     'Дата окончания': '', 'Условия акции': '',
-                     'Купон': '', 'URL': '', 'Тип купона': ''}
 
         def get_percent(action):
             if "%" in action:
@@ -185,7 +183,7 @@ class WebDriver:
             return percent
 
         def add():
-            with open('actions.csv', 'w', encoding='utf-8', newline='') as csv_file:
+            with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
                     if self.exit:
@@ -204,6 +202,9 @@ class WebDriver:
                         gui.show_process()
                         return
                     if action['Имя партнера'] != gui.partner_name.toPlainText():
+                        with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
+                            writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                            writer.writerow(action)
                         continue
                     vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
                     form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
@@ -261,16 +262,32 @@ class WebDriver:
                     sleep(1)
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                     self.driver.get(auth.coupun_url + id)
-                    # TODO удалять добавленные акции из файла
+            os.remove('actions.csv')
+            shutil.move('actions_temp.csv', 'actions.csv')
+            gui.chat_print_signal.emit('Акции успешно добавлены')
+            gui.show_process()
 
         gui.show_process()
+        with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            writer.writerow(headers)
         self.driver.switch_to_window(self.dt_window)
         threading.Thread(target=add, args=(), daemon=True).start()
-        gui.chat_print_signal.emit('Акции успешно добавлены, буфер очищен')
-        gui.show_process()
 
     def download_banners(self, gui):
         """Загрузка баннеров с сайта"""
+
+        def run(link):
+            format = re.search(r'(\w+)$', link).group(1)
+            name = str(self.name_index) + "." + format
+            self.name_index += 1
+            path = os.path.join(result, name)
+            p = requests.get(link)
+            out = open(path, 'wb')
+            out.write(p.content)
+            out.close()
+            gui.chat_print_signal.emit(f'{name} успешно скачан')
+
         gui.show_process()
         self.driver.switch_to_window(self.dt_window)
         for window in self.driver.window_handles:
@@ -298,17 +315,12 @@ class WebDriver:
                 os.mkdir(result)
             gui.chat_print_signal.emit(f'Всего будет скачано {len(links)} баннеров')
             gui.chat_print_signal.emit(f'Результаты здесь: {os.path.abspath(result)}')
-            for link in links:
-                format = re.search(r'(\w+)$', link).group(1)
-                name = str(self.name_index) + "." + format
-                self.name_index += 1
-                path = os.path.join(result, name)
-                p = requests.get(link)
-                out = open(path, 'wb')
-                out.write(p.content)
-                out.close()
-                gui.chat_print_signal.emit(f'{name} успешно скачан')
-            gui.chat_print_signal.emit(f'Загрузка успешно завершена')
+            threads = [threading.Thread(target=run, args=(link,), daemon=True) for link in links]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+            gui.chat_print_signal.emit('Загрузка завершена')
         else:
             gui.chat_print_signal.emit('Баннеры не найдены на этой странице')
         gui.show_process()

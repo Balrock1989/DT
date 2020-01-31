@@ -1,5 +1,6 @@
 import csv
 import re
+import threading
 from calendar import monthrange
 from datetime import datetime
 from time import sleep
@@ -40,16 +41,7 @@ class Parsers:
             end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime('%d.%m.%Y')
             return date_start, end_data
 
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-        main_url = 'https://sephora.ru/news/'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
-        links = page.find_all("a", class_='b-news-thumb__title')
-
-        # TODO Добавить потоки на обработку каждой ссылки
-        for link in links:
+        def run(link):
             link = main_url[:-5] + link['href'][1:]
             gui.log.info(f'{link}')
             request = s.get(link)
@@ -60,7 +52,7 @@ class Parsers:
                     date_start, date_end = get_date(self, div)
                 except TypeError:
                     gui.log.info('Не найдена дата проведения акции')
-                    continue
+                    return
                 code = "Не требуется"
                 action_type = 'подарок'
                 action_name = div.h1.text
@@ -89,4 +81,15 @@ class Parsers:
                 gui.chat_print_signal.emit(f'Имя партнера: Sephora, загружено акций: {len(descriptions)}')
                 gui.chat_print_signal.emit('*' * 60)
                 gui.set_partner_name_signal.emit('Sephora')
+
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+        main_url = 'https://sephora.ru/news/'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        links = page.find_all("a", class_='b-news-thumb__title')
+
+        for link in links:
+            threading.Thread(target=run, args=(link,), daemon=True).start()
         gui.show_process()
