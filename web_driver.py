@@ -34,11 +34,9 @@ class WebDriver:
         self.ad_window = None
         self.actions_data = []
         self.name_index = 1
-        self.gui = None
 
-    def auth(self, gui):
+    def auth(self):
         """Запуск браузера и авторизация на сайтах"""
-        self.gui = gui
         options = Options()
         options.add_argument('--start-maximized')
         options.add_argument('--disable-extensions')
@@ -167,6 +165,8 @@ class WebDriver:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
             gui.chat_print_signal.emit('Акции успешно загружены в память')
+            # TODO добавил очистку списка, проверить
+            self.actions_data.clear()
         else:
             gui.chat_print_signal.emit('Нужно зайти на страницу с акциями')
 

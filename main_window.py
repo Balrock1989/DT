@@ -55,7 +55,7 @@ class WebThread(QThread):
         self.web.url = self.mainwindow.url.toPlainText()
 
     def run(self):
-        self.web.auth(gui=self.mainwindow)
+        self.web.auth()
 
 
 class GlobalHotKey(QThread):
@@ -79,6 +79,7 @@ class ParserThread(QThread):
 
     def run(self):
         self.parser.parser_sephora(gui=self.mainwindow)
+        self.parser.parser_ildebote(gui=self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
