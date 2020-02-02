@@ -82,7 +82,8 @@ class ParserThread(QThread):
         # self.parser.parser_sephora(gui=self.mainwindow)
         # self.parser.parser_ildebote(gui=self.mainwindow)
         # self.parser.parser_kupivip(gui=self.mainwindow)
-        self.parser.parser_akusherstvo(gui=self.mainwindow)
+        # self.parser.parser_akusherstvo(gui=self.mainwindow)
+
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):

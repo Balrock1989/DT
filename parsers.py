@@ -42,7 +42,7 @@ class Parsers:
     @win32.show_window
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
-
+        gui.chat_print_signal.emit('Загрузка Sephora')
         def get_date(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
             day, month, year = incoming_date.split(" ")
@@ -100,6 +100,7 @@ class Parsers:
 
     @win32.show_window
     def parser_ildebote(self, gui):
+        gui.chat_print_signal.emit('Загрузка Иль Дэ Ботэ')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -129,6 +130,7 @@ class Parsers:
         self.print_result(gui, partner_name)
 
     def parser_kupivip(self, gui):
+        gui.chat_print_signal.emit('Загрузка KupiVip')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -168,6 +170,8 @@ class Parsers:
         self.print_result(gui, partner_name)
 
     def parser_akusherstvo(self, gui):
+        gui.chat_print_signal.emit('Загрузка Акушерство')
+
         def get_date(self, text):
             incoming_date = re.search(r'до\s(.*)\s?', text.lower()).group(1)
             day, month = incoming_date.split(" ")
@@ -178,16 +182,7 @@ class Parsers:
             end_data = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
             return end_data
 
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-        main_url = 'https://www.akusherstvo.ru/sale.php'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
-        divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
-        partner_name = 'Акушерство'
-        date_start = datetime.now().strftime('%d.%m.%Y')
-        for div in divs:
+        def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
             date_end = div.find("strong", class_='date').text.strip()
             date_end = get_date(self, date_end)
@@ -200,20 +195,44 @@ class Parsers:
             action_type = 'скидка'
             code = 'Не требуется'
             try:
-                desc = descs.find_all('p')
-                print(desc[0].text.strip())
+                desc = descs.find_all('p')[0].text.strip()
             except Exception as exc:
                 pass
             action_name = f'Скидки {persent} на {action_name}'
             action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_start, 'Условия акции': desc,
+                      'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': main_url, 'Тип купона': action_type}
             self.actions_data.append(action)
             with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
+
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+        main_url = 'https://www.akusherstvo.ru/sale.php'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
+        partner_name = 'Акушерство'
+        date_start = datetime.now().strftime('%d.%m.%Y')
+        threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
         self.print_result(gui, partner_name)
 
-# https://www.akusherstvo.ru/sale.php
+    def parser_sportmaster(self, gui):
+        gui.chat_print_signal.emit('Загрузка KupiVip')
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+        main_url = 'https://www.sportmaster.ru/news/1781660/?icid=home!w!button'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        divs = page.find_all("div", attrs={'data-banner': 'campaign'})
+        partner_name = 'KupiVip'
+        # for div in divs:
 
-# https://www.sportmaster.ru/news/1781660/?icid=home!w!button
+
