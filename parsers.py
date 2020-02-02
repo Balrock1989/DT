@@ -128,3 +128,41 @@ class Parsers:
                 writer.writerow(action)
         self.print_result(gui, partner_name)
 
+    def parser_kupivip(self, gui):
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+        main_url = 'https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        divs = page.find_all("div", attrs={'data-banner': 'campaign'})
+        partner_name = 'KupiVip'
+        for div in divs:
+            persent = ''
+            desc = ''
+            action_name = div.find("div", class_='brands').text.strip()
+            try:
+                persent = div.find("div", class_='percent').text.strip()
+            except Exception as exc:
+                pass
+            try:
+                desc = div.find("div", class_='name').text.strip()
+            except Exception as exc:
+                pass
+            if persent:
+                action_name += f'. Скидки до {persent}%'
+            date_start = datetime.now().strftime('%d.%m.%Y')
+            action_type = 'скидка'
+            code = 'Не требуется'
+            if 'промокод' in action_name.lower():
+                code = re.search(r'код\s(.*)\s?', action_name).group(1)
+            url = 'https://www.kupivip.ru/'
+            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+                      'Дата окончания': date_start, 'Условия акции': desc,
+                      'Купон': code, 'URL': url, 'Тип купона': action_type}
+            self.actions_data.append(action)
+            with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                writer.writerow(action)
+        self.print_result(gui, partner_name)
+

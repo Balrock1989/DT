@@ -165,7 +165,6 @@ class WebDriver:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
             gui.chat_print_signal.emit('Акции успешно загружены в память')
-            # TODO добавил очистку списка, проверить
             self.actions_data.clear()
         else:
             gui.chat_print_signal.emit('Нужно зайти на страницу с акциями')

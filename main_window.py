@@ -80,6 +80,7 @@ class ParserThread(QThread):
     def run(self):
         self.parser.parser_sephora(gui=self.mainwindow)
         self.parser.parser_ildebote(gui=self.mainwindow)
+        self.parser.parser_kupivip(gui=self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
