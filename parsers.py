@@ -156,6 +156,7 @@ class Parsers:
             code = 'Не требуется'
             if 'промокод' in action_name.lower():
                 code = re.search(r'код\s(.*)\s?', action_name).group(1)
+                action_type = 'купон'
             url = 'https://www.kupivip.ru/'
             action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
                       'Дата окончания': date_start, 'Условия акции': desc,
@@ -166,3 +167,53 @@ class Parsers:
                 writer.writerow(action)
         self.print_result(gui, partner_name)
 
+    def parser_akusherstvo(self, gui):
+        def get_date(self, text):
+            incoming_date = re.search(r'до\s(.*)\s?', text.lower()).group(1)
+            day, month = incoming_date.split(" ")
+            year = datetime.now().year
+            for num, name in self.month_name.items():
+                if name in month.lower():
+                    month = num
+            end_data = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
+            return end_data
+
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+        main_url = 'https://www.akusherstvo.ru/sale.php'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
+        partner_name = 'Акушерство'
+        date_start = datetime.now().strftime('%d.%m.%Y')
+        for div in divs:
+            persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
+            date_end = div.find("strong", class_='date').text.strip()
+            date_end = get_date(self, date_end)
+            link = div.find('a').get('href')
+            request = s.get(link)
+            action_page = BeautifulSoup(request.text, 'lxml')
+            action_name = action_page.h1.text.strip()
+            descs = action_page.find('table', class_='centre_header')
+            desc = ''
+            action_type = 'скидка'
+            code = 'Не требуется'
+            try:
+                desc = descs.find_all('p')
+                print(desc[0].text.strip())
+            except Exception as exc:
+                pass
+            action_name = f'Скидки {persent} на {action_name}'
+            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+                      'Дата окончания': date_start, 'Условия акции': desc,
+                      'Купон': code, 'URL': main_url, 'Тип купона': action_type}
+            self.actions_data.append(action)
+            with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                writer.writerow(action)
+        self.print_result(gui, partner_name)
+
+# https://www.akusherstvo.ru/sale.php
+
+# https://www.sportmaster.ru/news/1781660/?icid=home!w!button

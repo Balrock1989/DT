@@ -78,9 +78,11 @@ class ParserThread(QThread):
         self.parser = Parsers()
 
     def run(self):
-        self.parser.parser_sephora(gui=self.mainwindow)
-        self.parser.parser_ildebote(gui=self.mainwindow)
-        self.parser.parser_kupivip(gui=self.mainwindow)
+        self.mainwindow.chat_print_signal.emit('Началась загрузка')
+        # self.parser.parser_sephora(gui=self.mainwindow)
+        # self.parser.parser_ildebote(gui=self.mainwindow)
+        # self.parser.parser_kupivip(gui=self.mainwindow)
+        self.parser.parser_akusherstvo(gui=self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
