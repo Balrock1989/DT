@@ -20,7 +20,7 @@ from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresen
 import auth
 from parsers import headers, actions_csv
 import win32
-
+# TODO Добавить комменты
 
 class WebDriver:
 
@@ -240,7 +240,7 @@ class WebDriver:
                     if 'скидка' in action['Тип купона'].lower() or 'купон' in action['Тип купона'].lower():
                         vaucher_type.select_by_value('2') if 'скидка' in action['Тип купона'].lower() \
                             else vaucher_type.select_by_value('1')
-                        code.send_keys('Не требуется')
+                        code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
                         if '%' in action['Название акции']:
                             checkbox.click()
                             percent = get_percent(action['Название акции'])
