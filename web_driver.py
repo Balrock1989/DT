@@ -18,7 +18,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException, NoSuchElementException
 import auth
-from parsers import headers
+from parsers import headers, actions_csv
 import win32
 
 
@@ -150,7 +150,7 @@ class WebDriver:
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-                with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                     writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                     writer.writerow(action)
             gui.set_partner_name_signal.emit(partner_name)
@@ -185,7 +185,7 @@ class WebDriver:
 
         def add():
             partner_name = ''
-            with open('actions.csv', 'r', encoding='utf-8', newline='') as csv_file:
+            with open(actions_csv, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
                     if self.exit:
@@ -265,8 +265,8 @@ class WebDriver:
                     sleep(1)
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                     self.driver.get(auth.coupun_url + id)
-            os.remove('actions.csv')
-            shutil.move('actions_temp.csv', 'actions.csv')
+            os.remove(actions_csv)
+            shutil.move('actions_temp.csv', actions_csv)
             gui.del_partner_name_signal.emit(partner_name)
             gui.chat_print_signal.emit('Акции успешно добавлены')
             win32.show_process()

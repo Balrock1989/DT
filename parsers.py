@@ -1,4 +1,5 @@
 import csv
+import os
 import re
 import threading
 from calendar import monthrange
@@ -10,6 +11,9 @@ from bs4 import BeautifulSoup
 
 headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
            'Условия акции', 'Купон', 'URL', 'Тип купона']
+home_path = os.getenv('HOMEPATH')
+actions_csv = os.path.join('C:\\', home_path, 'Desktop', "actions.csv")
+actions_csv = os.path.normpath(actions_csv)
 
 
 class Parsers:
@@ -22,7 +26,8 @@ class Parsers:
         self.actions_data = []
 
     def generate_csv(self):
-        with open("actions.csv", "w", newline="", encoding="utf-8") as csv_file:
+
+        with open(actions_csv, "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
             writer.writerow(headers)
 
@@ -43,6 +48,7 @@ class Parsers:
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
         gui.chat_print_signal.emit('Загрузка Sephora')
+
         def get_date(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
             day, month, year = incoming_date.split(" ")
@@ -82,7 +88,7 @@ class Parsers:
                               'Дата окончания': date_end, 'Условия акции': desc,
                               'Купон': code, 'URL': url, 'Тип купона': action_type}
                     self.actions_data.append(action)
-                    with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+                    with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
                 self.print_result(gui, partner_name)
@@ -124,7 +130,7 @@ class Parsers:
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
         self.print_result(gui, partner_name)
@@ -164,7 +170,7 @@ class Parsers:
                       'Дата окончания': date_start, 'Условия акции': desc,
                       'Купон': code, 'URL': url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
         self.print_result(gui, partner_name)
@@ -196,6 +202,8 @@ class Parsers:
             code = 'Не требуется'
             try:
                 desc = descs.find_all('p')[0].text.strip()
+                desc = re.sub(r'\n', '', desc)
+                desc = re.sub(r'\r', '', desc)
             except Exception as exc:
                 pass
             action_name = f'Скидки {persent} на {action_name}'
@@ -203,7 +211,7 @@ class Parsers:
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': main_url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open("actions.csv", "a", newline="", encoding="utf-8") as csv_file:
+            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
 
@@ -223,16 +231,14 @@ class Parsers:
             thread.join()
         self.print_result(gui, partner_name)
 
-    def parser_sportmaster(self, gui):
-        gui.chat_print_signal.emit('Загрузка KupiVip')
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-        main_url = 'https://www.sportmaster.ru/news/1781660/?icid=home!w!button'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
-        divs = page.find_all("div", attrs={'data-banner': 'campaign'})
-        partner_name = 'KupiVip'
-        # for div in divs:
-
-
+    # def parser_sportmaster(self, gui):
+    #     gui.chat_print_signal.emit('Загрузка KupiVip')
+    #     s = requests.Session()
+    #     s.headers.update({
+    #         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+    #     main_url = 'https://www.sportmaster.ru/news/1781660/?icid=home!w!button'
+    #     request = s.get(main_url)
+    #     page = BeautifulSoup(request.text, 'lxml')
+    #     divs = page.find_all("div", attrs={'data-banner': 'campaign'})
+    #     partner_name = 'KupiVip'
+    #     # for div in divs:

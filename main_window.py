@@ -8,7 +8,8 @@ from custom_design import Ui_MainWindow
 from rename_image import Rename
 from web_driver import WebDriver
 from parsers import Parsers
-from custom_dialog import Ui_Dialog
+from custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
+from custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from image_sizer import Resizer
 import global_hotkey
 import logger
@@ -16,7 +17,7 @@ import logger
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
 
-class CustomDialog(QDialog, Ui_Dialog):
+class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
     """Класс для кастомизации диалогового окна"""
 
     def __init__(self, sizer, message, size):
@@ -39,6 +40,30 @@ class CustomDialog(QDialog, Ui_Dialog):
 
     def exit_func(self):
         self.sizer.exit = True
+        self.close()
+
+
+class CustomDialog_parser(QDialog, Ui_Dialog_parser):
+    """Класс для кастомизации диалогового окна"""
+
+    def __init__(self, parser):
+        QDialog.__init__(self)
+        self.parser = parser
+        self.setupUi(self)
+        self.ok.clicked.connect(self.change)
+
+    def change(self):
+        if self.sephora.isChecked():
+            self.parser.sephora = True
+        if self.ildebote.isChecked():
+            self.parser.ildebote = True
+        if self.kupivip.isChecked():
+            self.parser.kupivip = True
+        if self.akusherstvo.isChecked():
+            self.parser.akusherstvo = True
+        self.close()
+
+    def exit_func(self):
         self.close()
 
 
@@ -76,14 +101,21 @@ class ParserThread(QThread):
         super(ParserThread, self).__init__()
         self.mainwindow = mainwindow
         self.parser = Parsers()
+        self.sephora = False
+        self.ildebote = False
+        self.kupivip = False
+        self.akusherstvo = False
 
     def run(self):
         self.mainwindow.chat_print_signal.emit('Началась загрузка')
-        # self.parser.parser_sephora(gui=self.mainwindow)
-        # self.parser.parser_ildebote(gui=self.mainwindow)
-        # self.parser.parser_kupivip(gui=self.mainwindow)
-        # self.parser.parser_akusherstvo(gui=self.mainwindow)
-
+        if self.sephora:
+            self.parser.parser_sephora(self.mainwindow)
+        if self.ildebote:
+            self.parser.parser_ildebote(self.mainwindow)
+        if self.kupivip:
+            self.parser.parser_kupivip(self.mainwindow)
+        if self.akusherstvo:
+            self.parser.parser_akusherstvo(self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -110,7 +142,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     chat_print_signal = pyqtSignal(str)
     del_partner_name_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
-
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
@@ -182,6 +213,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
     def parsers(self):
+        self.show_parser_checklist()
         self.parser_thread.start()
 
     def launch_thread_dt(self):
@@ -203,14 +235,23 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.chat_print_signal.emit(f'Браузер уже запущен, попытка {self.try_start_browser}')
 
     def show_dialog_width(self):
-        dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
-                              size=f'{self.sizer.w} x {self.sizer.h}')
+        dialog = CustomDialog_resizer(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
+                                      size=f'{self.sizer.w} x {self.sizer.h}')
         dialog.show()
         dialog.exec_()
 
     def show_dialog_heigth(self):
-        dialog = CustomDialog(self.sizer, message=f'{self.sizer.count}Введите ВЫСОТУ:',
-                              size=f'{self.sizer.w} x {self.sizer.h}')
+        dialog = CustomDialog_resizer(self.sizer, message=f'{self.sizer.count}Введите ВЫСОТУ:',
+                                      size=f'{self.sizer.w} x {self.sizer.h}')
+        dialog.show()
+        dialog.exec_()
+
+    def show_parser_checklist(self):
+        self.parser_thread.sephora = False
+        self.parser_thread.ildebote = False
+        self.parser_thread.kupivip = False
+        self.parser_thread.akusherstvo = False
+        dialog = CustomDialog_parser(self.parser_thread)
         dialog.show()
         dialog.exec_()
 
