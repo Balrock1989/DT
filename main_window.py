@@ -200,7 +200,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.path_window.append(self.dir_name)
 
     def rename(self):
-        self.partner_name.setText('')
         rename = Rename()
         rename.rename_image(gui=self,
                             path=self.dir_name,

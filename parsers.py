@@ -5,7 +5,8 @@ import threading
 from calendar import monthrange
 from datetime import datetime, timedelta
 import win32
-
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 
@@ -188,51 +189,7 @@ class Parsers:
             end_data = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
             return end_data
 
-        # def run(div):
-        # persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
-        # date_end = div.find("strong", class_='date').text.strip()
-        # date_end = get_date(self, date_end)
-        # link = div.find('a').get('href')
-        # request = s.get(link)
-        # action_page = BeautifulSoup(request.text, 'lxml')
-        # action_name = action_page.h1.text.strip()
-        #
-        # test = action_page.find('div', class_='ContentCenter')
-        # print(test.h1)
-        # print(action_name, persent)
-        # descs = action_page.find('table', class_='centre_header')
-        # desc = ''
-        # action_type = 'скидка'
-        # code = 'Не требуется'
-        # try:
-        #     desc = descs.find_all('p')[0].text.strip()
-        #     desc = re.sub(r'\n', '', desc)
-        #     desc = re.sub(r'\r', '', desc)
-        # except Exception as exc:
-        #     pass
-        # action_name = f'Скидки {persent} на {action_name}'
-        # action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-        #           'Дата окончания': date_end, 'Условия акции': desc,
-        #           'Купон': code, 'URL': main_url, 'Тип купона': action_type}
-        # self.actions_data.append(action)
-        # with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-        #     writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
-        #     writer.writerow(action)
-
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-        main_url = 'https://www.akusherstvo.ru/sale.php'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
-        divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
-        test = page.find_all({'iframe':'src'})
-        print(test)
-        # TODO половина акций на iframe
-        divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
-        partner_name = 'Акушерство'
-        date_start = datetime.now().strftime('%d.%m.%Y')
-        for div in divs:
+        def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
             date_end = div.find("strong", class_='date').text.strip()
             date_end = get_date(self, date_end)
@@ -258,11 +215,26 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
-        # threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
-        #         # for thread in threads:
-        #         #     thread.start()
-        #         # for thread in threads:
-        #         #     thread.join()
+
+        s = requests.Session()
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        main_url = 'https://www.akusherstvo.ru/sale.php'
+        self.driver = webdriver.Chrome(options=options)
+        self.driver.get(main_url)
+        page = BeautifulSoup(self.driver.page_source, 'lxml')
+        divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
+        divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
+        divs = divs + divs_2
+        partner_name = 'Акушерство'
+        date_start = datetime.now().strftime('%d.%m.%Y')
+
+        threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
         self.print_result(gui, partner_name)
 
     # def parser_sportmaster(self, gui):
