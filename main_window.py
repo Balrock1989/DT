@@ -61,6 +61,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             self.parser.kupivip = True
         if self.akusherstvo.isChecked():
             self.parser.akusherstvo = True
+        if self.utkonos.isChecked():
+            self.parser.utkonos = True
         self.close()
 
     def exit_func(self):
@@ -105,6 +107,7 @@ class ParserThread(QThread):
         self.ildebote = False
         self.kupivip = False
         self.akusherstvo = False
+        self.utkonos = False
 
     def run(self):
         self.mainwindow.chat_print_signal.emit('Началась загрузка')
@@ -116,6 +119,8 @@ class ParserThread(QThread):
             self.parser.parser_kupivip(self.mainwindow)
         if self.akusherstvo:
             self.parser.parser_akusherstvo(self.mainwindow)
+        if self.utkonos:
+            self.parser.parser_utkonos(self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):

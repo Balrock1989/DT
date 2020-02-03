@@ -45,12 +45,26 @@ class Parsers:
         gui.set_partner_name_signal.emit(partner_name)
         self.actions_data.clear()
 
+    def get_one_date(self, text):
+        day, month = text.split(" ")
+        year = datetime.now().year
+        for num, name in self.month_name.items():
+            if name in month.lower():
+                month = num
+        end_data = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
+        return end_data
+
+    def get_double_date(self, first, second):
+        first = self.get_one_date(first)
+        second = self.get_one_date(second)
+        return first, second
+
     @win32.show_window
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
         gui.chat_print_signal.emit('Загрузка Sephora')
 
-        def get_date(self, div):
+        def get_date_with_year(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
             day, month, year = incoming_date.split(" ")
             for num, name in self.month_name.items():
@@ -69,13 +83,13 @@ class Parsers:
             div = page.find('div', class_='b-news-detailed')
             if div:
                 try:
-                    date_start, date_end = get_date(self, div)
+                    date_start, date_end = get_date_with_year(self, div)
                 except TypeError:
                     gui.log.info('Не найдена дата проведения акции')
                     return
                 code = "Не требуется"
-                action_type = 'подарок'
                 action_name = div.h1.text
+                action_type = 'подарок' if 'подар' in action_name.lower() else 'скидка'
                 paragraphs = div.findAll('p')
                 url = 'https://sephora.ru/news/'
                 partner_name = 'Sephora'
@@ -125,7 +139,7 @@ class Parsers:
             date_start = datetime.now().strftime('%d.%m.%Y')
             date_end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
             desc = div.find("p", class_='desc').text.strip()
-            action_type = 'скидка'
+            action_type = 'подарок' if 'подарок' in action_name.lower() else 'скидка'
             code = 'Не требуется'
             action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
                       'Дата окончания': date_end, 'Условия акции': desc,
@@ -179,20 +193,11 @@ class Parsers:
     def parser_akusherstvo(self, gui):
         gui.chat_print_signal.emit('Загрузка Акушерство')
 
-        def get_date(self, text):
-            incoming_date = re.search(r'до\s(.*)\s?', text.lower()).group(1)
-            day, month = incoming_date.split(" ")
-            year = datetime.now().year
-            for num, name in self.month_name.items():
-                if name in month.lower():
-                    month = num
-            end_data = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
-            return end_data
-
         def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
             date_end = div.find("strong", class_='date').text.strip()
-            date_end = get_date(self, date_end)
+            incoming_date = re.search(r'до\s(.*)\s?', date_end.lower()).group(1)
+            date_end = self.get_one_date(incoming_date)
             link = div.find('a').get('href')
             request = s.get(link)
             action_page = BeautifulSoup(request.text, 'lxml')
@@ -237,14 +242,33 @@ class Parsers:
             thread.join()
         self.print_result(gui, partner_name)
 
-    # def parser_sportmaster(self, gui):
-    #     gui.chat_print_signal.emit('Загрузка KupiVip')
-    #     s = requests.Session()
-    #     s.headers.update({
-    #         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-    #     main_url = 'https://www.sportmaster.ru/news/1781660/?icid=home!w!button'
-    #     request = s.get(main_url)
-    #     page = BeautifulSoup(request.text, 'lxml')
-    #     divs = page.find_all("div", attrs={'data-banner': 'campaign'})
-    #     partner_name = 'KupiVip'
-    #     # for div in divs:
+    def parser_utkonos(self, gui):
+
+        gui.chat_print_signal.emit('Загрузка KupiVip')
+        s = requests.Session()
+        s.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+        main_url = 'https://www.utkonos.ru/action'
+        request = s.get(main_url)
+        page = BeautifulSoup(request.text, 'lxml')
+        divs = page.find_all("div", class_='action_wrapper')
+        partner_name = 'Утконос'
+        for div in divs:
+            action_name = div.a.text.strip()
+            code = 'Не требуется'
+            action_type = 'скидка'
+            url = 'https://www.utkonos.ru' + div.a.get('href')
+            incoming_date = div.find('div', class_='text').text.strip()
+            incoming_date = re.search(r'с\s(\d+\s[а-яА-Я]+).*по\s(\d+\s[а-яА-Я]+)', incoming_date.lower())
+            date_start, date_end = self.get_double_date(incoming_date.group(1), incoming_date.group(2))
+            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+                      'Дата окончания': date_end, 'Условия акции': '',
+                      'Купон': code, 'URL': url, 'Тип купона': action_type}
+            self.actions_data.append(action)
+            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                writer.writerow(action)
+        self.print_result(gui, partner_name)
+
+    # def parser_sportmaster(self):
+# https: // www.sportmaster.ru / news / 1781660 /?icid = home!w!button
