@@ -62,7 +62,8 @@ class Parsers:
     @win32.show_window
     def parser_sephora(self, gui):
         """Сбор и форамтирование информации об акциях"""
-        gui.chat_print_signal.emit('Загрузка Sephora')
+        partner_name = 'Sephora'
+        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
 
         def get_date_with_year(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
@@ -92,7 +93,7 @@ class Parsers:
                 action_type = 'подарок' if 'подар' in action_name.lower() else 'скидка'
                 paragraphs = div.findAll('p')
                 url = 'https://sephora.ru/news/'
-                partner_name = 'Sephora'
+
                 descriptions = []
                 for p in paragraphs:
                     text = p.text.strip()
@@ -151,7 +152,9 @@ class Parsers:
         self.print_result(gui, partner_name)
 
     def parser_kupivip(self, gui):
-        gui.chat_print_signal.emit('Загрузка KupiVip')
+
+        partner_name = 'KupiVip'
+        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -159,7 +162,7 @@ class Parsers:
         request = s.get(main_url)
         page = BeautifulSoup(request.text, 'lxml')
         divs = page.find_all("div", attrs={'data-banner': 'campaign'})
-        partner_name = 'KupiVip'
+
         for div in divs:
             persent = ''
             desc = ''
@@ -191,7 +194,9 @@ class Parsers:
         self.print_result(gui, partner_name)
 
     def parser_akusherstvo(self, gui):
-        gui.chat_print_signal.emit('Загрузка Акушерство')
+
+        partner_name = 'Акушерство'
+        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
 
         def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
@@ -229,12 +234,11 @@ class Parsers:
         self.driver = webdriver.Chrome(options=options)
         self.driver.get(main_url)
         page = BeautifulSoup(self.driver.page_source, 'lxml')
+        self.driver.quit()
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
         divs = divs + divs_2
-        partner_name = 'Акушерство'
         date_start = datetime.now().strftime('%d.%m.%Y')
-
         threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
         for thread in threads:
             thread.start()
@@ -243,8 +247,8 @@ class Parsers:
         self.print_result(gui, partner_name)
 
     def parser_utkonos(self, gui):
-
-        gui.chat_print_signal.emit('Загрузка KupiVip')
+        partner_name = 'Утконос'
+        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -252,7 +256,6 @@ class Parsers:
         request = s.get(main_url)
         page = BeautifulSoup(request.text, 'lxml')
         divs = page.find_all("div", class_='action_wrapper')
-        partner_name = 'Утконос'
         for div in divs:
             action_name = div.a.text.strip()
             code = 'Не требуется'

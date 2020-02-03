@@ -255,6 +255,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.parser_thread.ildebote = False
         self.parser_thread.kupivip = False
         self.parser_thread.akusherstvo = False
+        self.parser_thread.utkonos = False
         dialog = CustomDialog_parser(self.parser_thread)
         dialog.show()
         dialog.exec_()
