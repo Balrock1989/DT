@@ -41,6 +41,13 @@ class Ui_Dialog(object):
         self.label_utkonos.setGeometry(QtCore.QRect(30, 85, 250, 30))
         self.label_utkonos.setObjectName('label_utkonos')
 
+        self.vseinstrumenti = QtWidgets.QCheckBox(Dialog)
+        self.vseinstrumenti.setGeometry(QtCore.QRect(10, 110, 20, 20))
+        self.vseinstrumenti.setObjectName('vseinstrumenti')
+        self.label_vseinstrumenti = QtWidgets.QLabel(Dialog)
+        self.label_vseinstrumenti.setGeometry(QtCore.QRect(30, 105, 250, 30))
+        self.label_vseinstrumenti.setObjectName('label_vseinstrumenti')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(170, 150, 90, 30))
         self.ok.setObjectName('ok')
@@ -68,4 +75,5 @@ class Ui_Dialog(object):
         self.label_kupivip.setText(_translate('Dialog', 'КупиВип'))
         self.label_akusherstvo.setText(_translate('Dialog', 'Акушерство'))
         self.label_utkonos.setText(_translate('Dialog', 'Утконос'))
+        self.label_vseinstrumenti.setText(_translate('Dialog', 'Все инструменты'))
 

@@ -63,6 +63,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             self.parser.akusherstvo = True
         if self.utkonos.isChecked():
             self.parser.utkonos = True
+        if self.vseinstrumenti.isChecked():
+            self.parser.vseinstrumenti = True
         self.close()
 
     def exit_func(self):
@@ -108,8 +110,10 @@ class ParserThread(QThread):
         self.kupivip = False
         self.akusherstvo = False
         self.utkonos = False
+        self.vseinstrumenti = False
 
     def run(self):
+        # TODO переделать в слот
         self.mainwindow.chat_print_signal.emit('Началась загрузка')
         if self.sephora:
             self.parser.parser_sephora(self.mainwindow)
@@ -121,6 +125,8 @@ class ParserThread(QThread):
             self.parser.parser_akusherstvo(self.mainwindow)
         if self.utkonos:
             self.parser.parser_utkonos(self.mainwindow)
+        if self.vseinstrumenti:
+            self.parser.parser_vseinstrumenti(self.mainwindow)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -251,11 +257,13 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.exec_()
 
     def show_parser_checklist(self):
+        # TODO Педелать на слот, и из диалога вызывать методы
         self.parser_thread.sephora = False
         self.parser_thread.ildebote = False
         self.parser_thread.kupivip = False
         self.parser_thread.akusherstvo = False
         self.parser_thread.utkonos = False
+        self.parser_thread.vseinstrumenti = False
         dialog = CustomDialog_parser(self.parser_thread)
         dialog.show()
         dialog.exec_()

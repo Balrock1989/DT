@@ -46,17 +46,29 @@ class Parsers:
         self.actions_data.clear()
 
     def get_one_date(self, text):
-        day, month = text.split(" ")
-        year = datetime.now().year
+        try:
+            text = re.sub(r'\xa0', ' ', text).strip()
+            day, month, year = text.split(' ')
+        except Exception:
+            day, month = text.split(" ")
+            year = datetime.now().year
         for num, name in self.month_name.items():
             if name in month.lower():
                 month = num
-        end_data = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
-        return end_data
+        date = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
+        return date
 
     def get_double_date(self, first, second):
-        first = self.get_one_date(first)
-        second = self.get_one_date(second)
+        try:
+            first = self.get_one_date(first)
+        except Exception:
+            first = datetime.now().strftime('%d.%m.%Y')
+        try:
+            second = self.get_one_date(second)
+        except Exception:
+            second = datetime.strptime(first, '%d.%m.%Y')
+            day_on_month = monthrange(year=int(second.year), month=int(second.month))
+            second = datetime(day=day_on_month[1], month=second.month, year=second.year).strftime('%d.%m.%Y')
         return first, second
 
     @win32.show_window
@@ -274,4 +286,35 @@ class Parsers:
         self.print_result(gui, partner_name)
 
     # def parser_sportmaster(self):
-# https: // www.sportmaster.ru / news / 1781660 /?icid = home!w!button
+    # https: // www.sportmaster.ru / news / 1781660 /?icid = home!w!button
+
+    def parser_vseinstrumenti(self, gui):
+        partner_name = 'Все инструменты'
+        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
+        self.driver = webdriver.Chrome(options=options)
+        self.driver.get(main_url)
+        page = BeautifulSoup(self.driver.page_source, 'lxml')
+        self.driver.quit()
+        divs = page.find_all("div", class_='action_main')
+        for div in divs:
+            action_name = div.find('div', class_='action_header').a.text.strip()
+            code = 'Не требуется'
+            action_type = 'скидка'
+            url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
+            desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
+            incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
+            incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
+            date_start, date_end = self.get_double_date(incoming_date.group(1), incoming_date.group(2))
+            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+                      'Дата окончания': date_end, 'Условия акции': desc,
+                      'Купон': code, 'URL': url, 'Тип купона': action_type}
+            self.actions_data.append(action)
+            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                writer.writerow(action)
+        self.print_result(gui, partner_name)
+
