@@ -240,13 +240,12 @@ class Parsers:
 
         s = requests.Session()
         options = Options()
-        options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         main_url = 'https://www.akusherstvo.ru/sale.php'
-        self.driver = webdriver.Chrome(options=options)
-        self.driver.get(main_url)
-        page = BeautifulSoup(self.driver.page_source, 'lxml')
-        self.driver.quit()
+        driver = webdriver.Chrome(options=options)
+        driver.get(main_url)
+        page = BeautifulSoup(driver.page_source, 'lxml')
+        driver.quit()
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
         divs = divs + divs_2
@@ -292,13 +291,12 @@ class Parsers:
         partner_name = 'Все инструменты'
         gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         options = Options()
-        options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
-        self.driver = webdriver.Chrome(options=options)
-        self.driver.get(main_url)
-        page = BeautifulSoup(self.driver.page_source, 'lxml')
-        self.driver.quit()
+        driver = webdriver.Chrome(options=options)
+        driver.get(main_url)
+        page = BeautifulSoup(driver.page_source, 'lxml')
+        driver.quit()
         divs = page.find_all("div", class_='action_main')
         for div in divs:
             action_name = div.find('div', class_='action_header').a.text.strip()
