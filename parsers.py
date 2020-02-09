@@ -28,7 +28,8 @@ class Parsers:
         self.generate_csv()
         self.actions_data = []
         self.gui = gui
-        self.count = 0
+        self.count_acusherstvo = 0
+        self.count_sephora = 0
 
     def generate_csv(self):
 
@@ -103,7 +104,7 @@ class Parsers:
                     date_start, date_end = get_date_with_year(div)
                 except TypeError:
                     self.gui.log.info('Не найдена дата проведения акции')
-                    self.count += 1
+                    self.count_sephora += 1
                     return
                 code = "Не требуется"
                 action_name = div.h1.text
@@ -123,7 +124,7 @@ class Parsers:
                     with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
-                self.count += 1
+                self.count_sephora += 1
                 self.print_result(partner_name)
 
         s = requests.Session()
@@ -137,11 +138,11 @@ class Parsers:
         for thread in threads:
             thread.start()
         while True:
-            self.gui.change_progress(self.count, len(threads))
-            if self.count == len(threads):
+            self.gui.change_progress(self.count_sephora, len(threads))
+            if self.count_sephora == len(threads):
                 self.gui.reset_progress_signal.emit()
                 break
-        self.count = 0
+        self.count_sephora = 0
 
     @win32.show_window
     def parser_ildebote(self):
@@ -249,7 +250,7 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
-            self.count += 1
+            self.count_acusherstvo += 1
 
         s = requests.Session()
         options = Options()
@@ -267,12 +268,12 @@ class Parsers:
         for thread in threads:
             thread.start()
         while True:
-            self.gui.change_progress(self.count, len(threads))
-            if self.count == len(threads):
+            self.gui.change_progress(self.count_acusherstvo, len(threads))
+            if self.count_acusherstvo == len(threads):
                 self.gui.reset_progress_signal.emit()
                 break
         self.print_result(partner_name)
-        self.count = 0
+        self.count_acusherstvo = 0
 
     def parser_utkonos(self):
         partner_name = 'Утконос'
