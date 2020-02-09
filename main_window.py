@@ -245,7 +245,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.chat_print_signal.emit('Теперь браузер можно запускать')
                 self.try_start_browser = 0
             else:
-                self.chat_print_signal.emit(f'Браузер уже запущен, попытка {self.try_start_browser}')
+                self.chat_print_signal.emit(f'Браузер уже запущен, попытка {self.try_start_browser}, на 3 он закроется')
 
     def show_dialog_width(self):
         dialog = CustomDialog_resizer(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',

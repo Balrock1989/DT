@@ -234,15 +234,23 @@ class WebDriver:
                     end_date.clear()
                     end_date.send_keys(action['Дата окончания'])
                     short_description.send_keys(action['Название акции'] + '!')
+                    digit_in_name, digit_in_desc = '', ''
+                    try:
+                        digit_in_name = re.search(r'(\d+)', action['Название акции']).group(1).strip()
+                    except Exception:
+                        pass
+                    try:
+                        digit_in_desc = re.search(r'(\d+)', action['Условия акции']).group(1).strip()
+                    except Exception:
+                        pass
                     if action['Условия акции']:
                         description.send_keys(action['Условия акции'] + '!')
                     else:
                         description.send_keys(action['Название акции'] + '!')
                     landing_url.send_keys(self.gui.url.toPlainText()) if \
                         self.gui.url.toPlainText() else landing_url.send_keys(action['URL'])
-                    if 'скидка' in action['Тип купона'].lower() or 'купон' in action['Тип купона'].lower():
-                        vaucher_type.select_by_value('2') if 'скидка' in action['Тип купона'].lower() \
-                            else vaucher_type.select_by_value('1')
+                    if 'скидка' in action['Тип купона'].lower():
+                        vaucher_type.select_by_value('2')
                         code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
                         if '%' in action['Название акции']:
                             checkbox.click()
@@ -252,11 +260,29 @@ class WebDriver:
                             checkbox.click()
                             percent = get_percent(action['Условия акции'])
                             discount_amount.send_keys(percent)
-                        elif any([i.isdigit() for i in action['Название акции']]):
+                        elif digit_in_name:
+                            discount_amount.send_keys(digit_in_name)
+                        elif digit_in_desc:
+                            discount_amount.send_keys(digit_in_desc)
+                        else:
+                            discount_amount.send_keys("0")
+                    elif 'купон' in action['Тип купона'].lower():
+                        vaucher_type.select_by_value('1')
+                        code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
+                        if '%' in action['Название акции']:
+                            checkbox.click()
                             percent = get_percent(action['Название акции'])
                             discount_amount.send_keys(percent)
+                        elif '%' in action['Условия акции']:
+                            checkbox.click()
+                            percent = get_percent(action['Условия акции'])
+                            discount_amount.send_keys(percent)
+                        elif digit_in_name in action['Название акции']:
+                            discount_amount.send_keys(digit_in_name)
+                        elif digit_in_desc in action['Условия акции']:
+                            discount_amount.send_keys(digit_in_desc)
                         else:
-                            discount_amount.send_keys('0')
+                            discount_amount.send_keys("0")
                     elif 'подарок' in action['Тип купона'].lower():
                         vaucher_type.select_by_value('3')
                         code.send_keys('Не требуется')
