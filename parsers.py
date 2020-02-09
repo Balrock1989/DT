@@ -156,7 +156,10 @@ class Parsers:
         partner_name = ''
         for div in divs:
             date = div.find("p", class_='date')
-            if 'сегодня' not in date.text.strip().lower():
+            # if 'сегодня' not in date.text.strip().lower():
+            #     continue
+            # TODO парсить сегодня и вчера (Проверить парсер)
+            if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
                 continue
             partner_name = date.text.split('|')[1].strip()
             action_name = div.h2.text
@@ -175,7 +178,6 @@ class Parsers:
         self.print_result(partner_name)
 
     def parser_kupivip(self):
-
         partner_name = 'KupiVip'
         self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         s = requests.Session()

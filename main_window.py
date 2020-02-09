@@ -2,7 +2,6 @@ import threading
 from datetime import datetime
 import os
 import sys
-from time import sleep
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject, Qt
@@ -19,6 +18,7 @@ import logger
 
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
+# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
 
 class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
     """Класс для кастомизации диалогового окна"""

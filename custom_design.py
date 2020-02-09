@@ -158,6 +158,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate('DTMainWindow', 'DTMainWindow'))
+        MainWindow.setWindowIcon(QtGui.QIcon('icon.png'))
         self.path_window.setPlaceholderText(
             _translate('MainWindow', 'Путь до папки с баннерами которые будут переименованы'))
         self.path_buttom.setText(_translate('MainWindow', 'Выбрать папку ...'))
