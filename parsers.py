@@ -18,13 +18,14 @@ actions_csv = os.path.normpath(actions_csv)
 
 
 class Parsers:
-    def __init__(self):
+    def __init__(self, gui):
         self.month_name = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
                            "05": "мая", "06": "июн", "07": "июл", "08": "авг",
                            "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
 
         self.generate_csv()
         self.actions_data = []
+        self.gui = gui
 
     def generate_csv(self):
 
@@ -32,17 +33,17 @@ class Parsers:
             writer = csv.writer(csv_file, delimiter=";")
             writer.writerow(headers)
 
-    def print_result(self, gui, partner_name):
+    def print_result(self, partner_name):
         for n, a in enumerate(self.actions_data, 1):
-            gui.chat_print_signal.emit(f'---№{n}\n')
+            self.gui.chat_print_signal.emit(f'---№{n}\n')
             action = ''
             for key, value in a.items():
                 action = action + "".join('{:_<20}: {}\n'.format(key, value))
-            gui.chat_print_signal.emit(action)
-        gui.chat_print_signal.emit('*' * 60)
-        gui.chat_print_signal.emit(f'Имя партнера: {partner_name}, загружено акций: {len(self.actions_data)}')
-        gui.chat_print_signal.emit('*' * 60)
-        gui.set_partner_name_signal.emit(partner_name)
+            self.gui.chat_print_signal.emit(action)
+        self.gui.chat_print_signal.emit('*' * 60)
+        self.gui.chat_print_signal.emit(f'Имя партнера: {partner_name}, загружено акций: {len(self.actions_data)}')
+        self.gui.chat_print_signal.emit('*' * 60)
+        self.gui.set_partner_name_signal.emit(partner_name)
         self.actions_data.clear()
 
     def get_one_date(self, text):
@@ -72,10 +73,10 @@ class Parsers:
         return first, second
 
     @win32.show_window
-    def parser_sephora(self, gui):
+    def parser_sephora(self):
         """Сбор и форамтирование информации об акциях"""
         partner_name = 'Sephora'
-        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
 
         def get_date_with_year(self, div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
@@ -90,7 +91,7 @@ class Parsers:
 
         def run(link):
             link = main_url[:-5] + link['href'][1:]
-            gui.log.info(f'{link}')
+            self.gui.log.info(f'{link}')
             request = s.get(link)
             page = BeautifulSoup(request.text, 'lxml')
             div = page.find('div', class_='b-news-detailed')
@@ -98,7 +99,7 @@ class Parsers:
                 try:
                     date_start, date_end = get_date_with_year(self, div)
                 except TypeError:
-                    gui.log.info('Не найдена дата проведения акции')
+                    self.gui.log.info('Не найдена дата проведения акции')
                     return
                 code = "Не требуется"
                 action_name = div.h1.text
@@ -119,7 +120,7 @@ class Parsers:
                     with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
-                self.print_result(gui, partner_name)
+                self.print_result(partner_name)
 
         s = requests.Session()
         s.headers.update({
@@ -133,8 +134,8 @@ class Parsers:
             threading.Thread(target=run, args=(link,), daemon=True).start()
 
     @win32.show_window
-    def parser_ildebote(self, gui):
-        gui.chat_print_signal.emit('Загрузка Иль Дэ Ботэ')
+    def parser_ildebote(self):
+        self.gui.chat_print_signal.emit('Загрузка Иль Дэ Ботэ')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -161,12 +162,12 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
-        self.print_result(gui, partner_name)
+        self.print_result(partner_name)
 
-    def parser_kupivip(self, gui):
+    def parser_kupivip(self):
 
         partner_name = 'KupiVip'
-        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -181,11 +182,11 @@ class Parsers:
             action_name = div.find("div", class_='brands').text.strip()
             try:
                 persent = div.find("div", class_='percent').text.strip()
-            except Exception as exc:
+            except Exception:
                 pass
             try:
                 desc = div.find("div", class_='name').text.strip()
-            except Exception as exc:
+            except Exception:
                 pass
             if persent:
                 action_name += f'. Скидки до {persent}%'
@@ -203,12 +204,12 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
-        self.print_result(gui, partner_name)
+        self.print_result(partner_name)
 
-    def parser_akusherstvo(self, gui):
+    def parser_akusherstvo(self):
 
         partner_name = 'Акушерство'
-        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
 
         def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
@@ -223,13 +224,13 @@ class Parsers:
             desc = ''
             action_type = 'скидка'
             code = 'Не требуется'
+            action_name = f'Скидки {persent} на {action_name}'
             try:
                 desc = descs.find_all('p')[0].text.strip()
                 desc = re.sub(r'\n', '', desc)
                 desc = re.sub(r'\r', '', desc)
-            except Exception as exc:
-                pass
-            action_name = f'Скидки {persent} на {action_name}'
+            except Exception:
+                self.gui.chat_print_signal.emit(f"Не удалось обработать описание для {action_name}")
             action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': main_url, 'Тип купона': action_type}
@@ -255,11 +256,11 @@ class Parsers:
             thread.start()
         for thread in threads:
             thread.join()
-        self.print_result(gui, partner_name)
+        self.print_result(partner_name)
 
-    def parser_utkonos(self, gui):
+    def parser_utkonos(self):
         partner_name = 'Утконос'
-        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
@@ -282,14 +283,14 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
-        self.print_result(gui, partner_name)
+        self.print_result(partner_name)
 
     # def parser_sportmaster(self):
     # https: // www.sportmaster.ru / news / 1781660 /?icid = home!w!button
 
-    def parser_vseinstrumenti(self, gui):
+    def parser_vseinstrumenti(self):
         partner_name = 'Все инструменты'
-        gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
         options = Options()
         options.add_argument('--disable-gpu')
         main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
@@ -314,5 +315,5 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
-        self.print_result(gui, partner_name)
+        self.print_result(partner_name)
 

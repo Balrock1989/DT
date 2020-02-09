@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 import os
 import sys
@@ -43,28 +44,29 @@ class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
         self.close()
 
 
-class CustomDialog_parser(QDialog, Ui_Dialog_parser):
+class CustomDialog_parser(QDialog, Ui_Dialog_parser, QThread):
     """Класс для кастомизации диалогового окна"""
 
-    def __init__(self, parser):
+    def __init__(self, mainwindow, parser):
         QDialog.__init__(self)
+        self.mainwindow = mainwindow
         self.parser = parser
         self.setupUi(self)
         self.ok.clicked.connect(self.change)
 
     def change(self):
         if self.sephora.isChecked():
-            self.parser.sephora = True
+            threading.Thread(target=self.parser.parser_sephora, args=(), daemon=True).start()
         if self.ildebote.isChecked():
-            self.parser.ildebote = True
+            threading.Thread(target=self.parser.parser_ildebote, args=(), daemon=True).start()
         if self.kupivip.isChecked():
-            self.parser.kupivip = True
+            threading.Thread(target=self.parser.parser_kupivip, args=(), daemon=True).start()
         if self.akusherstvo.isChecked():
-            self.parser.akusherstvo = True
+            threading.Thread(target=self.parser.parser_akusherstvo, args=(), daemon=True).start()
         if self.utkonos.isChecked():
-            self.parser.utkonos = True
+            threading.Thread(target=self.parser.parser_utkonos, args=(), daemon=True).start()
         if self.vseinstrumenti.isChecked():
-            self.parser.vseinstrumenti = True
+            threading.Thread(target=self.parser.parser_vseinstrumenti, args=(), daemon=True).start()
         self.close()
 
     def exit_func(self):
@@ -77,7 +79,7 @@ class WebThread(QThread):
     def __init__(self, mainwindow):
         super(WebThread, self).__init__()
         self.mainwindow = mainwindow
-        self.web = WebDriver()
+        self.web = WebDriver(mainwindow)
         mainwindow.browser = self.web
         self.web.start_data = self.mainwindow.date_start.toPlainText()
         self.web.end_data = self.mainwindow.date_end.toPlainText()
@@ -98,37 +100,6 @@ class GlobalHotKey(QThread):
         global_hotkey.hotkey(self.mainwindow)
 
 
-class ParserThread(QThread):
-    """Отдельный поток для работы чата"""
-
-    def __init__(self, mainwindow):
-        super(ParserThread, self).__init__()
-        self.mainwindow = mainwindow
-        self.parser = Parsers()
-        self.sephora = False
-        self.ildebote = False
-        self.kupivip = False
-        self.akusherstvo = False
-        self.utkonos = False
-        self.vseinstrumenti = False
-
-    def run(self):
-        # TODO переделать в слот
-        self.mainwindow.chat_print_signal.emit('Началась загрузка')
-        if self.sephora:
-            self.parser.parser_sephora(self.mainwindow)
-        if self.ildebote:
-            self.parser.parser_ildebote(self.mainwindow)
-        if self.kupivip:
-            self.parser.parser_kupivip(self.mainwindow)
-        if self.akusherstvo:
-            self.parser.parser_akusherstvo(self.mainwindow)
-        if self.utkonos:
-            self.parser.parser_utkonos(self.mainwindow)
-        if self.vseinstrumenti:
-            self.parser.parser_vseinstrumenti(self.mainwindow)
-
-
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     """Основной поток интерфейса"""
 
@@ -141,7 +112,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web_thread = None
         self.sizer = None
         self.web_thread_run = False
-        self.parser_thread = ParserThread(mainwindow=self)
+        self.parser = Parsers(gui=self)
         self.ghk = GlobalHotKey(self)
         self.ghk.start()
         self.init_buttons()
@@ -179,7 +150,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             self.sizer.exit = True
 
     def init_signals(self):
-        self.moveToThread(self.parser_thread)
         self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
@@ -224,7 +194,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def parsers(self):
         self.show_parser_checklist()
-        self.parser_thread.start()
 
     def launch_thread_dt(self):
         if self.web_thread is None:
@@ -257,14 +226,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.exec_()
 
     def show_parser_checklist(self):
-        # TODO Педелать на слот, и из диалога вызывать методы
-        self.parser_thread.sephora = False
-        self.parser_thread.ildebote = False
-        self.parser_thread.kupivip = False
-        self.parser_thread.akusherstvo = False
-        self.parser_thread.utkonos = False
-        self.parser_thread.vseinstrumenti = False
-        dialog = CustomDialog_parser(self.parser_thread)
+        dialog = CustomDialog_parser(self, self.parser)
+        self.moveToThread(dialog)
         dialog.show()
         dialog.exec_()
 

@@ -24,22 +24,22 @@ def hotkey(gui):
         gui.web_thread.web.start_data = gui.date_start.toPlainText()
         gui.web_thread.web.end_data = gui.date_end.toPlainText()
         gui.web_thread.web.url = gui.url.toPlainText()
-        gui.web_thread.web.add_banner(gui=gui)
+        gui.web_thread.web.add_banner()
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 1 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab2():
-        gui.web_thread.web.parser(gui=gui)
+        gui.web_thread.web.parser()
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 2 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab3():
-        gui.web_thread.web.download_banners(gui=gui)
+        gui.web_thread.web.download_banners()
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 3 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab4():
-        gui.web_thread.web.add_actions(gui=gui)
+        gui.web_thread.web.add_actions()
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 4 \n *** Должна вызваться функция :)')
 
     def get_key_name(key):
