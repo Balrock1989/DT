@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QProgressBar
 
 
 class Ui_MainWindow(object):
@@ -142,6 +143,9 @@ class Ui_MainWindow(object):
         self.resize_buttom.setFont(font)
         self.resize_buttom.setObjectName('resize_buttom')
         self.resize_buttom.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+        self.progress = QProgressBar(self)
+        self.progress.setGeometry(10, 63, 585, 15)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)

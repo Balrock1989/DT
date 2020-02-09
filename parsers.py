@@ -207,9 +207,9 @@ class Parsers:
         self.print_result(partner_name)
 
     def parser_akusherstvo(self):
-
         partner_name = 'Акушерство'
         self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+        self.gui.create_progress_bar(30)
 
         def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
