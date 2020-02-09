@@ -4,6 +4,8 @@ import re
 import threading
 from calendar import monthrange
 from datetime import datetime, timedelta
+from time import sleep
+
 import win32
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -26,6 +28,7 @@ class Parsers:
         self.generate_csv()
         self.actions_data = []
         self.gui = gui
+        self.count = 0
 
     def generate_csv(self):
 
@@ -78,7 +81,7 @@ class Parsers:
         partner_name = 'Sephora'
         self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
 
-        def get_date_with_year(self, div):
+        def get_date_with_year(div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
             day, month, year = incoming_date.split(" ")
             for num, name in self.month_name.items():
@@ -97,16 +100,16 @@ class Parsers:
             div = page.find('div', class_='b-news-detailed')
             if div:
                 try:
-                    date_start, date_end = get_date_with_year(self, div)
+                    date_start, date_end = get_date_with_year(div)
                 except TypeError:
                     self.gui.log.info('Не найдена дата проведения акции')
+                    self.count += 1
                     return
                 code = "Не требуется"
                 action_name = div.h1.text
                 action_type = 'подарок' if 'подар' in action_name.lower() else 'скидка'
                 paragraphs = div.findAll('p')
                 url = 'https://sephora.ru/news/'
-
                 descriptions = []
                 for p in paragraphs:
                     text = p.text.strip()
@@ -120,6 +123,7 @@ class Parsers:
                     with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                         writer.writerow(action)
+                self.count += 1
                 self.print_result(partner_name)
 
         s = requests.Session()
@@ -129,9 +133,15 @@ class Parsers:
         request = s.get(main_url)
         page = BeautifulSoup(request.text, 'lxml')
         links = page.find_all("a", class_='b-news-thumb__title')
-
-        for link in links:
-            threading.Thread(target=run, args=(link,), daemon=True).start()
+        threads = [threading.Thread(target=run, args=(link,), daemon=True) for link in links]
+        for thread in threads:
+            thread.start()
+        while True:
+            self.gui.change_progress(self.count, len(threads))
+            if self.count == len(threads):
+                self.gui.reset_progress_signal.emit()
+                break
+        self.count = 0
 
     @win32.show_window
     def parser_ildebote(self):
@@ -209,7 +219,6 @@ class Parsers:
     def parser_akusherstvo(self):
         partner_name = 'Акушерство'
         self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
-        self.gui.create_progress_bar(30)
 
         def run(div):
             persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
@@ -230,7 +239,7 @@ class Parsers:
                 desc = re.sub(r'\n', '', desc)
                 desc = re.sub(r'\r', '', desc)
             except Exception:
-                self.gui.chat_print_signal.emit(f"Не удалось обработать описание для {action_name}")
+                pass
             action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': main_url, 'Тип купона': action_type}
@@ -238,6 +247,7 @@ class Parsers:
             with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
+            self.count += 1
 
         s = requests.Session()
         options = Options()
@@ -254,9 +264,13 @@ class Parsers:
         threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
         for thread in threads:
             thread.start()
-        for thread in threads:
-            thread.join()
+        while True:
+            self.gui.change_progress(self.count, len(threads))
+            if self.count == len(threads):
+                self.gui.reset_progress_signal.emit()
+                break
         self.print_result(partner_name)
+        self.count = 0
 
     def parser_utkonos(self):
         partner_name = 'Утконос'

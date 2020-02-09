@@ -105,24 +105,14 @@ class GlobalHotKey(QThread):
 class ProgressBar(QThread):
     """Отдельный поток для работы чата"""
 
-    def __init__(self, mainwindow, time_limit):
+    def __init__(self, mainwindow):
         super(ProgressBar, self).__init__()
         self.mainwindow = mainwindow
-        self.time_limit = time_limit
+        self.count = 0
+        self.max = 0
 
     def run(self):
-        count = 0
-        while count < self.time_limit:
-            count += 1
-            sleep(1)
-            self.mainwindow.change_progress_signal.emit(count)
-        self.mainwindow.change_progress_signal.emit(0)
-        # count = 0
-        # while count < self.time_limit:
-        #     count += 1
-        #     sleep(1)
-        #     self.mainwindow.change_progress_signal.emit(count)
-        # self.mainwindow.change_progress_signal.emit(0)
+        self.mainwindow.change_progress_signal.emit(self.count, self.max)
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -140,17 +130,18 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.parser = Parsers(gui=self)
         self.ghk = GlobalHotKey(self)
         self.ghk.start()
-        self.init_buttons()
-        self.init_signals()
         self.try_start_browser = 0
         self.browser = None
-        self.progress_bar = None
+        self.progress_bar = ProgressBar(self)
+        self.init_buttons()
+        self.init_signals()
 
     set_partner_name_signal = pyqtSignal(str)
     chat_print_signal = pyqtSignal(str)
     del_partner_name_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
-    change_progress_signal = pyqtSignal(int)
+    change_progress_signal = pyqtSignal(int, int)
+    reset_progress_signal = pyqtSignal()
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
@@ -176,17 +167,29 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sizer:
             self.sizer.exit = True
 
-    @pyqtSlot(int)
-    def change_progress_slot(self, value):
+    @pyqtSlot(int, int)
+    def change_progress_slot(self, value, max):
+        self.progress.setMaximum(max)
         self.progress.setValue(value)
 
+    def change_progress(self, value, max):
+        self.progress_bar.count = value
+        self.progress_bar.max = max
+        self.progress_bar.start()
+
+    @pyqtSlot()
+    def reset_progress_slot(self):
+        self.progress.reset()
+
     def init_signals(self):
+        self.moveToThread(self.progress_bar)
         self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
         self.change_progress_signal.connect(self.change_progress_slot)
+        self.reset_progress_signal.connect(self.reset_progress_slot)
 
     def init_buttons(self):
         now = datetime.now()
@@ -226,12 +229,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def parsers(self):
         self.show_parser_checklist()
-
-    def create_progress_bar(self, value):
-        self.progress.setMaximum(value)
-        self.progress_bar = ProgressBar(self, value)
-        self.moveToThread(self.progress_bar)
-        self.progress_bar.start()
 
     def launch_thread_dt(self):
         if self.web_thread is None:
