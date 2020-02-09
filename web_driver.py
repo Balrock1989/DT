@@ -79,7 +79,7 @@ class WebDriver:
         dir_name = re.search(r'Хостинг файлов: (.*)', dir_name.text).group(1)
         self.gui.chat_print_signal.emit(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
         self.gui.chat_print_signal.emit(f'Дата начала акции:{self.start_data},'
-                                   f' Дата окончания акции:{self.end_data}, url: {self.url}')
+                                        f' Дата окончания акции:{self.end_data}, url: {self.url}')
         if not self.start_data:
             now = datetime.now()
             self.start_data = now.strftime('%d.%m.%Y')
@@ -167,7 +167,7 @@ class WebDriver:
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-            self.gui.chat_print_signal.emit('Акции успешно загружены в память')
+            self.gui.chat_print_signal.emit('Акции успешно загружены')
             self.actions_data.clear()
         else:
             self.gui.chat_print_signal.emit('Нужно зайти на страницу с акциями')

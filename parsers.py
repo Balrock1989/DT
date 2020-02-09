@@ -316,4 +316,3 @@ class Parsers:
                 writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
                 writer.writerow(action)
         self.print_result(partner_name)
-
