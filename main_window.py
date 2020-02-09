@@ -2,6 +2,7 @@ import threading
 from datetime import datetime
 import os
 import sys
+from queue import Queue
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject, Qt
@@ -105,14 +106,13 @@ class GlobalHotKey(QThread):
 class ProgressBar(QThread):
     """Отдельный поток для работы чата"""
 
-    def __init__(self, mainwindow):
+    def __init__(self):
         super(ProgressBar, self).__init__()
-        self.mainwindow = mainwindow
-        self.count = 0
-        self.max = 0
+        self.queue = Queue()
 
     def run(self):
-        self.mainwindow.change_progress_signal.emit(self.count, self.max)
+        while True:
+            self.queue.get()
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -132,7 +132,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ghk.start()
         self.try_start_browser = 0
         self.browser = None
-        self.progress_bar = ProgressBar(self)
+        self.progress_bar = ProgressBar()
+        self.progress_bar.start()
         self.init_buttons()
         self.init_signals()
 
@@ -173,9 +174,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.progress.setValue(value)
 
     def change_progress(self, value, max):
-        self.progress_bar.count = value
-        self.progress_bar.max = max
-        self.progress_bar.start()
+        self.progress_bar.queue.put(self.change_progress_signal.emit(value, max))
 
     @pyqtSlot()
     def reset_progress_slot(self):

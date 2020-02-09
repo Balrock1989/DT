@@ -4,8 +4,6 @@ import re
 import threading
 from calendar import monthrange
 from datetime import datetime, timedelta
-from time import sleep
-
 import win32
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -32,7 +30,6 @@ class Parsers:
         self.count_sephora = 0
 
     def generate_csv(self):
-
         with open(actions_csv, "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
             writer.writerow(headers)
@@ -272,8 +269,8 @@ class Parsers:
             if self.count_acusherstvo == len(threads):
                 self.gui.reset_progress_signal.emit()
                 break
-        self.print_result(partner_name)
         self.count_acusherstvo = 0
+        self.print_result(partner_name)
 
     def parser_utkonos(self):
         partner_name = 'Утконос'
