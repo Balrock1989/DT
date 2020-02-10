@@ -18,7 +18,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException, NoSuchElementException
 import auth
-from parsers import headers, actions_csv
+import helpers.helper as helper
+
 import win32
 
 
@@ -153,8 +154,8 @@ class WebDriver:
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-                with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                    writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+                    writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                     writer.writerow(action)
             self.gui.set_partner_name_signal.emit(partner_name)
             for n, a in enumerate(self.actions_data, 1):
@@ -188,7 +189,7 @@ class WebDriver:
 
         def add():
             partner_name = ''
-            with open(actions_csv, 'r', encoding='utf-8', newline='') as csv_file:
+            with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
                     if self.exit:
@@ -208,7 +209,7 @@ class WebDriver:
                         return
                     if action['Имя партнера'] != self.gui.partner_name.currentText():
                         with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
-                            writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                            writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                             writer.writerow(action)
                         continue
                     partner_name = action['Имя партнера']
@@ -294,15 +295,15 @@ class WebDriver:
                     sleep(1)
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                     self.driver.get(auth.coupun_url + id)
-            os.remove(actions_csv)
-            shutil.move('actions_temp.csv', actions_csv)
+            os.remove(helper.actions_csv_path)
+            shutil.move('actions_temp.csv', helper.actions_csv_path)
             self.gui.del_partner_name_signal.emit(partner_name)
             self.gui.chat_print_signal.emit('Акции успешно добавлены')
             win32.show_process()
 
         with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
-            writer.writerow(headers)
+            writer.writerow(helper.HEADERS)
         self.driver.switch_to_window(self.dt_window)
         threading.Thread(target=add, args=(), daemon=True).start()
 

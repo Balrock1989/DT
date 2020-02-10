@@ -2,7 +2,7 @@ import threading
 from datetime import datetime
 import os
 import sys
-from queue import Queue
+from multiprocessing import Process, Queue
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject, Qt
@@ -16,10 +16,13 @@ from custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from image_sizer import Resizer
 import global_hotkey
 import logger
+from Parsers.process_ildebote import parser_ildebote
+from Parsers.process_sephora import parser_sephora
 
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
+
 
 class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
     """Класс для кастомизации диалогового окна"""
@@ -59,9 +62,12 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser, QThread):
 
     def change(self):
         if self.sephora.isChecked():
-            threading.Thread(target=self.parser.parser_sephora, args=(), daemon=True).start()
+            self.start_process(parser_sephora)
+            # threading.Thread(target=self.parser.parser_sephora, args=(), daemon=True).start()
         if self.ildebote.isChecked():
-            threading.Thread(target=self.parser.parser_ildebote, args=(), daemon=True).start()
+            # self.start_process(parser_ildebote)
+            parser_ildebote()
+            # threading.Thread(target=self.parser.parser_ildebote, args=(), daemon=True).start()
         if self.kupivip.isChecked():
             threading.Thread(target=self.parser.parser_kupivip, args=(), daemon=True).start()
         if self.akusherstvo.isChecked():
@@ -71,6 +77,35 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser, QThread):
         if self.vseinstrumenti.isChecked():
             threading.Thread(target=self.parser.parser_vseinstrumenti, args=(), daemon=True).start()
         self.close()
+
+    def start_process(self, parser):
+        print_queue = Queue()
+        set_partner_queue = Queue()
+        p = Process(target=parser, args=(print_queue, set_partner_queue))
+        p.start()
+        p.join()
+        while not print_queue.empty():
+            income_data = print_queue.get()
+            if isinstance(income_data, list):
+                partner_name = income_data[0]["Имя партнера"]
+                for n, a in enumerate(income_data, 1):
+                    self.mainwindow.chat_print_signal.emit((f'---№{n}\n'))
+                    action = ''
+                    for key, value in a.items():
+                        action = action + "".join('{:_<20}: {}\n'.format(key, value))
+                    self.mainwindow.chat_print_signal.emit(action)
+                self.mainwindow.chat_print_signal.emit('*' * 60)
+                self.mainwindow.chat_print_signal.emit(f'Имя партнера: {partner_name}, загружено акций: {len(income_data)}')
+                self.mainwindow.chat_print_signal.emit('*' * 60)
+            else:
+                self.mainwindow.chat_print_signal.emit(income_data)
+        while not set_partner_queue.empty():
+            income_data = set_partner_queue.get()
+            if isinstance(income_data, str):
+                self.mainwindow.set_partner_name_signal.emit(income_data)
+            else:
+                income_data()
+
 
     def exit_func(self):
         self.close()

@@ -10,19 +10,11 @@ from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 
-headers = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-           'Условия акции', 'Купон', 'URL', 'Тип купона']
-home_path = os.getenv('HOMEPATH')
-actions_csv = os.path.join('C:\\', home_path, 'Desktop', "actions.csv")
-actions_csv = os.path.normpath(actions_csv)
+import helpers.helper as helper
 
 
 class Parsers:
     def __init__(self, gui):
-        self.month_name = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
-                           "05": "мая", "06": "июн", "07": "июл", "08": "авг",
-                           "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
-
         self.generate_csv()
         self.actions_data = []
         self.gui = gui
@@ -30,9 +22,9 @@ class Parsers:
         self.count_sephora = 0
 
     def generate_csv(self):
-        with open(actions_csv, "w", newline="", encoding="utf-8") as csv_file:
+        with open(helper.actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file, delimiter=";")
-            writer.writerow(headers)
+            writer.writerow(helper.HEADERS)
 
     def print_result(self, partner_name):
         for n, a in enumerate(self.actions_data, 1):
@@ -54,7 +46,7 @@ class Parsers:
         except Exception:
             day, month = text.split(" ")
             year = datetime.now().year
-        for num, name in self.month_name.items():
+        for num, name in helper.MONTH_NAME.items():
             if name in month.lower():
                 month = num
         date = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
@@ -82,7 +74,7 @@ class Parsers:
         def get_date_with_year(div):
             incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
             day, month, year = incoming_date.split(" ")
-            for num, name in self.month_name.items():
+            for num, name in helper.MONTH_NAME.items():
                 if name in month.lower():
                     month = num
             date_start = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
@@ -118,8 +110,8 @@ class Parsers:
                               'Дата окончания': date_end, 'Условия акции': desc,
                               'Купон': code, 'URL': url, 'Тип купона': action_type}
                     self.actions_data.append(action)
-                    with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                        writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+                    with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+                        writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                         writer.writerow(action)
                 self.count_sephora += 1
                 self.print_result(partner_name)
@@ -141,39 +133,39 @@ class Parsers:
                 break
         self.count_sephora = 0
 
-    @win32.show_window
-    def parser_ildebote(self):
-        self.gui.chat_print_signal.emit('Загрузка Иль Дэ Ботэ')
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-        url = 'https://iledebeaute.ru/company/actions/'
-        request = s.get(url)
-        page = BeautifulSoup(request.text, 'lxml')
-        divs = page.find_all("div", class_='news_block')
-        partner_name = ''
-        for div in divs:
-            date = div.find("p", class_='date')
-            # if 'сегодня' not in date.text.strip().lower():
-            #     continue
-            # TODO парсить сегодня и вчера (Проверить парсер)
-            if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
-                continue
-            partner_name = date.text.split('|')[1].strip()
-            action_name = div.h2.text
-            date_start = datetime.now().strftime('%d.%m.%Y')
-            date_end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
-            desc = div.find("p", class_='desc').text.strip()
-            action_type = 'подарок' if 'подарок' in action_name.lower() else 'скидка'
-            code = 'Не требуется'
-            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': desc,
-                      'Купон': code, 'URL': url, 'Тип купона': action_type}
-            self.actions_data.append(action)
-            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
-                writer.writerow(action)
-        self.print_result(partner_name)
+    # @win32.show_window
+    # def parser_ildebote(self):
+    #     self.gui.chat_print_signal.emit('Загрузка Иль Дэ Ботэ')
+    #     s = requests.Session()
+    #     s.headers.update({
+    #         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
+    #     url = 'https://iledebeaute.ru/company/actions/'
+    #     request = s.get(url)
+    #     page = BeautifulSoup(request.text, 'lxml')
+    #     divs = page.find_all("div", class_='news_block')
+    #     partner_name = ''
+    #     for div in divs:
+    #         date = div.find("p", class_='date')
+    #         # if 'сегодня' not in date.text.strip().lower():
+    #         #     continue
+    #         # TODO парсить сегодня и вчера (Проверить парсер)
+    #         if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
+    #             continue
+    #         partner_name = date.text.split('|')[1].strip()
+    #         action_name = div.h2.text
+    #         date_start = datetime.now().strftime('%d.%m.%Y')
+    #         date_end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
+    #         desc = div.find("p", class_='desc').text.strip()
+    #         action_type = 'подарок' if 'подарок' in action_name.lower() else 'скидка'
+    #         code = 'Не требуется'
+    #         action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+    #                   'Дата окончания': date_end, 'Условия акции': desc,
+    #                   'Купон': code, 'URL': url, 'Тип купона': action_type}
+    #         self.actions_data.append(action)
+    #         with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
+    #             writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+    #             writer.writerow(action)
+    #     self.print_result(partner_name)
 
     def parser_kupivip(self):
         partner_name = 'KupiVip'
@@ -211,8 +203,8 @@ class Parsers:
                       'Дата окончания': date_start, 'Условия акции': desc,
                       'Купон': code, 'URL': url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+            with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                 writer.writerow(action)
         self.print_result(partner_name)
 
@@ -244,8 +236,8 @@ class Parsers:
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': main_url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+            with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                 writer.writerow(action)
             self.count_acusherstvo += 1
 
@@ -294,8 +286,8 @@ class Parsers:
                       'Дата окончания': date_end, 'Условия акции': '',
                       'Купон': code, 'URL': url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+            with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                 writer.writerow(action)
         self.print_result(partner_name)
 
@@ -326,7 +318,12 @@ class Parsers:
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': url, 'Тип купона': action_type}
             self.actions_data.append(action)
-            with open(actions_csv, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=headers, delimiter=";")
+            with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                 writer.writerow(action)
         self.print_result(partner_name)
+
+
+
+
+
