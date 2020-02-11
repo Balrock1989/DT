@@ -2,12 +2,17 @@ import threading
 from datetime import datetime
 import os
 import sys
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QDir, QThread, QWaitCondition, QMutex, pyqtSignal, pyqtSlot, QObject, Qt
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
 from custom_design import Ui_MainWindow
+from process_akusherstvo import Akusherstvo_process
+from process_ildebote import Ildebote_process
+from process_kupivip import Kupivip_process
+from process_utkonos import Utkonos_process
+from process_vseintrumenti import Vseinstrumenti_process
 from rename_image import Rename
 from web_driver import WebDriver
 from parsers import Parsers
@@ -16,12 +21,15 @@ from custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from image_sizer import Resizer
 import global_hotkey
 import logger
-from Parsers.process_ildebote import parser_ildebote
-from Parsers.process_sephora import parser_sephora
-
+from Parsers.process_sephora import Sephora_process
+from start_new_process import StartNewProcess
+import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
+
+
+sys.excepthook = helper.exception_hook
 
 
 class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
@@ -62,50 +70,37 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser, QThread):
 
     def change(self):
         if self.sephora.isChecked():
-            self.start_process(parser_sephora)
-            # threading.Thread(target=self.parser.parser_sephora, args=(), daemon=True).start()
+            parser = Sephora_process
+            sephora_process = StartNewProcess(self.mainwindow, parser)
+            self.mainwindow.moveToThread(sephora_process)
+            sephora_process.start()
         if self.ildebote.isChecked():
-            # self.start_process(parser_ildebote)
-            parser_ildebote()
-            # threading.Thread(target=self.parser.parser_ildebote, args=(), daemon=True).start()
+            parser = Ildebote_process
+            ildebote_process = StartNewProcess(self.mainwindow, parser)
+            self.mainwindow.moveToThread(ildebote_process)
+            ildebote_process.start()
         if self.kupivip.isChecked():
-            threading.Thread(target=self.parser.parser_kupivip, args=(), daemon=True).start()
+            parser = Kupivip_process
+            kupivip_process = StartNewProcess(self.mainwindow, parser)
+            self.mainwindow.moveToThread(kupivip_process)
+            kupivip_process.start()
         if self.akusherstvo.isChecked():
-            threading.Thread(target=self.parser.parser_akusherstvo, args=(), daemon=True).start()
+            parser = Akusherstvo_process
+            akusherstvo_process = StartNewProcess(self.mainwindow, parser)
+            self.mainwindow.moveToThread(akusherstvo_process)
+            akusherstvo_process.start()
         if self.utkonos.isChecked():
-            threading.Thread(target=self.parser.parser_utkonos, args=(), daemon=True).start()
+            parser = Utkonos_process
+            utkonos_process = StartNewProcess(self.mainwindow, parser)
+            self.mainwindow.moveToThread(utkonos_process)
+            utkonos_process.start()
+
         if self.vseinstrumenti.isChecked():
-            threading.Thread(target=self.parser.parser_vseinstrumenti, args=(), daemon=True).start()
+            parser = Vseinstrumenti_process
+            vseinstrumenti_process = StartNewProcess(self.mainwindow, parser)
+            self.mainwindow.moveToThread(vseinstrumenti_process)
+            vseinstrumenti_process.start()
         self.close()
-
-    def start_process(self, parser):
-        print_queue = Queue()
-        set_partner_queue = Queue()
-        p = Process(target=parser, args=(print_queue, set_partner_queue))
-        p.start()
-        p.join()
-        while not print_queue.empty():
-            income_data = print_queue.get()
-            if isinstance(income_data, list):
-                partner_name = income_data[0]["Имя партнера"]
-                for n, a in enumerate(income_data, 1):
-                    self.mainwindow.chat_print_signal.emit((f'---№{n}\n'))
-                    action = ''
-                    for key, value in a.items():
-                        action = action + "".join('{:_<20}: {}\n'.format(key, value))
-                    self.mainwindow.chat_print_signal.emit(action)
-                self.mainwindow.chat_print_signal.emit('*' * 60)
-                self.mainwindow.chat_print_signal.emit(f'Имя партнера: {partner_name}, загружено акций: {len(income_data)}')
-                self.mainwindow.chat_print_signal.emit('*' * 60)
-            else:
-                self.mainwindow.chat_print_signal.emit(income_data)
-        while not set_partner_queue.empty():
-            income_data = set_partner_queue.get()
-            if isinstance(income_data, str):
-                self.mainwindow.set_partner_name_signal.emit(income_data)
-            else:
-                income_data()
-
 
     def exit_func(self):
         self.close()
@@ -138,11 +133,11 @@ class GlobalHotKey(QThread):
         global_hotkey.hotkey(self.mainwindow)
 
 
-class ProgressBar(QThread):
+class WriterCsv(QThread):
     """Отдельный поток для работы чата"""
 
     def __init__(self):
-        super(ProgressBar, self).__init__()
+        super(WriterCsv, self).__init__()
         self.queue = Queue()
 
     def run(self):
@@ -167,8 +162,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ghk.start()
         self.try_start_browser = 0
         self.browser = None
-        self.progress_bar = ProgressBar()
-        self.progress_bar.start()
+        self.writer_csv_queue = WriterCsv()
+        self.writer_csv_queue.start()
         self.init_buttons()
         self.init_signals()
 
@@ -209,14 +204,14 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.progress.setValue(value)
 
     def change_progress(self, value, max):
-        self.progress_bar.queue.put(self.change_progress_signal.emit(value, max))
+        self.writer_csv_queue.queue.put(self.change_progress_signal.emit(value, max))
 
     @pyqtSlot()
     def reset_progress_slot(self):
         self.progress.reset()
 
     def init_signals(self):
-        self.moveToThread(self.progress_bar)
+        self.moveToThread(self.writer_csv_queue)
         self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
