@@ -208,61 +208,61 @@ class Parsers:
     #             writer.writerow(action)
     #     self.print_result(partner_name)
 
-    def parser_akusherstvo(self):
-        partner_name = 'Акушерство'
-        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
-
-        def run(div):
-            persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
-            date_end = div.find("strong", class_='date').text.strip()
-            incoming_date = re.search(r'до\s(.*)\s?', date_end.lower()).group(1)
-            date_end = self.get_one_date(incoming_date)
-            link = div.find('a').get('href')
-            request = s.get(link)
-            action_page = BeautifulSoup(request.text, 'lxml')
-            action_name = action_page.h1.text.strip()
-            descs = action_page.find('table', class_='centre_header')
-            desc = ''
-            action_type = 'скидка'
-            code = 'Не требуется'
-            action_name = f'Скидки {persent} на {action_name}'
-            try:
-                desc = descs.find_all('p')[0].text.strip()
-                desc = re.sub(r'\n', '', desc)
-                desc = re.sub(r'\r', '', desc)
-            except Exception:
-                pass
-            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': desc,
-                      'Купон': code, 'URL': main_url, 'Тип купона': action_type}
-            self.actions_data.append(action)
-            with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
-                writer.writerow(action)
-            self.count_acusherstvo += 1
-
-        s = requests.Session()
-        options = Options()
-        options.add_argument('--disable-gpu')
-        main_url = 'https://www.akusherstvo.ru/sale.php'
-        driver = webdriver.Chrome(options=options)
-        driver.get(main_url)
-        page = BeautifulSoup(driver.page_source, 'lxml')
-        driver.quit()
-        divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
-        divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
-        divs = divs + divs_2
-        date_start = datetime.now().strftime('%d.%m.%Y')
-        threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
-        for thread in threads:
-            thread.start()
-        while True:
-            self.gui.change_progress(self.count_acusherstvo, len(threads))
-            if self.count_acusherstvo == len(threads):
-                self.gui.reset_progress_signal.emit()
-                break
-        self.count_acusherstvo = 0
-        self.print_result(partner_name)
+    # def parser_akusherstvo(self):
+    #     partner_name = 'Акушерство'
+    #     self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+    #
+    #     def run(div):
+    #         persent = div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
+    #         date_end = div.find("strong", class_='date').text.strip()
+    #         incoming_date = re.search(r'до\s(.*)\s?', date_end.lower()).group(1)
+    #         date_end = self.get_one_date(incoming_date)
+    #         link = div.find('a').get('href')
+    #         request = s.get(link)
+    #         action_page = BeautifulSoup(request.text, 'lxml')
+    #         action_name = action_page.h1.text.strip()
+    #         descs = action_page.find('table', class_='centre_header')
+    #         desc = ''
+    #         action_type = 'скидка'
+    #         code = 'Не требуется'
+    #         action_name = f'Скидки {persent} на {action_name}'
+    #         try:
+    #             desc = descs.find_all('p')[0].text.strip()
+    #             desc = re.sub(r'\n', '', desc)
+    #             desc = re.sub(r'\r', '', desc)
+    #         except Exception:
+    #             pass
+    #         action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+    #                   'Дата окончания': date_end, 'Условия акции': desc,
+    #                   'Купон': code, 'URL': main_url, 'Тип купона': action_type}
+    #         self.actions_data.append(action)
+    #         with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+    #             writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
+    #             writer.writerow(action)
+    #         self.count_acusherstvo += 1
+    #
+    #     s = requests.Session()
+    #     options = Options()
+    #     options.add_argument('--disable-gpu')
+    #     main_url = 'https://www.akusherstvo.ru/sale.php'
+    #     driver = webdriver.Chrome(options=options)
+    #     driver.get(main_url)
+    #     page = BeautifulSoup(driver.page_source, 'lxml')
+    #     driver.quit()
+    #     divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
+    #     divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
+    #     divs = divs + divs_2
+    #     date_start = datetime.now().strftime('%d.%m.%Y')
+    #     threads = [threading.Thread(target=run, args=(div,), daemon=True) for div in divs]
+    #     for thread in threads:
+    #         thread.start()
+    #     while True:
+    #         self.gui.change_progress(self.count_acusherstvo, len(threads))
+    #         if self.count_acusherstvo == len(threads):
+    #             self.gui.reset_progress_signal.emit()
+    #             break
+    #     self.count_acusherstvo = 0
+    #     self.print_result(partner_name)
 
     # def parser_utkonos(self):
     #     partner_name = 'Утконос'
@@ -294,34 +294,34 @@ class Parsers:
     # def parser_sportmaster(self):
     # https: // www.sportmaster.ru / news / 1781660 /?icid = home!w!button
 
-    def parser_vseinstrumenti(self):
-        partner_name = 'Все инструменты'
-        self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
-        options = Options()
-        options.add_argument('--disable-gpu')
-        main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
-        driver = webdriver.Chrome(options=options)
-        driver.get(main_url)
-        page = BeautifulSoup(driver.page_source, 'lxml')
-        driver.quit()
-        divs = page.find_all("div", class_='action_main')
-        for div in divs:
-            action_name = div.find('div', class_='action_header').a.text.strip()
-            code = 'Не требуется'
-            action_type = 'скидка'
-            url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
-            desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
-            incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
-            incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
-            date_start, date_end = self.get_double_date(incoming_date.group(1), incoming_date.group(2))
-            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': desc,
-                      'Купон': code, 'URL': url, 'Тип купона': action_type}
-            self.actions_data.append(action)
-            with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
-                writer.writerow(action)
-        self.print_result(partner_name)
+    # def parser_vseinstrumenti(self):
+    #     partner_name = 'Все инструменты'
+    #     self.gui.chat_print_signal.emit(f'Загрузка {partner_name}')
+    #     options = Options()
+    #     options.add_argument('--disable-gpu')
+    #     main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
+    #     driver = webdriver.Chrome(options=options)
+    #     driver.get(main_url)
+    #     page = BeautifulSoup(driver.page_source, 'lxml')
+    #     driver.quit()
+    #     divs = page.find_all("div", class_='action_main')
+    #     for div in divs:
+    #         action_name = div.find('div', class_='action_header').a.text.strip()
+    #         code = 'Не требуется'
+    #         action_type = 'скидка'
+    #         url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
+    #         desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
+    #         incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
+    #         incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
+    #         date_start, date_end = self.get_double_date(incoming_date.group(1), incoming_date.group(2))
+    #         action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+    #                   'Дата окончания': date_end, 'Условия акции': desc,
+    #                   'Купон': code, 'URL': url, 'Тип купона': action_type}
+    #         self.actions_data.append(action)
+    #         with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+    #             writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
+    #             writer.writerow(action)
+    #     self.print_result(partner_name)
 
 
 
