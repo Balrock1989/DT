@@ -154,9 +154,7 @@ class WebDriver:
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-                with open(helper.actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
-                    writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
-                    writer.writerow(action)
+                self.gui.queue.queue.put(helper.write_csv(action))
             self.gui.set_partner_name_signal.emit(partner_name)
             for n, a in enumerate(self.actions_data, 1):
                 self.gui.chat_print_signal.emit(f'---№{n}\n')
@@ -189,6 +187,7 @@ class WebDriver:
 
         def add():
             partner_name = ''
+            count = 0
             with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
@@ -295,10 +294,12 @@ class WebDriver:
                     sleep(1)
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                     self.driver.get(auth.coupun_url + id)
+                    count += 1
             os.remove(helper.actions_csv_path)
             shutil.move('actions_temp.csv', helper.actions_csv_path)
             self.gui.del_partner_name_signal.emit(partner_name)
-            self.gui.chat_print_signal.emit('Акции успешно добавлены')
+            self.gui.chat_print_signal.emit(f'Акции успешно добавлены ({count}шт.)') if count \
+                else self.gui.chat_print_signal.emit('Нет акций выбранного партнера')
             win32.show_process()
 
         with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
