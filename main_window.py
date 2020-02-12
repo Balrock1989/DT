@@ -136,13 +136,36 @@ class GlobalHotKey(QThread):
 class WriterCsv(QThread):
     """Отдельный поток для работы чата"""
 
-    def __init__(self):
+    def __init__(self, mainwindow):
         super(WriterCsv, self).__init__()
+        self.mainwindow = mainwindow
         self.queue = Queue()
 
     def run(self):
         while True:
             self.queue.get()
+            # income_data = self.queue.get()
+            # if isinstance(income_data, list):
+            #     partner_name = income_data[0]["Имя партнера"]
+            #     for n, a in enumerate(income_data, 1):
+            #         self.mainwindow.chat_print_signal.emit((f'---№{n}\n'))
+            #         action = ''
+            #         for key, value in a.items():
+            #             action = action + "".join('{:_<20}: {}\n'.format(key, value))
+            #         self.mainwindow.chat_print_signal.emit(action)
+            #     self.mainwindow.chat_print_signal.emit('*' * 60)
+            #     self.mainwindow.chat_print_signal.emit(
+            #         f'Имя партнера: {partner_name}, загружено акций: {len(income_data)}')
+            #     self.mainwindow.chat_print_signal.emit('*' * 60)
+            # elif callable(income_data):
+            #     self.queue.get()
+            # elif isinstance(income_data, tuple):
+            #     self.mainwindow.set_partner_name_signal.emit(income_data[0])
+            # elif isinstance(income_data, str):
+            #     if income_data:
+            #         self.mainwindow.chat_print_signal.emit(income_data)
+            # else:
+            #     pass
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -162,7 +185,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ghk.start()
         self.try_start_browser = 0
         self.browser = None
-        self.writer_csv_queue = WriterCsv()
+        self.writer_csv_queue = WriterCsv(self)
         self.writer_csv_queue.start()
         self.init_buttons()
         self.init_signals()

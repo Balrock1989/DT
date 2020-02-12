@@ -22,7 +22,7 @@ import helpers.helper as helper
 
 import win32
 
-
+# TODO Писать сколько акций добавлено после add actions
 # TODO Добавить комменты
 
 class WebDriver:
