@@ -315,7 +315,7 @@ class WebDriver:
             format = re.search(r'(\w+)$', link).group(1)
             name = str(self.name_index) + "." + format
             self.name_index += 1
-            path = os.path.join(result, name)
+            path = os.path.join(helper.result_path, name)
             p = requests.get(link)
             out = open(path, 'wb')
             out.write(p.content)
@@ -342,13 +342,10 @@ class WebDriver:
                 self.gui.chat_print_signal.emit('Процесс был прерван пользователем.')
                 win32.show_process()
                 return
-            home_path = os.getenv('HOMEPATH')
-            result = os.path.join('C:\\', home_path, 'Desktop', 'result')
-            result = os.path.normpath(result)
-            if not os.path.exists(result):
-                os.mkdir(result)
+            if not os.path.exists(helper.result_path):
+                os.mkdir(helper.result_path)
             self.gui.chat_print_signal.emit(f'Всего будет скачано {len(links)} баннеров')
-            self.gui.chat_print_signal.emit(f'Результаты здесь: {os.path.abspath(result)}')
+            self.gui.chat_print_signal.emit(f'Результаты здесь: {os.path.abspath(helper.result_path)}')
             threads = [threading.Thread(target=run, args=(link,), daemon=True) for link in links]
             for thread in threads:
                 thread.start()

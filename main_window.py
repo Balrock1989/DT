@@ -1,28 +1,19 @@
-import threading
 from datetime import datetime
 import os
 import sys
-from multiprocessing import Queue
-
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
+
+from MyQueue import MyQueue
 from custom_design import Ui_MainWindow
-from process_akusherstvo import Akusherstvo_process
-from process_ildebote import Ildebote_process
-from process_kupivip import Kupivip_process
-from process_utkonos import Utkonos_process
-from process_vseintrumenti import Vseinstrumenti_process
+from dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from web_driver import WebDriver
 from parsers import Parsers
-from custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
-from custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from image_sizer import Resizer
 import global_hotkey
 import logger
-from Parsers.process_sephora import Sephora_process
-from start_new_process import StartNewProcess
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
@@ -30,81 +21,6 @@ import helpers.helper as helper
 
 
 sys.excepthook = helper.exception_hook
-
-
-class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
-    """Класс для кастомизации диалогового окна"""
-
-    def __init__(self, sizer, message, size):
-        QDialog.__init__(self)
-        self.sizer = sizer
-        self.setupUi(self)
-        self.ok.clicked.connect(self.change)
-        self.textEdit.returnPressed.connect(self.ok.click)
-        self.label.setText(message)
-        self.label2.setText(size)
-
-    def change(self):
-        if not self.textEdit.text():
-            self.sizer.basewidth = self.sizer.w
-            self.sizer.baseheight = self.sizer.h
-        else:
-            self.sizer.basewidth = int(self.textEdit.text())
-            self.sizer.baseheight = int(self.textEdit.text())
-        self.close()
-
-    def exit_func(self):
-        self.sizer.exit = True
-        self.close()
-
-
-class CustomDialog_parser(QDialog, Ui_Dialog_parser, QThread):
-    """Класс для кастомизации диалогового окна"""
-
-    def __init__(self, mainwindow, parser):
-        QDialog.__init__(self)
-        self.mainwindow = mainwindow
-        self.parser = parser
-        self.setupUi(self)
-        self.ok.clicked.connect(self.change)
-
-    def change(self):
-        if self.sephora.isChecked():
-            parser = Sephora_process
-            sephora_process = StartNewProcess(self.mainwindow, parser)
-            self.mainwindow.moveToThread(sephora_process)
-            sephora_process.start()
-        if self.ildebote.isChecked():
-            parser = Ildebote_process
-            ildebote_process = StartNewProcess(self.mainwindow, parser)
-            self.mainwindow.moveToThread(ildebote_process)
-            ildebote_process.start()
-        if self.kupivip.isChecked():
-            parser = Kupivip_process
-            kupivip_process = StartNewProcess(self.mainwindow, parser)
-            self.mainwindow.moveToThread(kupivip_process)
-            kupivip_process.start()
-        if self.akusherstvo.isChecked():
-            parser = Akusherstvo_process
-            akusherstvo_process = StartNewProcess(self.mainwindow, parser)
-            self.mainwindow.moveToThread(akusherstvo_process)
-            akusherstvo_process.start()
-        if self.utkonos.isChecked():
-            parser = Utkonos_process
-            utkonos_process = StartNewProcess(self.mainwindow, parser)
-            self.mainwindow.moveToThread(utkonos_process)
-            utkonos_process.start()
-
-        if self.vseinstrumenti.isChecked():
-            parser = Vseinstrumenti_process
-            vseinstrumenti_process = StartNewProcess(self.mainwindow, parser)
-            self.mainwindow.moveToThread(vseinstrumenti_process)
-            vseinstrumenti_process.start()
-        self.close()
-
-    def exit_func(self):
-        self.close()
-
 
 class WebThread(QThread):
     """Отдельный поток для работы браузера"""
@@ -133,40 +49,6 @@ class GlobalHotKey(QThread):
         global_hotkey.hotkey(self.mainwindow)
 
 
-class WriterCsv(QThread):
-    """Отдельный поток для работы чата"""
-
-    def __init__(self, mainwindow):
-        super(WriterCsv, self).__init__()
-        self.mainwindow = mainwindow
-        self.queue = Queue()
-
-    def run(self):
-        while True:
-            self.queue.get()
-            # income_data = self.queue.get()
-            # if isinstance(income_data, list):
-            #     partner_name = income_data[0]["Имя партнера"]
-            #     for n, a in enumerate(income_data, 1):
-            #         self.mainwindow.chat_print_signal.emit((f'---№{n}\n'))
-            #         action = ''
-            #         for key, value in a.items():
-            #             action = action + "".join('{:_<20}: {}\n'.format(key, value))
-            #         self.mainwindow.chat_print_signal.emit(action)
-            #     self.mainwindow.chat_print_signal.emit('*' * 60)
-            #     self.mainwindow.chat_print_signal.emit(
-            #         f'Имя партнера: {partner_name}, загружено акций: {len(income_data)}')
-            #     self.mainwindow.chat_print_signal.emit('*' * 60)
-            # elif callable(income_data):
-            #     self.queue.get()
-            # elif isinstance(income_data, tuple):
-            #     self.mainwindow.set_partner_name_signal.emit(income_data[0])
-            # elif isinstance(income_data, str):
-            #     if income_data:
-            #         self.mainwindow.chat_print_signal.emit(income_data)
-            # else:
-            #     pass
-
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     """Основной поток интерфейса"""
@@ -185,8 +67,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ghk.start()
         self.try_start_browser = 0
         self.browser = None
-        self.writer_csv_queue = WriterCsv(self)
-        self.writer_csv_queue.start()
+        self.queue = MyQueue(self)
+        self.queue.start()
         self.init_buttons()
         self.init_signals()
 
@@ -194,8 +76,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     chat_print_signal = pyqtSignal(str)
     del_partner_name_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
-    change_progress_signal = pyqtSignal(int, int)
-    reset_progress_signal = pyqtSignal()
+    # change_progress_signal = pyqtSignal(int, int)
+    # reset_progress_signal = pyqtSignal()
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
@@ -221,27 +103,27 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sizer:
             self.sizer.exit = True
 
-    @pyqtSlot(int, int)
-    def change_progress_slot(self, value, max):
-        self.progress.setMaximum(max)
-        self.progress.setValue(value)
-
-    def change_progress(self, value, max):
-        self.writer_csv_queue.queue.put(self.change_progress_signal.emit(value, max))
-
-    @pyqtSlot()
-    def reset_progress_slot(self):
-        self.progress.reset()
+    # @pyqtSlot(int, int)
+    # def change_progress_slot(self, value, max):
+    #     self.progress.setMaximum(max)
+    #     self.progress.setValue(value)
+    #
+    # def change_progress(self, value, max):
+    #     self.queue.queue.put(self.change_progress_signal.emit(value, max))
+    #
+    # @pyqtSlot()
+    # def reset_progress_slot(self):
+    #     self.progress.reset()
 
     def init_signals(self):
-        self.moveToThread(self.writer_csv_queue)
+        self.moveToThread(self.queue)
         self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
-        self.change_progress_signal.connect(self.change_progress_slot)
-        self.reset_progress_signal.connect(self.reset_progress_slot)
+        # self.change_progress_signal.connect(self.change_progress_slot)
+        # self.reset_progress_signal.connect(self.reset_progress_slot)
 
     def init_buttons(self):
         now = datetime.now()

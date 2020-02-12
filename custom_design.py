@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QProgressBar
-
+import helpers.helper as helper
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -11,6 +11,7 @@ class Ui_MainWindow(object):
         self.path_window = QtWidgets.QTextBrowser(self.centralwidget)
         self.path_window.setGeometry(QtCore.QRect(10, 30, 681, 31))
         self.path_window.setObjectName('path_window')
+        self.path_window.append(helper.result_path)
         self.path_buttom = QtWidgets.QPushButton(self.centralwidget)
         self.path_buttom.setGeometry(QtCore.QRect(700, 30, 140, 31))
 
