@@ -4,7 +4,6 @@ import sys
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
-
 from MyQueue import MyQueue
 from custom_design import Ui_MainWindow
 from dialogs import CustomDialog_resizer, CustomDialog_parser
@@ -16,8 +15,10 @@ import global_hotkey
 import logger
 import helpers.helper as helper
 
-# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." main_window.py
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
+# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." --additional-hooks-dir=helpers main_window.py
+# pyinstaller main_window.spec
+
 
 
 sys.excepthook = helper.exception_hook
