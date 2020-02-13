@@ -13,18 +13,18 @@ from bs4 import BeautifulSoup
 import helpers.helper as helper
 
 
-class Parsers:
-    def __init__(self, gui):
-        self.generate_csv()
-        self.actions_data = []
-        self.gui = gui
-        self.count_acusherstvo = 0
-        self.count_sephora = 0
+# class Parsers:
+#     def __init__(self, gui):
+#         self.generate_csv()
+#         self.actions_data = []
+#         self.gui = gui
+#         self.count_acusherstvo = 0
+#         self.count_sephora = 0
 
-    def generate_csv(self):
-        with open(helper.actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
-            writer = csv.writer(csv_file, delimiter=";")
-            writer.writerow(helper.HEADERS)
+    # def generate_csv(self):
+    #     with open(helper.actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
+    #         writer = csv.writer(csv_file, delimiter=";")
+    #         writer.writerow(helper.HEADERS)
 
     # def print_result(self, partner_name):
     #     for n, a in enumerate(self.actions_data, 1):

@@ -4,12 +4,11 @@ import sys
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
-from MyQueue import MyQueue
+from helpers.MyQueue import MyQueue
 from custom_design import Ui_MainWindow
-from dialogs import CustomDialog_resizer, CustomDialog_parser
+from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from web_driver import WebDriver
-from parsers import Parsers
 from image_sizer import Resizer
 import global_hotkey
 import logger
@@ -63,7 +62,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.web_thread = None
         self.sizer = None
         self.web_thread_run = False
-        self.parser = Parsers(gui=self)
         self.ghk = GlobalHotKey(self)
         self.ghk.start()
         self.try_start_browser = 0
@@ -127,8 +125,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.reset_progress_signal.connect(self.reset_progress_slot)
 
     def init_buttons(self):
-        now = datetime.now()
-        self.date_start.append(now.strftime('%d.%m.%Y'))
+        helper.generate_csv()
+        self.date_start.append(helper.DATA_NOW)
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)
@@ -196,8 +194,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog.exec_()
 
     def show_parser_checklist(self):
-        dialog = CustomDialog_parser(self, self.parser)
-        self.moveToThread(dialog)
+        dialog = CustomDialog_parser(self)
         dialog.show()
         dialog.exec_()
 

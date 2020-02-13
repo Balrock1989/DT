@@ -34,7 +34,10 @@ class Vseinstrumenti_process(Process):
             desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
             incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
             incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
-            date_start, date_end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
+            try:
+                date_start, date_end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
+            except Exception:
+                date_start, date_end = helper.get_date_now_to_end_month()
             action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': url, 'Тип купона': action_type}

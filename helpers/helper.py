@@ -26,11 +26,20 @@ actions_csv_path = os.path.join('C:\\', home_path, 'Desktop', "actions.csv")
 actions_csv_path = os.path.normpath(actions_csv_path)
 result_path = os.path.join('C:\\', home_path, 'Desktop', 'result')
 result_path = os.path.normpath(result_path)
+DATA_NOW = datetime.now().strftime('%d.%m.%Y')
+
+
+def generate_csv():
+    with open(actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file, delimiter=";")
+        writer.writerow(HEADERS)
 
 def write_csv(action):
     with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
         writer.writerow(action)
+
+
 
 
 def one_date_return_two(incoming_date):
@@ -50,7 +59,7 @@ def get_double_date(first, second):
     try:
         first = get_one_date(first)
     except Exception:
-        first = datetime.now().strftime('%d.%m.%Y')
+        first = DATA_NOW
     try:
         second = get_one_date(second)
     except Exception:
@@ -73,3 +82,10 @@ def get_one_date(text):
             month = num
     date = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
     return date
+
+def get_date_now_to_end_month():
+    date_start = DATA_NOW
+    date_end = datetime.strptime(date_start, '%d.%m.%Y')
+    day_on_month = monthrange(year=int(date_end.year), month=int(date_end.month))
+    date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
+    return date_start, date_end
