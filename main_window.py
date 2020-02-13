@@ -17,12 +17,10 @@ import logger
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
-# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." --additional-hooks-dir=helpers main_window.py
 # pyinstaller main_window.spec
 
-
-
 sys.excepthook = helper.exception_hook
+
 
 class WebThread(QThread):
     """Отдельный поток для работы браузера"""
