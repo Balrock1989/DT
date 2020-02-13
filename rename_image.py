@@ -7,7 +7,7 @@ from PIL import Image
 
 class Rename:
 
-    def rename_image(self, gui, path, end_data, checkbox):
+    def rename_image(self, gui, end_data, checkbox):
         """Обработка загруженных баннеров, форматирование имени"""
         """
         :param gui:  MainWindow интерфейс
@@ -18,11 +18,11 @@ class Rename:
         """
         i = 1
         remove = 0
-        path = os.path.normpath(path)
+        path = gui.path_window.toPlainText()
         path_end_data = end_data.replace('.', '_')
         zip_target = os.path.join(path, f'do_{path_end_data}.zip')
         result = os.path.join(path, f'do_{path_end_data}')
-        if path == '.' or not gui.path_window.toPlainText():
+        if len(path) == '.' or not gui.path_window.toPlainText():
             gui.chat_print_signal.emit('Необходимо указать путь до папки')
             return
         if not os.path.exists(result) and checkbox:

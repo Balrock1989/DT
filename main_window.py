@@ -1,26 +1,23 @@
-from datetime import datetime
 import os
 import sys
+
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QSpinBox
 from helpers.my_queue import MyQueue
-from custom_design import Ui_MainWindow
+from design.custom_design import Ui_MainWindow
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from web_driver import WebDriver
 from image_sizer import Resizer
-import global_hotkey
-import logger
+from helpers import global_hotkey, logger
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
-# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." --additional-hooks-dir=helpers main_window.py
 # pyinstaller main_window.spec
 
-
-
 sys.excepthook = helper.exception_hook
+
 
 class WebThread(QThread):
     """Отдельный поток для работы браузера"""
@@ -49,7 +46,6 @@ class GlobalHotKey(QThread):
         global_hotkey.hotkey(self.mainwindow)
 
 
-
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     """Основной поток интерфейса"""
 
@@ -75,8 +71,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     chat_print_signal = pyqtSignal(str)
     del_partner_name_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
-    # change_progress_signal = pyqtSignal(int, int)
-    # reset_progress_signal = pyqtSignal()
+    change_progress_signal = pyqtSignal(int)
+    reset_progress_signal = pyqtSignal()
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
@@ -102,32 +98,31 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sizer:
             self.sizer.exit = True
 
-    # @pyqtSlot(int, int)
-    # def change_progress_slot(self, value, max):
-    #     self.progress.setMaximum(max)
-    #     self.progress.setValue(value)
-    #
-    # def change_progress(self, value, max):
-    #     self.queue.queue.put(self.change_progress_signal.emit(value, max))
-    #
-    # @pyqtSlot()
-    # def reset_progress_slot(self):
-    #     self.progress.reset()
+    @pyqtSlot(int)
+    def change_progress_slot(self, max):
+        value = self.progress_bar.value() + 1
+        self.progress_bar.setValue(value)
+        if max:
+            self.progress_bar.setValue(0)
+            self.progress_bar.setMaximum(max)
+
+    @pyqtSlot()
+    def reset_progress_slot(self):
+        self.progress_bar.reset()
 
     def init_signals(self):
-        self.moveToThread(self.queue)
-        self.moveToThread(self.ghk)
+        # self.moveToThread(self.queue)
+        # self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
-        # self.change_progress_signal.connect(self.change_progress_slot)
-        # self.reset_progress_signal.connect(self.reset_progress_slot)
+        self.change_progress_signal.connect(self.change_progress_slot)
+        self.reset_progress_signal.connect(self.reset_progress_slot)
 
     def init_buttons(self):
-        now = datetime.now()
         helper.generate_csv()
-        self.date_start.append(now.strftime('%d.%m.%Y'))
+        self.date_start.append(helper.DATA_NOW)
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)
@@ -152,20 +147,18 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def rename(self):
         rename = Rename()
         rename.rename_image(gui=self,
-                            path=self.dir_name,
                             end_data=self.date_end.toPlainText(),
                             checkbox=self.rename_checbox.isChecked())
 
     def resizer(self):
         self.sizer = Resizer()
         self.sizer.exit = False
-        self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
-
+        self.sizer.resize_image(gui=self, end_data=self.date_end.toPlainText())
 
     def launch_thread_dt(self):
         if self.web_thread is None:
             self.web_thread = WebThread(mainwindow=self)
-            self.moveToThread(self.web_thread)
+            # self.moveToThread(self.web_thread)
             self.web_thread.start()
         else:
             self.try_start_browser += 1
@@ -194,7 +187,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def show_parser_checklist(self):
         dialog = CustomDialog_parser(self)
-        self.moveToThread(dialog)
         dialog.show()
         dialog.exec_()
 

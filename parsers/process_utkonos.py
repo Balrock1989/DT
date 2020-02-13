@@ -39,3 +39,4 @@ class Utkonos_process(Process):
             self.queue.put(helper.write_csv(action))
         self.queue.put(actions_data)
         self.queue.put((partner_name,))
+        self.queue.put('progress')
