@@ -73,3 +73,8 @@ def get_one_date(text):
             month = num
     date = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
     return date
+
+def generate_csv():
+    with open(actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file, delimiter=";")
+        writer.writerow(HEADERS)

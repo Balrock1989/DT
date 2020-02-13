@@ -10,9 +10,10 @@ class StartNewProcess(QThread):
         self.parser = parser
 
     def run(self):
+        # TODO Запускать отсюда же браузер
         self.parser = self.parser(self.queue)
         self.mainwindow.chat_print_signal.emit(f'Началась загрузка {self.parser}')
         self.parser.daemon = False
         self.parser.start()
-        # self.parser.join()
+
 

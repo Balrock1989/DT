@@ -2,6 +2,8 @@ import pyautogui
 import win32con
 import win32gui
 
+# нужно ставить pywin32
+
 dt_process = None
 chromedriver_process = None
 
