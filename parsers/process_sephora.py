@@ -76,5 +76,3 @@ class Sephora_thread(Thread):
                 with self.lock:
                     self.queue.put(helper.write_csv(action))
                     self.actions_data.append(action)
-
-
