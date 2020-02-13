@@ -150,15 +150,13 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def rename(self):
         rename = Rename()
         rename.rename_image(gui=self,
-                            path=self.dir_name,
                             end_data=self.date_end.toPlainText(),
                             checkbox=self.rename_checbox.isChecked())
 
     def resizer(self):
         self.sizer = Resizer()
         self.sizer.exit = False
-        self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
-
+        self.sizer.resize_image(gui=self, end_data=self.date_end.toPlainText())
 
     def launch_thread_dt(self):
         if self.web_thread is None:

@@ -13,9 +13,9 @@ class Resizer:
         self.exit = False
         self.count = ''
 
-    def resize_image(self, gui, path, end_data):
+    def resize_image(self, gui, end_data):
         """Изменение размера изображений"""
-        path = os.path.normpath(path)
+        path = gui.path_window.toPlainText()
         if path == '.' or not gui.path_window.toPlainText():
             gui.chat_print_signal.emit('Необходимо указать путь до папки')
             return

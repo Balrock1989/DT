@@ -34,6 +34,11 @@ def generate_csv():
         writer = csv.writer(csv_file, delimiter=";")
         writer.writerow(HEADERS)
 
+def generate_temp_csv():
+    with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file, delimiter=";")
+        writer.writerow(HEADERS)
+
 def write_csv(action):
     with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")

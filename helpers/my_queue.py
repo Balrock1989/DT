@@ -34,7 +34,6 @@ class MyQueue(QThread):
                 if 'progress' in income_data:
                     self.mainwindow.change_progress_signal.emit(0)
                     if self.mainwindow.progress_bar.value() == self.mainwindow.progress_bar.maximum() - 1:
-                        print("вызван ресет")
                         self.mainwindow.reset_progress_signal.emit()
                     continue
                 if income_data:
