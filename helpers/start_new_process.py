@@ -13,7 +13,7 @@ class StartNewProcess(Thread):
     def run(self):
         self.process = self.process(self.queue)
         self.mainwindow.chat_print_signal.emit(f'Запущен процесс: {self.process}')
-        self.process.daemon = False
+        self.process.daemon = True
         self.process.start()
 
 

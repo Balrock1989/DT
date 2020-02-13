@@ -111,8 +111,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.progress_bar.reset()
 
     def init_signals(self):
-        self.moveToThread(self.queue)
-        self.moveToThread(self.ghk)
+        # self.moveToThread(self.queue)
+        # self.moveToThread(self.ghk)
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
@@ -158,7 +158,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def launch_thread_dt(self):
         if self.web_thread is None:
             self.web_thread = WebThread(mainwindow=self)
-            self.moveToThread(self.web_thread)
+            # self.moveToThread(self.web_thread)
             self.web_thread.start()
         else:
             self.try_start_browser += 1

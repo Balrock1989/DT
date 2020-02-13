@@ -1,8 +1,5 @@
-/gui.log
 /auth.py
 .json
-/main_window.spec
 /gui.spec
 .log
-/result.csv
-/trash/google.py
+/trash/
