@@ -9,20 +9,17 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from datetime import datetime, timedelta
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
+from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException, NoSuchElementException
 import auth
 import helpers.helper as helper
-
 import win32
 
-# TODO Писать сколько акций добавлено после add actions
 # TODO Добавить комменты
 
 class WebDriver:

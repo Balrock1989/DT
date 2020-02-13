@@ -2,6 +2,7 @@ import os
 import shutil
 import zipfile
 from PIL import Image
+# Нужно ставить Pillow
 
 
 class Rename:

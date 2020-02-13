@@ -1,7 +1,7 @@
 import os
 import shutil
-
 from PIL import Image
+# Нужно ставить Pillow
 
 
 class Resizer:
