@@ -6,7 +6,7 @@ class StartNewProcess(QThread):
     def __init__(self, mainwindow, parser):
         super(StartNewProcess, self).__init__()
         self.mainwindow = mainwindow
-        self.queue = mainwindow.writer_csv_queue.queue
+        self.queue = mainwindow.queue.queue
         self.parser = parser
 
     def run(self):
