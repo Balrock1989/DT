@@ -45,8 +45,6 @@ def write_csv(action):
         writer.writerow(action)
 
 
-
-
 def one_date_return_two(incoming_date):
     """ принимает дату в формате 1 февраля 2019, возвращает 2 даты в формате 01.02.2019 и до конца месяца """
     day, month, year = incoming_date.split(" ")
