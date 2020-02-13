@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog
-from custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
-from custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
+from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
+from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from parsers.process_akusherstvo import Akusherstvo_process
 from parsers.process_ildebote import Ildebote_process
 from parsers.process_kupivip import Kupivip_process

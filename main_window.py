@@ -1,19 +1,16 @@
-from datetime import datetime
 import os
 import sys
-from multiprocessing import Queue
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
+from PyQt5.QtWidgets import QFileDialog, QSpinBox
 from helpers.my_queue import MyQueue
-from custom_design import Ui_MainWindow
+from design.custom_design import Ui_MainWindow
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from web_driver import WebDriver
 from image_sizer import Resizer
-import global_hotkey
-import logger
+from helpers import global_hotkey, logger
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py

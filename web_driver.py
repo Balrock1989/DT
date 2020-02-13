@@ -9,18 +9,18 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from datetime import datetime, timedelta
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import WebDriverException, UnexpectedAlertPresentException, TimeoutException, \
+from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException, NoSuchElementException
 import auth
 import helpers.helper as helper
 
-import win32
+from helpers import win32
+
 
 # TODO Писать сколько акций добавлено после add actions
 # TODO Добавить комменты
@@ -141,7 +141,6 @@ class WebDriver:
                 try:
                     full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)')).text.strip()
                 except AttributeError:
-                    self.gui.log.exception('Неизвестный формат даты')
                     date_end = now + timedelta(days=180)
                     full_date = str(now.strftime('%d.%m.%Y')) + "-" + date_end.strftime('%d.%m.%Y')
                 temp = ''.join(str(full_date).split())
