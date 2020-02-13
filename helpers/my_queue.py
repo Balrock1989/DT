@@ -31,6 +31,12 @@ class MyQueue(QThread):
             elif isinstance(income_data, tuple):
                 self.mainwindow.set_partner_name_signal.emit(income_data[0])
             elif isinstance(income_data, str):
+                if 'progress' in income_data:
+                    self.mainwindow.change_progress_signal.emit(0)
+                    if self.mainwindow.progress_bar.value() == self.mainwindow.progress_bar.maximum() - 1:
+                        print("вызван ресет")
+                        self.mainwindow.reset_progress_signal.emit()
+                    continue
                 if income_data:
                     self.mainwindow.chat_print_signal.emit(income_data)
             else:

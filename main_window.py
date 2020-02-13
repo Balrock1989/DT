@@ -1,10 +1,12 @@
 from datetime import datetime
 import os
 import sys
+from multiprocessing import Queue
+
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QSpinBox, QDialog
-from helpers.MyQueue import MyQueue
+from helpers.my_queue import MyQueue
 from custom_design import Ui_MainWindow
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
@@ -49,7 +51,6 @@ class GlobalHotKey(QThread):
         global_hotkey.hotkey(self.mainwindow)
 
 
-
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     """Основной поток интерфейса"""
 
@@ -75,8 +76,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     chat_print_signal = pyqtSignal(str)
     del_partner_name_signal = pyqtSignal(str)
     set_exit_signal = pyqtSignal()
-    # change_progress_signal = pyqtSignal(int, int)
-    # reset_progress_signal = pyqtSignal()
+    change_progress_signal = pyqtSignal(int)
+    reset_progress_signal = pyqtSignal()
 
     @pyqtSlot(str)
     def set_partner_name_slot(self, text):
@@ -102,17 +103,17 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.sizer:
             self.sizer.exit = True
 
-    # @pyqtSlot(int, int)
-    # def change_progress_slot(self, value, max):
-    #     self.progress.setMaximum(max)
-    #     self.progress.setValue(value)
-    #
-    # def change_progress(self, value, max):
-    #     self.queue.queue.put(self.change_progress_signal.emit(value, max))
-    #
-    # @pyqtSlot()
-    # def reset_progress_slot(self):
-    #     self.progress.reset()
+    @pyqtSlot(int)
+    def change_progress_slot(self, max):
+        value = self.progress_bar.value() + 1
+        self.progress_bar.setValue(value)
+        if max:
+            self.progress_bar.setValue(0)
+            self.progress_bar.setMaximum(max)
+
+    @pyqtSlot()
+    def reset_progress_slot(self):
+        self.progress_bar.reset()
 
     def init_signals(self):
         self.moveToThread(self.queue)
@@ -121,8 +122,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)
-        # self.change_progress_signal.connect(self.change_progress_slot)
-        # self.reset_progress_signal.connect(self.reset_progress_slot)
+        self.change_progress_signal.connect(self.change_progress_slot)
+        self.reset_progress_signal.connect(self.reset_progress_slot)
 
     def init_buttons(self):
         helper.generate_csv()
@@ -131,7 +132,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)
         self.resize_buttom.clicked.connect(self.resizer)
-        self.parser_button.clicked.connect(self.parsers)
+        self.parser_button.clicked.connect(self.show_parser_checklist)
 
     # def keyPressEvent(self, e):
     #     if e.key() == Qt.Key_Escape:
@@ -160,8 +161,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer.exit = False
         self.sizer.resize_image(gui=self, path=self.dir_name, end_data=self.date_end.toPlainText())
 
-    def parsers(self):
-        self.show_parser_checklist()
 
     def launch_thread_dt(self):
         if self.web_thread is None:

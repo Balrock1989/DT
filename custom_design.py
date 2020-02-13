@@ -145,8 +145,8 @@ class Ui_MainWindow(object):
         self.resize_buttom.setObjectName('resize_buttom')
         self.resize_buttom.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
-        self.progress = QProgressBar(self)
-        self.progress.setGeometry(10, 63, 585, 15)
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setGeometry(10, 63, 585, 15)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)

@@ -34,6 +34,7 @@ class Sephora_process(Process):
             thread.join()
         self.queue.put(actions_data)
         self.queue.put((partner_name,))
+        self.queue.put('progress')
 
 
 class Sephora_thread(Thread):
@@ -75,4 +76,5 @@ class Sephora_thread(Thread):
                 with self.lock:
                     self.queue.put(helper.write_csv(action))
                     self.actions_data.append(action)
+
 
