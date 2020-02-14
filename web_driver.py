@@ -326,7 +326,6 @@ class WebDriver:
             out.close()
             self.gui.chat_print_signal.emit(f'{name} успешно скачан')
 
-        self.driver.switch_to_window(self.dt_window)
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
