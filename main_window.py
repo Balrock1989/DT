@@ -1,5 +1,6 @@
 import os
 import sys
+from multiprocessing import freeze_support
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, QThread, pyqtSignal, pyqtSlot
@@ -200,4 +201,5 @@ def main():
 
 
 if __name__ == '__main__':
+    freeze_support()
     main()
