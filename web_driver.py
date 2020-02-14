@@ -332,7 +332,7 @@ class WebDriver:
         if len(self.driver.window_handles) == 2:
             self.driver.switch_to.window(self.ad_window)
         try:
-            wait = WebDriverWait(self.driver, 5, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
+            wait = WebDriverWait(self.driver, 2, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[class="banner_view"]')))
         except TimeoutException:
             self.gui.chat_print_signal.emit('Нужно зайти на страницу с баннерами')
