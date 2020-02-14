@@ -49,6 +49,7 @@ class Akusherstvo_process(Process):
             thread.join()
         self.queue.put((partner_name,))
         self.queue.put(actions_data)
+        self.queue.put('progress')
 
 
 class Akusherstvo_thread(Thread):

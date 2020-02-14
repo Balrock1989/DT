@@ -18,8 +18,11 @@ from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutE
     NoSuchFrameException, NoSuchElementException
 import auth
 import helpers.helper as helper
-import win32
 
+from helpers import win32
+
+
+# TODO Писать сколько акций добавлено после add actions
 # TODO Добавить комменты
 
 class WebDriver:
@@ -79,8 +82,8 @@ class WebDriver:
         self.gui.chat_print_signal.emit(f'Дата начала акции:{self.start_data},'
                                         f' Дата окончания акции:{self.end_data}, url: {self.url}')
         if not self.start_data:
-            now = datetime.now()
-            self.start_data = now.strftime('%d.%m.%Y')
+            self.start_data = helper.DATA_NOW
+        self.gui.change_progress_signal.emit(len(links))
         for link in links:
             if self.exit:
                 self.gui.chat_print_signal.emit(f'Загрузка прервана пользователем')
@@ -110,6 +113,7 @@ class WebDriver:
             WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, 'input[value="Сохранить"]'))).click()
             self.gui.chat_print_signal.emit(f'файл {size} успешно загружен')
+            self.gui.queue.queue.put('progress')
         self.gui.chat_print_signal.emit('#' * 60)
         self.gui.chat_print_signal.emit('Загрузка завершена')
 
@@ -127,6 +131,7 @@ class WebDriver:
         self.gui.chat_print_signal.emit(f'Всего будет обработано акций {len(actions)}')
         partner_name = ''
         if actions:
+            self.gui.change_progress_signal.emit(len(actions))
             for act in actions:
                 action = OrderedDict()
                 action['Имя партнера'] = act.findAll('b', text=True)[1].text.strip()
@@ -136,7 +141,6 @@ class WebDriver:
                 try:
                     full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)')).text.strip()
                 except AttributeError:
-                    self.gui.log.exception('Неизвестный формат даты')
                     date_end = now + timedelta(days=180)
                     full_date = str(now.strftime('%d.%m.%Y')) + "-" + date_end.strftime('%d.%m.%Y')
                 temp = ''.join(str(full_date).split())
@@ -152,6 +156,7 @@ class WebDriver:
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
                 self.gui.queue.queue.put(helper.write_csv(action))
+                self.gui.queue.queue.put('progress')
             self.gui.set_partner_name_signal.emit(partner_name)
             for n, a in enumerate(self.actions_data, 1):
                 self.gui.chat_print_signal.emit(f'---№{n}\n')
@@ -184,7 +189,11 @@ class WebDriver:
 
         def add():
             partner_name = ''
-            count = 0
+            with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
+                csv_data = csv.DictReader(csv_file, delimiter=';')
+                suitable_actions = [action for action in csv_data if action['Имя партнера'] == self.gui.partner_name.currentText()]
+            count = len(suitable_actions)
+            self.gui.change_progress_signal.emit(count)
             with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
@@ -291,17 +300,14 @@ class WebDriver:
                     sleep(1)
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                     self.driver.get(auth.coupun_url + id)
-                    count += 1
+                    self.gui.queue.queue.put('progress')
             os.remove(helper.actions_csv_path)
             shutil.move('actions_temp.csv', helper.actions_csv_path)
             self.gui.del_partner_name_signal.emit(partner_name)
             self.gui.chat_print_signal.emit(f'Акции успешно добавлены ({count}шт.)') if count \
                 else self.gui.chat_print_signal.emit('Нет акций выбранного партнера')
             win32.show_process()
-
-        with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
-            writer = csv.writer(csv_file, delimiter=";")
-            writer.writerow(helper.HEADERS)
+        helper.generate_temp_csv()
         self.driver.switch_to_window(self.dt_window)
         threading.Thread(target=add, args=(), daemon=True).start()
 
