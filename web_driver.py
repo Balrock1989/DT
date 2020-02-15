@@ -19,7 +19,7 @@ from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutE
 import auth
 import helpers.helper as helper
 
-from helpers import win32
+from helpers import win32, my_queue
 
 
 # TODO Писать сколько акций добавлено после add actions
@@ -158,12 +158,7 @@ class WebDriver:
                 self.gui.queue.queue.put(helper.write_csv(action))
                 self.gui.queue.queue.put('progress')
             self.gui.set_partner_name_signal.emit(partner_name)
-            for n, a in enumerate(self.actions_data, 1):
-                self.gui.chat_print_signal.emit(f'---№{n}\n')
-                action = ''
-                for key, value in a.items():
-                    action = action + "".join('{:_<20}: {}\n'.format(key, value))
-                self.gui.chat_print_signal.emit(action)
+            self.gui.queue.print_download_actions_in_chat(self.actions_data)
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
