@@ -39,10 +39,11 @@ def generate_temp_csv():
         writer = csv.writer(csv_file, delimiter=";")
         writer.writerow(HEADERS)
 
-def write_csv(action):
-    with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
-        writer.writerow(action)
+def write_csv(actions):
+    for action in actions:
+        with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
+            writer.writerow(action)
 
 
 def one_date_return_two(incoming_date):

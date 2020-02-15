@@ -34,6 +34,7 @@ class Sephora_process(Process):
             thread.join()
         self.queue.put(actions_data)
         self.queue.put((partner_name,))
+        self.queue.put(helper.write_csv(actions_data))
         self.queue.put('progress')
 
 
@@ -74,5 +75,4 @@ class Sephora_thread(Thread):
                           'Дата окончания': date_end, 'Условия акции': desc,
                           'Купон': code, 'URL': url, 'Тип купона': action_type}
                 with self.lock:
-                    self.queue.put(helper.write_csv(action))
                     self.actions_data.append(action)

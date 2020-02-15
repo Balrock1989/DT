@@ -155,8 +155,8 @@ class WebDriver:
                 action['Условия акции'] = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 self.actions_data.append(action)
-                self.gui.queue.queue.put(helper.write_csv(action))
                 self.gui.queue.queue.put('progress')
+            self.gui.queue.queue.put(helper.write_csv(self.actions_data))
             self.gui.set_partner_name_signal.emit(partner_name)
             self.gui.queue.print_download_actions_in_chat(self.actions_data)
             if self.driver.current_window_handle != self.ad_window and \

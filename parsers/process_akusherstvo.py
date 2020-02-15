@@ -48,6 +48,7 @@ class Akusherstvo_process(Process):
         for thread in threads:
             thread.join()
         self.queue.put((partner_name,))
+        self.queue.put(helper.write_csv(actions_data))
         self.queue.put(actions_data)
         self.queue.put('progress')
 
@@ -88,5 +89,4 @@ class Akusherstvo_thread(Thread):
                   'Дата окончания': date_end, 'Условия акции': desc,
                   'Купон': code, 'URL': main_url, 'Тип купона': action_type}
         with self.lock:
-            self.queue.put(helper.write_csv(action))
             self.actions_data.append(action)

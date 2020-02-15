@@ -1,4 +1,5 @@
 from multiprocessing import Queue
+from time import sleep
 
 from PyQt5.QtCore import QThread
 

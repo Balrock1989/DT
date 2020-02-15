@@ -42,7 +42,8 @@ class Vseinstrumenti_process(Process):
                       'Дата окончания': date_end, 'Условия акции': desc,
                       'Купон': code, 'URL': url, 'Тип купона': action_type}
             actions_data.append(action)
-            self.queue.put(helper.write_csv(action))
+
         self.queue.put(actions_data)
+        self.queue.put(helper.write_csv(actions_data))
         self.queue.put((partner_name,))
         self.queue.put('progress')
