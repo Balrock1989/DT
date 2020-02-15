@@ -110,7 +110,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def reset_progress_slot(self):
         self.progress_bar.reset()
-        print("Был вызван ресет")
+
 
     def init_signals(self):
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
