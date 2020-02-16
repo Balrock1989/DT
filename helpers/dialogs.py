@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
+from parsers.butic import Butic_process
 from parsers.process_akusherstvo import Akusherstvo_process
 from parsers.process_ildebote import Ildebote_process
 from parsers.process_kupivip import Kupivip_process
@@ -50,6 +51,11 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             parser = Vseinstrumenti_process
             vseinstrumenti_process = StartNewProcess(self.mainwindow, parser)
             vseinstrumenti_process.start()
+            self.count_process += 1
+        if self.butic.isChecked():
+            parser = Butic_process
+            butic_process = StartNewProcess(self.mainwindow, parser)
+            butic_process.start()
             self.count_process += 1
         self.mainwindow.change_progress_signal.emit(self.count_process)
         self.close()

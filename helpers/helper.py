@@ -1,8 +1,12 @@
 import csv
 import os
 import re
+import threading
 from calendar import monthrange
 from datetime import datetime
+from random import randint
+
+import requests
 
 MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
               "05": "мая", "06": "июн", "07": "июл", "08": "авг",
@@ -34,10 +38,12 @@ def generate_csv():
         writer = csv.writer(csv_file, delimiter=";")
         writer.writerow(HEADERS)
 
+
 def generate_temp_csv():
     with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file, delimiter=";")
         writer.writerow(HEADERS)
+
 
 def write_csv(actions):
     for action in actions:
@@ -87,9 +93,42 @@ def get_one_date(text):
     date = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
     return date
 
+
 def get_date_now_to_end_month():
     date_start = DATA_NOW
     date_end = datetime.strptime(date_start, '%d.%m.%Y')
     day_on_month = monthrange(year=int(date_end.year), month=int(date_end.month))
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_start, date_end
+
+
+def banner_downloader(links, queue):
+    """Загрузка баннеров с сайта"""
+    if links:
+        if not os.path.exists(result_path):
+            os.mkdir(result_path)
+        queue.put(f'Всего будет скачано {len(links)} баннеров')
+        queue.put(f'Результаты здесь: {os.path.abspath(result_path)}')
+
+        threads = [threading.Thread(target=downloader_run, args=(link, queue), daemon=True) for link in links]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        queue.put('Загрузка завершена')
+    else:
+        queue.put('Баннеры не найдены на этой странице')
+
+
+def downloader_run(link, queue):
+    name = randint(1000000, 9999999)
+    format = re.search(r'(\w+)$', link).group(1)
+    name = str(name) + "." + format
+    path = os.path.join(result_path, name)
+    p = requests.get(link)
+    out = open(path, 'wb')
+    out.write(p.content)
+    out.close()
+    queue.put(f'{name} успешно скачан')
+
+

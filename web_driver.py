@@ -310,17 +310,6 @@ class WebDriver:
     def download_banners(self):
         """Загрузка баннеров с сайта"""
 
-        def run(link):
-            format = re.search(r'(\w+)$', link).group(1)
-            name = str(self.name_index) + "." + format
-            self.name_index += 1
-            path = os.path.join(helper.result_path, name)
-            p = requests.get(link)
-            out = open(path, 'wb')
-            out.write(p.content)
-            out.close()
-            self.gui.chat_print_signal.emit(f'{name} успешно скачан')
-
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
@@ -335,20 +324,5 @@ class WebDriver:
             return
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
-        if links:
-            if self.exit:
-                self.gui.chat_print_signal.emit('Процесс был прерван пользователем.')
-                win32.show_process()
-                return
-            if not os.path.exists(helper.result_path):
-                os.mkdir(helper.result_path)
-            self.gui.chat_print_signal.emit(f'Всего будет скачано {len(links)} баннеров')
-            self.gui.chat_print_signal.emit(f'Результаты здесь: {os.path.abspath(helper.result_path)}')
-            threads = [threading.Thread(target=run, args=(link,), daemon=True) for link in links]
-            for thread in threads:
-                thread.start()
-            for thread in threads:
-                thread.join()
-            self.gui.chat_print_signal.emit('Загрузка завершена')
-        else:
-            self.gui.chat_print_signal.emit('Баннеры не найдены на этой странице')
+        helper.banner_downloader(links, self.gui.queue.queue)
+
