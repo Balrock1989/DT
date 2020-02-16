@@ -15,7 +15,7 @@ class Ildebote_process(Process):
         return "ИльДэБотэ"
 
     def run(self):
-        partner_name = 'ИльДэБотэ'
+        partner = 'ИльДэБотэ'
         actions_data = []
         s = requests.Session()
         s.headers.update({
@@ -28,17 +28,15 @@ class Ildebote_process(Process):
             date = div.find("p", class_='date')
             if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
                 continue
-            action_name = div.h2.text
-            date_start = datetime.now().strftime('%d.%m.%Y')
-            date_end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
+            name = div.h2.text
+            start = datetime.now().strftime('%d.%m.%Y')
+            end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
             desc = div.find("p", class_='desc').text.strip()
-            action_type = 'подарок' if 'подарок' in action_name.lower() else 'скидка'
+            action_type = 'подарок' if 'подарок' in name.lower() else 'скидка'
             code = 'Не требуется'
-            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': desc,
-                      'Купон': code, 'URL': url, 'Тип купона': action_type}
+            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
             actions_data.append(action)
         self.queue.put(actions_data)
-        self.queue.put((partner_name,))
+        self.queue.put((partner,))
         self.queue.put(helper.write_csv(actions_data))
         self.queue.put('progress')

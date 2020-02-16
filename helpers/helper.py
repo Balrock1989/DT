@@ -132,3 +132,7 @@ def downloader_run(link, queue):
     queue.put(f'{name} успешно скачан')
 
 
+def generate_action(partner_name, action_name, date_start, date_end, description, code, url, action_type):
+    return {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
+            'Дата окончания': date_end, 'Условия акции': description,
+            'Купон': code, 'URL': url, 'Тип купона': action_type}

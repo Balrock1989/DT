@@ -15,7 +15,7 @@ class Vseinstrumenti_process(Process):
         return "ВсеИнструменты"
 
     def run(self):
-        partner_name = 'Все инструменты'
+        partner = 'Все инструменты'
         actions_data = []
         options = Options()
         options.add_argument('--disable-gpu')
@@ -27,7 +27,7 @@ class Vseinstrumenti_process(Process):
         driver.quit()
         divs = page.find_all("div", class_='action_main')
         for div in divs:
-            action_name = div.find('div', class_='action_header').a.text.strip()
+            name = div.find('div', class_='action_header').a.text.strip()
             code = 'Не требуется'
             action_type = 'скидка'
             url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
@@ -35,15 +35,13 @@ class Vseinstrumenti_process(Process):
             incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
             incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
             try:
-                date_start, date_end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
+                start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
             except Exception:
-                date_start, date_end = helper.get_date_now_to_end_month()
-            action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': desc,
-                      'Купон': code, 'URL': url, 'Тип купона': action_type}
+                start, end = helper.get_date_now_to_end_month()
+            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
             actions_data.append(action)
 
         self.queue.put(actions_data)
         self.queue.put(helper.write_csv(actions_data))
-        self.queue.put((partner_name,))
+        self.queue.put((partner,))
         self.queue.put('progress')

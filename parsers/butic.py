@@ -1,13 +1,7 @@
-import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from multiprocessing import Process
-from pprint import pprint
-
 import requests
-from bs4 import BeautifulSoup
-from requests.auth import HTTPDigestAuth, AuthBase
-
 import auth
 import helpers.helper as helper
 
@@ -21,7 +15,7 @@ class Butic_process(Process):
         return "Бутик"
 
     def run(self):
-        partner_name = 'Бутик'
+        partner = 'Бутик'
         actions_data = []
         session = requests.Session()
         result = session.post(auth.butic_auth_url, data=auth.butic_payload)
@@ -32,9 +26,6 @@ class Butic_process(Process):
             raise RuntimeError
         bearer_value = 'Bearer ' + result_data['token']
         auth_header = {'Authorization': bearer_value}
-        result = session.get(auth.butic_url_current, headers=auth_header)
-        if result.status_code != 200:
-            raise RuntimeError
         promo_data = {"operationName": "getPromotions",
                     "variables": {"where": {"status": {"$ne": 3}}, "limit": 100,
                                   "order": "reverse:created"},
@@ -44,9 +35,9 @@ class Butic_process(Process):
             raise RuntimeError
         for action in result.json()['data']['promotions']['rows']:
             action_id = int(action['id'])
-            action_name = action['title']
-            date_start = datetime.strptime(action['start'], '%Y-%m-%d').strftime('%d.%m.%Y')
-            date_end = datetime.strptime(action['end'], '%Y-%m-%d').strftime('%d.%m.%Y')
+            name = action['title']
+            start = datetime.strptime(action['start'], '%Y-%m-%d').strftime('%d.%m.%Y')
+            end = datetime.strptime(action['end'], '%Y-%m-%d').strftime('%d.%m.%Y')
             full_description = action['description']
             action_type = 'скидка'
             try:
@@ -56,14 +47,10 @@ class Butic_process(Process):
                 code = "Не требуется"
             url_woman = re.search(r'для женщин:.*(https.*)', full_description).group(1).strip()
             url_man = re.search(r'для мужчин:.*(https.*)', full_description).group(1).strip()
-            action_desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
-            action_desc = re.sub(r'\*', '', action_desc).strip()
-            action_man = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': action_desc,
-                      'Купон': code, 'URL': url_man, 'Тип купона': action_type}
-            action_woman = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                      'Дата окончания': date_end, 'Условия акции': action_desc,
-                      'Купон': code, 'URL': url_woman, 'Тип купона': action_type}
+            desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
+            desc = re.sub(r'\*', '', desc).strip()
+            action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type)
+            action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type)
             actions_data.append(action_man)
             actions_data.append(action_woman)
             banner_data = {"operationName": "getBanners",
@@ -80,6 +67,6 @@ class Butic_process(Process):
                 banners_links.append(link)
             helper.banner_downloader(banners_links, self.queue)
             self.queue.put(actions_data)
-            self.queue.put((partner_name,))
+            self.queue.put((partner,))
             self.queue.put(helper.write_csv(actions_data))
 

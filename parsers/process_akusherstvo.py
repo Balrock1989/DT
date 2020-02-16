@@ -64,29 +64,27 @@ class Akusherstvo_thread(Thread):
 
     def run(self):
         persent = self.div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
-        date_end = self.div.find("strong", class_='date').text.strip()
-        incoming_date = re.search(r'до\s(.*)\s?', date_end.lower()).group(1)
-        date_end = helper.get_one_date(incoming_date)
-        date_start = datetime.now().strftime('%d.%m.%Y')
+        end = self.div.find("strong", class_='date').text.strip()
+        incoming_date = re.search(r'до\s(.*)\s?', end.lower()).group(1)
+        end = helper.get_one_date(incoming_date)
+        start = datetime.now().strftime('%d.%m.%Y')
         link = self.div.find('a').get('href')
         request = requests.get(link)
-        partner_name = 'Акушерство'
-        main_url = 'https://www.akusherstvo.ru/sale.php'
+        partner = 'Акушерство'
+        url = 'https://www.akusherstvo.ru/sale.php'
         action_page = BeautifulSoup(request.text, 'lxml')
-        action_name = action_page.h1.text.strip()
+        name = action_page.h1.text.strip()
         descs = action_page.find('table', class_='centre_header')
         desc = ''
         action_type = 'скидка'
         code = 'Не требуется'
-        action_name = f'Скидки {persent} на {action_name}'
+        name = f'Скидки {persent} на {name}'
         try:
             desc = descs.find_all('p')[0].text.strip()
             desc = re.sub(r'\n', '', desc)
             desc = re.sub(r'\r', '', desc)
         except Exception:
             pass
-        action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                  'Дата окончания': date_end, 'Условия акции': desc,
-                  'Купон': code, 'URL': main_url, 'Тип купона': action_type}
+        action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
         with self.lock:
             self.actions_data.append(action)

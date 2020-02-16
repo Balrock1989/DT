@@ -56,13 +56,13 @@ class Sephora_thread(Thread):
         if div:
             try:
                 incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
-                date_start, date_end = helper.one_date_return_two(incoming_date)
+                start, end = helper.one_date_return_two(incoming_date)
             except TypeError:
                 return
             code = "Не требуется"
-            action_name = div.h1.text
-            partner_name = 'Sephora'
-            action_type = 'подарок' if 'подар' in action_name.lower() else 'скидка'
+            name = div.h1.text
+            partner = 'Sephora'
+            action_type = 'подарок' if 'подар' in name.lower() else 'скидка'
             paragraphs = div.findAll('p')
             url = 'https://sephora.ru/news/'
             descriptions = []
@@ -71,8 +71,6 @@ class Sephora_thread(Thread):
                 if 'При' in text:
                     descriptions.append(text)
             for desc in descriptions:
-                action = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                          'Дата окончания': date_end, 'Условия акции': desc,
-                          'Купон': code, 'URL': url, 'Тип купона': action_type}
+                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
                 with self.lock:
                     self.actions_data.append(action)
