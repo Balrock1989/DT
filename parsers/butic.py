@@ -50,12 +50,12 @@ class Butic_process(Process):
             full_description = action['description']
             action_type = 'скидка'
             try:
-                code = re.search(r'(?s)([a-zA-Z]+.*)', action['preview']).group(1).strip()
+                code = re.search(r'([a-zA-Z]+.*)', action['preview']).group(1).strip()
                 action_type = 'купон'
             except Exception:
                 code = "Не требуется"
-            url_woman = re.search(r'(?s)для женщин.*(https.*)/', full_description).group(1).strip()
-            url_man = re.search(r'(?s)для мужчин.*(https.*)/', full_description).group(1).strip()
+            url_woman = re.search(r'для женщин:.*(https.*)', full_description).group(1).strip()
+            url_man = re.search(r'для мужчин:.*(https.*)', full_description).group(1).strip()
             action_desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
             action_desc = re.sub(r'\*', '', action_desc).strip()
             action_man = {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
