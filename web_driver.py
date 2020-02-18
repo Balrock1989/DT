@@ -44,7 +44,6 @@ class WebDriver:
         options.add_argument('--disable-notifications')
         options.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome(options=options)
-        # TODO Попробовать добавить коноль позже, или несколько раз
         win32.hide_chrome_console()
         self.driver.get(auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
@@ -116,7 +115,7 @@ class WebDriver:
         if not self.start_data:
             self.start_data = helper.DATA_NOW
         self.gui.change_progress_signal.emit(len(links))
-        threading.Thread(target=run, args=(links, ), daemon=True).start()
+        threading.Thread(target=run, args=(links,), daemon=True).start()
 
     @win32.show_window
     def parser(self):
@@ -160,7 +159,7 @@ class WebDriver:
                 self.actions_data.append(action)
                 self.queue.put('progress')
             self.queue.put(helper.write_csv(self.actions_data))
-            self.queue.put((partner, ))
+            self.queue.put((partner,))
             self.queue.put(self.actions_data)
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
@@ -189,7 +188,8 @@ class WebDriver:
             partner_name = ''
             with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
-                suitable_actions = [action for action in csv_data if action['Имя партнера'] == self.gui.partner_name.currentText()]
+                suitable_actions = [action for action in csv_data if
+                                    action['Имя партнера'] == self.gui.partner_name.currentText()]
             count = len(suitable_actions)
             self.gui.change_progress_signal.emit(count)
             with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
@@ -302,9 +302,10 @@ class WebDriver:
             os.remove(helper.actions_csv_path)
             shutil.move('actions_temp.csv', helper.actions_csv_path)
             self.gui.del_partner_name_signal.emit(partner_name)
-            self.queue.put(f'Акции успешно добавлены ({count}шт.)') if count else\
+            self.queue.put(f'Акции успешно добавлены ({count}шт.)') if count else \
                 self.queue.put('Нет акций выбранного партнера')
             win32.show_process()
+
         helper.generate_temp_csv()
         self.driver.switch_to_window(self.dt_window)
         threading.Thread(target=add, args=(), daemon=True).start()
@@ -328,4 +329,3 @@ class WebDriver:
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
         helper.banner_downloader(links, self.gui.queue.queue)
-

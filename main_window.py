@@ -11,7 +11,7 @@ from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from web_driver import WebDriver
 from image_sizer import Resizer
-from helpers import global_hotkey, logger
+from helpers import global_hotkey, logger, win32
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
@@ -112,7 +112,6 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def reset_progress_slot(self):
         self.progress_bar.reset()
 
-
     def init_signals(self):
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
@@ -157,9 +156,9 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sizer.resize_image(gui=self, end_data=self.date_end.toPlainText())
 
     def launch_thread_dt(self):
+        win32.close_all_chromedriver()
         if self.web_thread is None:
             self.web_thread = WebThread(mainwindow=self)
-            # self.moveToThread(self.web_thread)
             self.web_thread.start()
         else:
             self.try_start_browser += 1
@@ -203,3 +202,4 @@ def main():
 if __name__ == '__main__':
     freeze_support()
     main()
+    win32.close_all_chromedriver()
