@@ -44,6 +44,7 @@ class WebDriver:
         options.add_argument('--disable-notifications')
         options.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome(options=options)
+        # TODO Попробовать добавить коноль позже, или несколько раз
         win32.hide_chrome_console()
         self.driver.get(auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
@@ -65,7 +66,6 @@ class WebDriver:
         def run(links):
             for link in links:
                 if self.exit:
-                    # TODO Не работает прерывание
                     self.queue.put(f'Загрузка прервана пользователем')
                     win32.show_process()
                     return

@@ -23,39 +23,25 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
 
     def change(self):
         if self.sephora.isChecked():
-            parser = Sephora_process
-            sephora_process = StartNewProcess(self.mainwindow, parser)
-            sephora_process.start()
+            StartNewProcess(self.mainwindow, Sephora_process).start()
             self.count_process += 1
         if self.ildebote.isChecked():
-            parser = Ildebote_process
-            ildebote_process = StartNewProcess(self.mainwindow, parser)
-            ildebote_process.start()
+            StartNewProcess(self.mainwindow, Ildebote_process).start()
             self.count_process += 1
         if self.kupivip.isChecked():
-            parser = Kupivip_process
-            kupivip_process = StartNewProcess(self.mainwindow, parser)
-            kupivip_process.start()
+            StartNewProcess(self.mainwindow, Kupivip_process).start()
             self.count_process += 1
         if self.akusherstvo.isChecked():
-            parser = Akusherstvo_process
-            akusherstvo_process = StartNewProcess(self.mainwindow, parser)
-            akusherstvo_process.start()
+            StartNewProcess(self.mainwindow, Akusherstvo_process).start()
             self.count_process += 1
         if self.utkonos.isChecked():
-            parser = Utkonos_process
-            utkonos_process = StartNewProcess(self.mainwindow, parser)
-            utkonos_process.start()
+            StartNewProcess(self.mainwindow, Utkonos_process).start()
             self.count_process += 1
         if self.vseinstrumenti.isChecked():
-            parser = Vseinstrumenti_process
-            vseinstrumenti_process = StartNewProcess(self.mainwindow, parser)
-            vseinstrumenti_process.start()
+            StartNewProcess(self.mainwindow, Vseinstrumenti_process).start()
             self.count_process += 1
         if self.butic.isChecked():
-            parser = Butic_process
-            butic_process = StartNewProcess(self.mainwindow, parser)
-            butic_process.start()
+            StartNewProcess(self.mainwindow, Butic_process).start()
             self.count_process += 1
         self.mainwindow.change_progress_signal.emit(self.count_process)
         self.close()
