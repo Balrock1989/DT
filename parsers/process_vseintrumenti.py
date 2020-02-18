@@ -30,6 +30,7 @@ class Vseinstrumenti_process(Process):
             name = div.find('div', class_='action_header').a.text.strip()
             code = 'Не требуется'
             action_type = 'скидка'
+            short_desc = ''
             url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
             desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
             incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
@@ -38,7 +39,7 @@ class Vseinstrumenti_process(Process):
                 start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
             except Exception:
                 start, end = helper.get_date_now_to_end_month()
-            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
+            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
 
         self.queue.put(actions_data)

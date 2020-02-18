@@ -62,6 +62,7 @@ class Sephora_thread(Thread):
             code = "Не требуется"
             name = div.h1.text
             partner = 'Sephora'
+            short_desc = ''
             action_type = 'подарок' if 'подар' in name.lower() else 'скидка'
             paragraphs = div.findAll('p')
             url = 'https://sephora.ru/news/'
@@ -71,6 +72,6 @@ class Sephora_thread(Thread):
                 if 'При' in text:
                     descriptions.append(text)
             for desc in descriptions:
-                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
+                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)

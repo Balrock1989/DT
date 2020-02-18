@@ -34,7 +34,8 @@ class Ildebote_process(Process):
             desc = div.find("p", class_='desc').text.strip()
             action_type = 'подарок' if 'подарок' in name.lower() else 'скидка'
             code = 'Не требуется'
-            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
+            short_desc = ''
+            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         self.queue.put(actions_data)
         self.queue.put((partner,))

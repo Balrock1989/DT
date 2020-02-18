@@ -43,12 +43,13 @@ class Kupivip_process(Process):
             start = datetime.now().strftime('%d.%m.%Y')
             end = datetime.now().strftime('%d.%m.%Y')
             action_type = 'скидка'
+            short_desc = ''
             code = 'Не требуется'
             if 'промокод' in name.lower():
                 code = re.search(r'код\s(.*)\s?', name).group(1)
                 action_type = 'купон'
             url = 'https://www.kupivip.ru/'
-            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
+            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
 
         self.queue.put(actions_data)

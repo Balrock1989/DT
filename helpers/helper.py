@@ -13,7 +13,7 @@ MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
               "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
 
 HEADERS = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-           'Условия акции', 'Купон', 'URL', 'Тип купона']
+           'Условия акции', 'Купон', 'URL', 'Тип купона', 'Короткое описание']
 
 
 def exception_hook(exctype, value, tb):
@@ -101,6 +101,12 @@ def get_date_now_to_end_month():
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_start, date_end
 
+def get_date_end_month():
+    date_end = datetime.strptime(DATA_NOW, '%d.%m.%Y')
+    day_on_month = monthrange(year=int(date_end.year), month=int(date_end.month))
+    date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
+    return date_end
+
 
 def banner_downloader(links, queue):
     """Загрузка баннеров с сайта"""
@@ -132,7 +138,7 @@ def downloader_run(link, queue):
     queue.put(f'{name} успешно скачан')
 
 
-def generate_action(partner_name, action_name, date_start, date_end, description, code, url, action_type):
+def generate_action(partner_name, action_name, date_start, date_end, description, code, url, action_type, short_desc):
     return {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
             'Дата окончания': date_end, 'Условия акции': description,
-            'Купон': code, 'URL': url, 'Тип купона': action_type}
+            'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}

@@ -40,6 +40,7 @@ class Butic_process(Process):
             end = datetime.strptime(action['end'], '%Y-%m-%d').strftime('%d.%m.%Y')
             full_description = action['description']
             action_type = 'скидка'
+            short_desc = ''
             try:
                 code = re.search(r'([a-zA-Z]+.*)', action['preview']).group(1).strip()
                 action_type = 'купон'
@@ -49,8 +50,8 @@ class Butic_process(Process):
             url_man = re.search(r'для мужчин:.*(https.*)', full_description).group(1).strip()
             desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
             desc = re.sub(r'\*', '', desc).strip()
-            action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type)
-            action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type)
+            action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type, short_desc)
+            action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type, short_desc)
             actions_data.append(action_man)
             actions_data.append(action_woman)
             banner_data = {"operationName": "getBanners",

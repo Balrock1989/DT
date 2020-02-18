@@ -78,6 +78,7 @@ class Akusherstvo_thread(Thread):
         desc = ''
         action_type = 'скидка'
         code = 'Не требуется'
+        short_desc = ''
         name = f'Скидки {persent} на {name}'
         try:
             desc = descs.find_all('p')[0].text.strip()
@@ -85,6 +86,6 @@ class Akusherstvo_thread(Thread):
             desc = re.sub(r'\r', '', desc)
         except Exception:
             pass
-        action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
+        action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

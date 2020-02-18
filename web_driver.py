@@ -145,6 +145,7 @@ class WebDriver:
                 temp = ''.join(str(full_date).split())
                 url = ''
                 code = ''
+                short_desc = ''
                 start = datetime.strptime(re.search(r'^(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
                 end = datetime.strptime(re.search(r'-(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
                 diff_date = end - start
@@ -155,7 +156,7 @@ class WebDriver:
                 action_type = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()
                 desc = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
-                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type)
+                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 self.actions_data.append(action)
                 self.queue.put('progress')
             self.queue.put(helper.write_csv(self.actions_data))
@@ -237,7 +238,8 @@ class WebDriver:
                     start_date.send_keys(action['Дата начала'])
                     end_date.clear()
                     end_date.send_keys(action['Дата окончания'])
-                    short_description.send_keys(action['Название акции'] + '!')
+                    short_description.send_keys(action['Короткое описание']) if action['Короткое описание']\
+                        else short_description.send_keys(action['Название акции'] + '!')
                     digit_in_name, digit_in_desc = '', ''
                     try:
                         digit_in_name = re.search(r'(\d+)', action['Название акции']).group(1).strip()
@@ -304,6 +306,7 @@ class WebDriver:
             self.gui.del_partner_name_signal.emit(partner_name)
             self.queue.put(f'Акции успешно добавлены ({count}шт.)') if count else \
                 self.queue.put('Нет акций выбранного партнера')
+            self.gui.reset_progress_signal.emit()
             win32.show_process()
 
         helper.generate_temp_csv()
