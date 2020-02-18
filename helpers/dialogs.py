@@ -19,31 +19,25 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         self.mainwindow = mainwindow
         self.setupUi(self)
         self.ok.clicked.connect(self.change)
-        self.count_process = 0
 
     def change(self):
+        processes = []
         if self.sephora.isChecked():
-            StartNewProcess(self.mainwindow, Sephora_process).start()
-            self.count_process += 1
+            processes.append(StartNewProcess(self.mainwindow, Sephora_process))
         if self.ildebote.isChecked():
-            StartNewProcess(self.mainwindow, Ildebote_process).start()
-            self.count_process += 1
+            processes.append(StartNewProcess(self.mainwindow, Ildebote_process))
         if self.kupivip.isChecked():
-            StartNewProcess(self.mainwindow, Kupivip_process).start()
-            self.count_process += 1
+            processes.append(StartNewProcess(self.mainwindow, Kupivip_process))
         if self.akusherstvo.isChecked():
-            StartNewProcess(self.mainwindow, Akusherstvo_process).start()
-            self.count_process += 1
+            processes.append(StartNewProcess(self.mainwindow, Akusherstvo_process))
         if self.utkonos.isChecked():
-            StartNewProcess(self.mainwindow, Utkonos_process).start()
-            self.count_process += 1
+            processes.append(StartNewProcess(self.mainwindow, Utkonos_process))
         if self.vseinstrumenti.isChecked():
-            StartNewProcess(self.mainwindow, Vseinstrumenti_process).start()
-            self.count_process += 1
+            processes.append(StartNewProcess(self.mainwindow, Vseinstrumenti_process))
         if self.butic.isChecked():
-            StartNewProcess(self.mainwindow, Butic_process).start()
-            self.count_process += 1
-        self.mainwindow.change_progress_signal.emit(self.count_process)
+            processes.append(StartNewProcess(self.mainwindow, Butic_process))
+        [process.start() for process in processes]
+        self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()
 
     def exit_func(self):
