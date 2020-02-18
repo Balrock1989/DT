@@ -98,6 +98,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
             self.web_thread.web.exit = True
         if self.sizer:
             self.sizer.exit = True
+        self.reset_progress_signal.emit()
 
     @pyqtSlot(int)
     def change_progress_slot(self, max):

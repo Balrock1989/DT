@@ -61,6 +61,42 @@ class WebDriver:
     @win32.show_window
     def add_banner(self):
         """Загрузка баннеров на сервер"""
+
+        def run(links):
+            for link in links:
+                if self.exit:
+                    # TODO Не работает прерывание
+                    self.queue.put(f'Загрузка прервана пользователем')
+                    win32.show_process()
+                    return
+                self.driver.get(link)
+                size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
+                width = re.search(r'(\d+)__\d\d', size).group(1)
+                height = re.search(r'__(\d+)x', size).group(1)
+                width_field = self.driver.find_element_by_name('width')
+                height_field = self.driver.find_element_by_name('height')
+                start_data_field = self.driver.find_element_by_css_selector(
+                    'input[name="graphicalElementTransport.startDate"]')
+                end_data_field = self.driver.find_element_by_css_selector(
+                    'input[name="graphicalElementTransport.endDate"]')
+                url_field = self.driver.find_element_by_css_selector(
+                    'textarea[name="graphicalElementTransport.description"]')
+                width_field.clear()
+                height_field.clear()
+                width_field.send_keys(width)
+                height_field.send_keys(height)
+                self.driver.find_element_by_class_name('noDecoration').click()
+                start_data_field.send_keys(self.start_data)
+                end_data_field.send_keys(self.end_data)
+                url_field.send_keys(self.url)
+                self.driver.find_elements_by_css_selector('input[value="Предварительный"]')[1].click()
+                WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'input[value="Сохранить"]'))).click()
+                self.queue.put(f'файл {size} успешно загружен')
+                self.queue.put('progress')
+            self.queue.put('#' * 60)
+            self.queue.put('Загрузка завершена')
+
         self.driver.switch_to_window(self.dt_window)
         try:
             wait = WebDriverWait(self.driver, 1, poll_frequency=0.5, ignored_exceptions=UnexpectedAlertPresentException)
@@ -80,39 +116,7 @@ class WebDriver:
         if not self.start_data:
             self.start_data = helper.DATA_NOW
         self.gui.change_progress_signal.emit(len(links))
-        for link in links:
-            if self.exit:
-                # TODO Не работает прерывание
-                self.queue.put(f'Загрузка прервана пользователем')
-                win32.show_process()
-                return
-            self.driver.get(link)
-            size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
-            width = re.search(r'(\d+)__\d\d', size).group(1)
-            height = re.search(r'__(\d+)x', size).group(1)
-            width_field = self.driver.find_element_by_name('width')
-            height_field = self.driver.find_element_by_name('height')
-            start_data_field = self.driver.find_element_by_css_selector(
-                'input[name="graphicalElementTransport.startDate"]')
-            end_data_field = self.driver.find_element_by_css_selector(
-                'input[name="graphicalElementTransport.endDate"]')
-            url_field = self.driver.find_element_by_css_selector(
-                'textarea[name="graphicalElementTransport.description"]')
-            width_field.clear()
-            height_field.clear()
-            width_field.send_keys(width)
-            height_field.send_keys(height)
-            self.driver.find_element_by_class_name('noDecoration').click()
-            start_data_field.send_keys(self.start_data)
-            end_data_field.send_keys(self.end_data)
-            url_field.send_keys(self.url)
-            self.driver.find_elements_by_css_selector('input[value="Предварительный"]')[1].click()
-            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(
-                (By.CSS_SELECTOR, 'input[value="Сохранить"]'))).click()
-            self.queue.put(f'файл {size} успешно загружен')
-            self.queue.put('progress')
-        self.queue.put('#' * 60)
-        self.queue.put('Загрузка завершена')
+        threading.Thread(target=run, args=(links, ), daemon=True).start()
 
     @win32.show_window
     def parser(self):
