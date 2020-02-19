@@ -1,7 +1,6 @@
 import re
 from multiprocessing import Process
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 import helpers.helper as helper
 
