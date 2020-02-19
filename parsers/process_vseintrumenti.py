@@ -1,7 +1,7 @@
 import re
 from multiprocessing import Process
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 import helpers.helper as helper
 
@@ -17,11 +17,9 @@ class Vseinstrumenti_process(Process):
     def run(self):
         partner = 'Все инструменты'
         actions_data = []
-        options = Options()
-        options.add_argument('--disable-gpu')
         # TODO разобраться почему перестал работать headless
         main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome()
         driver.get(main_url)
         page = BeautifulSoup(driver.page_source, 'lxml')
         driver.quit()

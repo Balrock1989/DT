@@ -32,6 +32,9 @@ class Sephora_process(Process):
             thread.start()
         for thread in threads:
             thread.join()
+        if len(actions_data) == 0:
+            self.queue.put(f'Акции по {partner_name} не найдены ')
+            return
         self.queue.put(actions_data)
         self.queue.put((partner_name,))
         self.queue.put(helper.write_csv(actions_data))

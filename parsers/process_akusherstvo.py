@@ -1,18 +1,12 @@
-import multiprocessing
-import os
-import signal
 from datetime import datetime
 import re
 import threading
-from pprint import pprint
-
 import requests
 from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 class Akusherstvo_process(Process):
@@ -28,13 +22,8 @@ class Akusherstvo_process(Process):
         partner_name = 'Акушерство'
         actions_data = []
         lock = threading.Lock()
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
         main_url = 'https://www.akusherstvo.ru/sale.php'
-        options = Options()
-        options.add_argument('--disable-gpu')
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.PhantomJS()
         driver.get(main_url)
         page = BeautifulSoup(driver.page_source, 'lxml')
         driver.quit()

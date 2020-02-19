@@ -1,10 +1,14 @@
 import re
 import threading
+import time
+
 import requests
 from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 class Book_process(Process):
@@ -20,35 +24,40 @@ class Book_process(Process):
         partner_name = 'Book24'
         actions_data = []
         lock = threading.Lock()
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
         main_url = 'https://book24.ru/sales/'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
+        driver = webdriver.PhantomJS()
+        driver.get(main_url)
+        scroll_script = \
+            "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
+        lenOfPage = driver.execute_script(scroll_script)
+        while True:
+            lastCount = lenOfPage
+            time.sleep(1)
+            lenOfPage = driver.execute_script(scroll_script)
+            if lastCount == lenOfPage:
+                break
+        page = BeautifulSoup(driver.page_source, 'lxml')
+        driver.quit()
         begin_url = 'https://book24.ru'
-        # TODO Загрузить через вебдрайвер, проскролить сраницу в самый низ, и спарсить
         divs = page.find_all('div', class_='stock-list-item__actions')
         links = []
         for div in divs:
             if div.find('div', class_='stock-list-item__countdown'):
                 links.append(begin_url + div.find("div", class_='stock-list-item__more').a.get('href'))
             else:
-                print('НЕТ')
-        print(links)
-
-
-        # divs = page.find_all("div", class_='stock-list-item__more')
-        # links = [begin_url + div.a.get('href') for div in divs]
-        # threads = [Book_thread(actions_data, link, lock, self.queue) for link in links]
-        # for thread in threads:
-        #     thread.start()
-        # for thread in threads:
-        #     thread.join()
-        # self.queue.put(actions_data)
-        # self.queue.put((partner_name,))
-        # self.queue.put(helper.write_csv(actions_data))
-        # self.queue.put('progress')
+                pass
+        threads = [Book_thread(actions_data, link, lock, self.queue) for link in links]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        if len(actions_data) == 0:
+            self.queue.put(f'Акции по {partner_name} не найдены ')
+            return
+        self.queue.put(actions_data)
+        self.queue.put((partner_name,))
+        self.queue.put(helper.write_csv(actions_data))
+        self.queue.put('progress')
 
 
 class Book_thread(Thread):
@@ -87,9 +96,15 @@ class Book_thread(Thread):
             end = helper.get_one_date(end)
         except Exception:
             end = helper.get_date_end_month()
-        desc = page.find_all('div', class_='text-block-d')[1].text.strip()
-        desc = re.sub(r'\s{2,}', '', desc).strip()
-        desc = re.sub(r'\r', '', desc).strip()
+        try:
+            desc = page.find_all('div', class_='text-block-d')[1].text.strip()
+            desc = re.sub(r'\s{2,}', '', desc).strip()
+        except Exception:
+            try:
+                desc = page.find_all('div', class_='text-block-d')[0].text.strip()
+                desc = re.sub(r'\s{2,}', '', desc).strip()
+            except Exception:
+                return
         partner = 'Book24'
         action = helper.generate_action(partner, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
