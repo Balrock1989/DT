@@ -147,8 +147,8 @@ class Sephora_thread(Thread):
             desc = ''
             for p in all_p:
                 desc += p.text
-            desc = re.sub(r'\s{2,}', '', desc).strip()
-            desc = re.sub(r'\xa0', ' ', desc).strip()
+            desc = re.sub(r'\s{2,}', '\n', desc).strip()
+            desc = re.sub(r'\xa0', '\n', desc).strip()
             if len(desc) < 2500:
                 try:
                     range = helper.get_range_date(desc)
