@@ -292,7 +292,6 @@ class WebDriver:
                             checkbox.click()
                             percent = get_percent(action['Условия акции'])
                             discount_amount.send_keys(percent)
-                        # TODO Если купон то цифру не ставить?
                         elif digit_in_name in action['Название акции']:
                             discount_amount.send_keys(digit_in_name)
                         elif digit_in_desc in action['Условия акции']:

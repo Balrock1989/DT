@@ -144,6 +144,7 @@ def convern_list_to_date(my_list):
         start_temp = datetime.strptime(end, '%d.%m.%Y')
         start = datetime(day=int(start[0]), month=start_temp.month, year=start_temp.year).strftime('%d.%m.%Y')
     else:
+        start = ' '.join(start)
         start = get_one_date(start)
     return start, end
 

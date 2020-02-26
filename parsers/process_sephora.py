@@ -147,7 +147,9 @@ class Sephora_thread(Thread):
             desc = ''
             for p in all_p:
                 desc += p.text
-            if len(desc) < 1500:
+            desc = re.sub(r'\s{2,}', '', desc).strip()
+            desc = re.sub(r'\xa0', ' ', desc).strip()
+            if len(desc) < 2500:
                 try:
                     range = helper.get_range_date(desc)
                     start, end = helper.convern_list_to_date(range)
@@ -158,14 +160,12 @@ class Sephora_thread(Thread):
                         return
                 url = link
                 name = page.h1.text
-                desc = re.sub(r'\s{2,}', '', desc).strip()
-                desc = re.sub(r'\xa0', ' ', desc).strip()
                 desc = desc.replace("На этот номер телефона будет отправлено sms с кодом восстановления:Войди или"
                                     " зарегистрируйся, чтобы получить все преимущества постоянного покупателя", '')
                 partner = 'Sephora'
                 code = "Не требуется"
                 short_desc = ''
-                action_type = 'скидка'
+                action_type = 'подарок' if 'подарок' in desc.lower() else 'скидка'
                 action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)
