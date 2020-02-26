@@ -23,7 +23,7 @@ class Akusherstvo_process(Process):
         actions_data = []
         lock = threading.Lock()
         main_url = 'https://www.akusherstvo.ru/sale.php'
-        driver = webdriver.PhantomJS()
+        driver = webdriver.Chrome()
         driver.get(main_url)
         page = BeautifulSoup(driver.page_source, 'lxml')
         driver.quit()

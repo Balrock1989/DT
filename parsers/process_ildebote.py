@@ -29,7 +29,7 @@ class Ildebote_process(Process):
             if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
                 continue
             name = div.h2.text
-            start = datetime.now().strftime('%d.%m.%Y')
+            start = helper.DATA_NOW
             end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
             desc = div.find("p", class_='desc').text.strip()
             action_type = 'подарок' if 'подарок' in name.lower() else 'скидка'

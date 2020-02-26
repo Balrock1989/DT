@@ -95,17 +95,59 @@ def get_one_date(text):
 
 
 def get_date_now_to_end_month():
+    """Возвращает start с текущего дня и end  конец текущего месяца"""
     date_start = DATA_NOW
     date_end = datetime.strptime(date_start, '%d.%m.%Y')
     day_on_month = monthrange(year=int(date_end.year), month=int(date_end.month))
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_start, date_end
 
+
 def get_date_end_month():
+    """Возвращает дату на конец текущего месяца"""
     date_end = datetime.strptime(DATA_NOW, '%d.%m.%Y')
     day_on_month = monthrange(year=int(date_end.year), month=int(date_end.month))
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_end
+
+
+def get_range_date(text):
+    """ возвращает список [начало акции, конец акции] ищет текст в формате 1 по 20 февраля 2019 или 1 по 20февраля"""
+    try:
+        text = re.search(r'(\d+\sпо\s\d+\s\w+\s\d*)', text).group(1).strip()
+        data = text.split('по')
+    except Exception:
+        try:
+            text = re.search(r'(\d+\sи\s\d+\s\w+\s\d*)', text).group(1).strip()
+            data = text.split('и')
+        except Exception:
+            try:
+                text = re.search(r'(\d+\s\w+\sпо\s\d+\s\w+\s\d*)', text).group(1).strip()
+                data = text.split('по')
+            except Exception:
+                text = re.search(r'(\d+-\d+\s\w+\s\d*)', text).group(1).strip()
+                data = text.split('-')
+    return data
+
+
+def convern_list_to_date(my_list):
+    """принимает не отформатированный список [дата начала, дата окончания] [1, 20 февраля] [1 марта, 20 марта 2020]"""
+    end = get_one_date(my_list[1])
+    start = my_list[0].strip().split(' ')
+    if len(start) == 1:
+        start_temp = datetime.strptime(end, '%d.%m.%Y')
+        start = datetime(day=int(start[0]), month=start_temp.month, year=start_temp.year).strftime('%d.%m.%Y')
+    else:
+        start = get_one_date(start)
+    return start, end
+
+
+def get_start_date_in_date(text):
+    """ возвращает 1 дату в формате 1  по 20 февраля 2019 или 1 по 20февраля"""
+    start = re.search(r'(\d+\s\w+\s\d*)', text).group(1).strip()
+    start = get_one_date(start)
+    end = get_date_end_month()
+    return start, end
 
 
 def banner_downloader(links, queue):
@@ -142,3 +184,22 @@ def generate_action(partner_name, action_name, date_start, date_end, description
     return {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
             'Дата окончания': date_end, 'Условия акции': description,
             'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}
+
+
+def check_digit(text):
+    list = re.findall(r'[а-я]+\s\d+\s?\d+\s[а-я]+', text)
+    for string in list:
+        if len(string.split()) == 3:
+            digit = string.split()[1]
+        elif len(string.split()) == 4:
+            digit = string.split()
+            digit = digit[1] + " " + digit[2]
+        if f'до {digit} руб' in string:
+            continue
+        if f'от {digit} руб' in string:
+            continue
+        if f'{digit} руб' in string:
+            return digit.replace(' ', '')
+        else:
+            return '0'
+    return '0'

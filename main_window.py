@@ -107,6 +107,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         if max:
             self.progress_bar.setValue(0)
             self.progress_bar.setMaximum(max)
+        if self.progress_bar.value() == self.progress_bar.maximum():
+            self.reset_progress_signal.emit()
 
     @pyqtSlot()
     def reset_progress_slot(self):

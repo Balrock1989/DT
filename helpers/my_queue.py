@@ -27,7 +27,7 @@ class MyQueue(QThread):
 
     def change_progress_bar(self):
         self.mainwindow.change_progress_signal.emit(0)
-        if self.mainwindow.progress_bar.value() == self.mainwindow.progress_bar.maximum() - 1:
+        if self.mainwindow.progress_bar.value() == self.mainwindow.progress_bar.maximum():
             self.mainwindow.reset_progress_signal.emit()
 
     def run(self):
@@ -47,4 +47,3 @@ class MyQueue(QThread):
                     self.mainwindow.chat_print_signal.emit(income_data)
             else:
                 pass
-

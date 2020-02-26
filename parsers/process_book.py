@@ -25,7 +25,7 @@ class Book_process(Process):
         actions_data = []
         lock = threading.Lock()
         main_url = 'https://book24.ru/sales/'
-        driver = webdriver.PhantomJS()
+        driver = webdriver.Chrome()
         driver.get(main_url)
         scroll_script = \
             "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"

@@ -27,9 +27,9 @@ class Butic_process(Process):
         bearer_value = 'Bearer ' + result_data['token']
         auth_header = {'Authorization': bearer_value}
         promo_data = {"operationName": "getPromotions",
-                    "variables": {"where": {"status": {"$ne": 3}}, "limit": 100,
-                                  "order": "reverse:created"},
-                    "query": "query getPromotions($limit: Int!, $where: SequelizeJSON, $order: String!) {promotions(limit: $limit, where: $where, order: $order) {\n    rows {\n      id\n      url\n      title\n      status\n      preview\n      description\n      image\n      start\n      end\n      created\n      updated\n      __typename\n    }\n    __typename\n  }\n}"}
+                      "variables": {"where": {"status": {"$ne": 3}}, "limit": 100,
+                                    "order": "reverse:created"},
+                      "query": "query getPromotions($limit: Int!, $where: SequelizeJSON, $order: String!) {promotions(limit: $limit, where: $where, order: $order) {\n    rows {\n      id\n      url\n      title\n      status\n      preview\n      description\n      image\n      start\n      end\n      created\n      updated\n      __typename\n    }\n    __typename\n  }\n}"}
         result = session.post(auth.butic_main_url, headers=auth_header, json=promo_data)
         if result.status_code != 200:
             raise RuntimeError
@@ -51,12 +51,13 @@ class Butic_process(Process):
             desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
             desc = re.sub(r'\*', '', desc).strip()
             action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type, short_desc)
-            action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type, short_desc)
+            action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type,
+                                                  short_desc)
             actions_data.append(action_man)
             actions_data.append(action_woman)
             banner_data = {"operationName": "getBanners",
-                        "variables": {"where": {"promotionId": action_id}, "limit": 1000},
-                        "query": "query getBanners($limit: Int!, $where: JSON) {\n  banners(limit: $limit, where: $where) {\n    rows {\n      id\n      promotionId\n      name\n      path\n      width\n      height\n      __typename\n    }\n    __typename\n  }\n}\n"}
+                           "variables": {"where": {"promotionId": action_id}, "limit": 1000},
+                           "query": "query getBanners($limit: Int!, $where: JSON) {\n  banners(limit: $limit, where: $where) {\n    rows {\n      id\n      promotionId\n      name\n      path\n      width\n      height\n      __typename\n    }\n    __typename\n  }\n}\n"}
             banner_result = session.post(auth.butic_main_url, headers=auth_header, json=banner_data)
             if banner_result.status_code != 200:
                 raise RuntimeError
@@ -67,7 +68,7 @@ class Butic_process(Process):
                 link = begin_url_banner + banner['path']
                 banners_links.append(link)
             helper.banner_downloader(banners_links, self.queue)
+            self.queue.put('progress')
             self.queue.put(actions_data)
             self.queue.put((partner,))
             self.queue.put(helper.write_csv(actions_data))
-

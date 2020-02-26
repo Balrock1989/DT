@@ -115,7 +115,9 @@ class WebDriver:
         if not self.start_data:
             self.start_data = helper.DATA_NOW
         self.gui.change_progress_signal.emit(len(links))
-        threading.Thread(target=run, args=(links,), daemon=True).start()
+        thread = threading.Thread(target=run, args=(links,), daemon=True)
+        thread.start()
+        thread.join()
 
     @win32.show_window
     def parser(self):
@@ -176,13 +178,10 @@ class WebDriver:
         """Добавление акций на основе полученных данных"""
 
         def get_percent(action):
-            if "%" in action:
-                try:
-                    percent = re.search(r'(\d+)%', action).group(1)
-                except AttributeError:
-                    percent = re.search(r'%(\d+)', action).group(1)
-            else:
-                percent = re.search(r'(\d+\s?\d+)', action).group(1).replace(' ', '')
+            try:
+                percent = re.search(r'(\d+)%', action).group(1)
+            except AttributeError:
+                percent = re.search(r'%(\d+)', action).group(1)
             return percent
 
         def add():
@@ -240,15 +239,8 @@ class WebDriver:
                     end_date.send_keys(action['Дата окончания'])
                     short_description.send_keys(action['Короткое описание']) if action['Короткое описание']\
                         else short_description.send_keys(action['Название акции'] + '!')
-                    digit_in_name, digit_in_desc = '', ''
-                    try:
-                        digit_in_name = re.search(r'(\d+)', action['Название акции']).group(1).strip()
-                    except Exception:
-                        pass
-                    try:
-                        digit_in_desc = re.search(r'(\d+)', action['Условия акции']).group(1).strip()
-                    except Exception:
-                        pass
+                    digit_in_name = helper.check_digit(action['Название акции'])
+                    digit_in_desc = helper.check_digit(action['Условия акции'])
                     if action['Условия акции']:
                         description.send_keys(action['Условия акции'] + '!')
                     else:
@@ -283,6 +275,7 @@ class WebDriver:
                             checkbox.click()
                             percent = get_percent(action['Условия акции'])
                             discount_amount.send_keys(percent)
+                        # TODO Если купон то цифру не ставить?
                         elif digit_in_name in action['Название акции']:
                             discount_amount.send_keys(digit_in_name)
                         elif digit_in_desc in action['Условия акции']:
