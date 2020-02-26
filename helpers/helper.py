@@ -8,15 +8,18 @@ from random import randint
 
 import requests
 
+"""Даты для преобразования 02 февраля в 02.02 и тд."""
 MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
               "05": "мая", "06": "июн", "07": "июл", "08": "авг",
               "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
 
+"""Заголовки для CSV"""
 HEADERS = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
            'Условия акции', 'Купон', 'URL', 'Тип купона', 'Короткое описание']
 
 
 def exception_hook(exctype, value, tb):
+    """Переопределяем вывод ошибок"""
     print("*******ERROR********")
     print('My Error Information')
     print('Type:', exctype)
@@ -34,18 +37,21 @@ DATA_NOW = datetime.now().strftime('%d.%m.%Y')
 
 
 def generate_csv():
+    """Создает пустой CSV на рабочем столе при запуске программы, для хранения акций"""
     with open(actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file, delimiter=";")
         writer.writerow(HEADERS)
 
 
 def generate_temp_csv():
+    """Создает временный CSV, используется для удаления добавленных акций"""
     with open("actions_temp.csv", "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file, delimiter=";")
         writer.writerow(HEADERS)
 
 
 def write_csv(actions):
+    """Принимает список из акций, и записывает их в CSV"""
     for action in actions:
         with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
@@ -169,6 +175,7 @@ def banner_downloader(links, queue):
 
 
 def downloader_run(link, queue):
+    """Принимает ссылку на баннер http"//......jpg и скачивает ее, запускается из banner_downloader в потоках"""
     name = randint(1000000, 9999999)
     format = re.search(r'(\w+)$', link).group(1)
     name = str(name) + "." + format
@@ -181,12 +188,14 @@ def downloader_run(link, queue):
 
 
 def generate_action(partner_name, action_name, date_start, date_end, description, code, url, action_type, short_desc):
+    """Сборка акции для дальнейшей записи в CSV"""
     return {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
             'Дата окончания': date_end, 'Условия акции': description,
             'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}
 
 
 def check_digit(text):
+    """Принимает текст, ищет в нем все цифры и по одному слову слева и справа. Возвращает цифру по шаблону"""
     list = re.findall(r'[а-я]+\s\d+\s?\d+\s[а-я]+', text)
     for string in list:
         if len(string.split()) == 3:

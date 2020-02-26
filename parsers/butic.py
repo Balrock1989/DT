@@ -7,6 +7,7 @@ import helpers.helper as helper
 
 
 class Butic_process(Process):
+    """Парсер для партнера Бутик"""
     def __init__(self, queue):
         super().__init__()
         self.queue = queue

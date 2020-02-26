@@ -4,6 +4,8 @@ import re
 import shutil
 import threading
 from time import sleep
+
+from PyQt5.QtCore import QThread
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from datetime import datetime, timedelta
@@ -19,6 +21,21 @@ import helpers.helper as helper
 
 from helpers import win32
 
+
+class WebThread(QThread):
+    """Отдельный поток для работы браузера"""
+
+    def __init__(self, mainwindow):
+        super(WebThread, self).__init__()
+        self.mainwindow = mainwindow
+        self.web = WebDriver(mainwindow)
+        mainwindow.browser = self.web
+        self.web.start_data = self.mainwindow.date_start.toPlainText()
+        self.web.end_data = self.mainwindow.date_end.toPlainText()
+        self.web.url = self.mainwindow.url.toPlainText()
+
+    def run(self):
+        self.web.auth()
 
 # TODO Добавить комменты
 

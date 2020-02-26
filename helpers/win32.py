@@ -1,11 +1,8 @@
-import os
-
 import pyautogui
 import win32con
 import win32gui
 
 # нужно ставить pywin32
-import win32process
 
 dt_process = None
 chromedriver_main_process = None
@@ -33,6 +30,7 @@ def show_process():
 
 
 def show_window(func):
+    """Декоратор для функций который выводит окно программы на первый план до выполнения и после"""
     def show(*args, **kwargs):
         show_process()
         func(*args, **kwargs)
@@ -42,12 +40,14 @@ def show_window(func):
 
 
 def hide_chrome_console():
+    """Скрываем консоль от Chromedriver.exe при запуске приложения из exe"""
     show_process()
     if chromedriver_main_process:
         win32gui.ShowWindow(chromedriver_main_process, win32con.SW_HIDE)
 
 
 def close_all_chromedriver():
+    """При запуске программы закрывает все существующие процессы chromedriver.exe в windows"""
     import psutil
 
     chromedrivers = [item for item in psutil.process_iter() if item.name() == 'chromedriver.exe']

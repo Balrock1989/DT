@@ -1,6 +1,4 @@
 from multiprocessing import Queue
-from time import sleep
-
 from PyQt5.QtCore import QThread
 
 
@@ -13,6 +11,7 @@ class MyQueue(QThread):
         self.queue = Queue()
 
     def print_download_actions_in_chat(self, income_data):
+        """Форматированный вывод акции в окно интерфейса"""
         partner_name = income_data[0]["Имя партнера"]
         for n, a in enumerate(income_data, 1):
             self.mainwindow.chat_print_signal.emit((f'---№{n}\n'))
@@ -26,11 +25,13 @@ class MyQueue(QThread):
         self.mainwindow.chat_print_signal.emit('*' * 60)
 
     def change_progress_bar(self):
+        """Отправка сигнала для изменения прогресс бара"""
         self.mainwindow.change_progress_signal.emit(0)
         if self.mainwindow.progress_bar.value() == self.mainwindow.progress_bar.maximum():
             self.mainwindow.reset_progress_signal.emit()
 
     def run(self):
+        """слушаем общую очередь для вывода на экран, записи, прогресса и тд."""
         while True:
             income_data = self.queue.get()
             if isinstance(income_data, list):
