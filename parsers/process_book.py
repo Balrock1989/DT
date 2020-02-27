@@ -96,6 +96,8 @@ class Book_thread(Thread):
             end = helper.get_one_date(end)
         except Exception:
             end = helper.get_date_end_month()
+        if helper.promotion_is_outdated(end):
+            return
         try:
             desc = page.find_all('div', class_='text-block-d')[1].text.strip()
             desc = re.sub(r'\s{2,}', '', desc).strip()

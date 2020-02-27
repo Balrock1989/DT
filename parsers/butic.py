@@ -34,11 +34,16 @@ class Butic_process(Process):
         result = session.post(auth.butic_main_url, headers=auth_header, json=promo_data)
         if result.status_code != 200:
             raise RuntimeError
+        if len(result.json()['data']['promotions']['rows']) == 0:
+            self.queue.put(f'Акции по {partner} не найдены ')
+            return
         for action in result.json()['data']['promotions']['rows']:
             action_id = int(action['id'])
             name = action['title']
             start = datetime.strptime(action['start'], '%Y-%m-%d').strftime('%d.%m.%Y')
             end = datetime.strptime(action['end'], '%Y-%m-%d').strftime('%d.%m.%Y')
+            if helper.promotion_is_outdated(end):
+                continue
             full_description = action['description']
             action_type = 'скидка'
             short_desc = ''

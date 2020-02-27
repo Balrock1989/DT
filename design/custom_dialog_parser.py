@@ -62,6 +62,13 @@ class Ui_Dialog(object):
         self.label_book.setGeometry(QtCore.QRect(150, 5, 90, 30))
         self.label_book.setObjectName('label_book')
 
+        self.holodilnik = QtWidgets.QCheckBox(Dialog)
+        self.holodilnik.setGeometry(QtCore.QRect(130, 30, 20, 20))
+        self.holodilnik.setObjectName('holodilnik')
+        self.label_holodilnik = QtWidgets.QLabel(Dialog)
+        self.label_holodilnik.setGeometry(QtCore.QRect(150, 25, 90, 30))
+        self.label_holodilnik.setObjectName('label_holodilnik')
+
 
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(170, 150, 90, 30))
@@ -93,5 +100,6 @@ class Ui_Dialog(object):
         self.label_vseinstrumenti.setText(_translate('Dialog', 'Все инструменты'))
         self.label_butic.setText(_translate('Dialog', 'Бутик'))
         self.label_book.setText(_translate('Dialog', 'Book24'))
+        self.label_holodilnik.setText(_translate('Dialog', 'Холодильник'))
 
 

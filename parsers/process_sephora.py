@@ -152,12 +152,14 @@ class Sephora_thread(Thread):
             if len(desc) < 2500:
                 try:
                     range = helper.get_range_date(desc)
-                    start, end = helper.convern_list_to_date(range)
+                    start, end = helper.convert_list_to_date(range)
                 except Exception:
                     try:
                         start, end = helper.get_start_date_in_date(desc)
                     except Exception:
                         return
+                if helper.promotion_is_outdated(end):
+                    return
                 url = link
                 name = page.h1.text
                 desc = desc.replace("На этот номер телефона будет отправлено sms с кодом восстановления:Войди или"

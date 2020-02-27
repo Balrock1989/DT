@@ -42,6 +42,8 @@ class Kupivip_process(Process):
                 name += f'. Скидки до {persent}%'
             start = datetime.now().strftime('%d.%m.%Y')
             end = datetime.now().strftime('%d.%m.%Y')
+            if helper.promotion_is_outdated(end):
+                continue
             action_type = 'скидка'
             short_desc = ''
             code = 'Не требуется'
@@ -51,7 +53,9 @@ class Kupivip_process(Process):
             url = 'https://www.kupivip.ru/'
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
-
+        if len(actions_data) == 0:
+            self.queue.put(f'Акции по {partner} не найдены ')
+            return
         self.queue.put(actions_data)
         self.queue.put(helper.write_csv(actions_data))
         self.queue.put((partner,))

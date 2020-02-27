@@ -29,9 +29,10 @@ class Akusherstvo_process(Process):
         driver.quit()
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
-        divs = divs + divs_2
+        divs_3 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item')
+        divs_4 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item middle')
+        divs = divs + divs_2 + divs_3 + divs_4
         threads = [Akusherstvo_thread(actions_data, div, lock, self.queue) for div in divs]
-
         for thread in threads:
             thread.start()
         for thread in threads:
@@ -56,6 +57,8 @@ class Akusherstvo_thread(Thread):
         end = self.div.find("strong", class_='date').text.strip()
         incoming_date = re.search(r'до\s(.*)\s?', end.lower()).group(1)
         end = helper.get_one_date(incoming_date)
+        if helper.promotion_is_outdated(end):
+            return
         start = datetime.now().strftime('%d.%m.%Y')
         link = self.div.find('a').get('href')
         request = requests.get(link)

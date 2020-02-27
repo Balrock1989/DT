@@ -36,6 +36,8 @@ class Vseinstrumenti_process(Process):
                 start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
             except Exception:
                 start, end = helper.get_date_now_to_end_month()
+            if helper.promotion_is_outdated(end):
+                continue
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
 

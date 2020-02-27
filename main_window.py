@@ -17,7 +17,6 @@ import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
 # pyinstaller main_window.spec
-
 sys.excepthook = helper.exception_hook
 
 

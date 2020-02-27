@@ -3,8 +3,8 @@ import os
 import re
 import threading
 from calendar import monthrange
-from datetime import datetime
 from random import randint
+from datetime import datetime, timedelta
 
 import requests
 
@@ -116,6 +116,17 @@ def get_date_end_month():
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_end
 
+def get_date_month_ahead(start):
+    """Возвращает дату через 30 дней после даты начала"""
+    date_end = datetime.strptime(start, '%d.%m.%Y') + timedelta(days=30)
+    return date_end.strftime('%d.%m.%Y')
+
+def promotion_is_outdated(end):
+    """Проверяет кончилась ли акция"""
+    date_end = datetime.strptime(end, '%d.%m.%Y')
+    date_now = datetime.strptime(DATA_NOW, '%d.%m.%Y')
+    return False if date_end >= date_now else True
+
 
 def get_range_date(text):
     """ возвращает список [начало акции, конец акции] ищет текст в формате 1 по 20 февраля 2019 или 1 по 20февраля"""
@@ -136,7 +147,7 @@ def get_range_date(text):
     return data
 
 
-def convern_list_to_date(my_list):
+def convert_list_to_date(my_list):
     """принимает не отформатированный список [дата начала, дата окончания] [1, 20 февраля] [1 марта, 20 марта 2020]"""
     end = get_one_date(my_list[1])
     start = my_list[0].strip().split(' ')
@@ -150,7 +161,7 @@ def convern_list_to_date(my_list):
 
 
 def get_start_date_in_date(text):
-    """ возвращает 1 дату в формате 1  по 20 февраля 2019 или 1 по 20февраля"""
+    """ Принимает текст, ищет даты в формате 20 февраля 2019 или 20 февраля, возвращает дату начала и конец месяца"""
     start = re.search(r'(\d+\s\w+\s\d*)', text).group(1).strip()
     start = get_one_date(start)
     end = get_date_end_month()
@@ -213,3 +224,10 @@ def check_digit(text):
         else:
             return '0'
     return '0'
+
+
+def find_promo_code(text):
+    """Принимает текст, по слову промокод ищет код стоящий после слова"""
+    list = re.findall(r'\bпромокод[а-я]*?\b\s\"?\«?\'?(\w+)', text)
+    return list[0] if list[0] else ''
+
