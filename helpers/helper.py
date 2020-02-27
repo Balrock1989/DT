@@ -228,6 +228,9 @@ def check_digit(text):
 
 def find_promo_code(text):
     """Принимает текст, по слову промокод ищет код стоящий после слова"""
-    list = re.findall(r'\bпромокод[а-я]*?\b\s\"?\«?\'?(\w+)', text)
-    return list[0] if list[0] else ''
+    try:
+        list = re.findall(r'\bпромокод[а-я]*?\b\s\"?\«?\'?(\w+)', text)
+    except Exception:
+        return 'Не требуется'
+    return list[0] if list else 'Не требуется'
 
