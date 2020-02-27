@@ -5,12 +5,12 @@ import win32gui
 # нужно ставить pywin32
 
 dt_process = None
-chromedriver_process = None
+chromedriver_main_process = None
 
 
 def show_process():
     """Поиск окна программы в Windows, отображение его и активация, используется для чата"""
-    global dt_process, chromedriver_process
+    global dt_process, chromedriver_main_process
     toplist = []
     winlist = []
 
@@ -18,18 +18,19 @@ def show_process():
         winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
 
     win32gui.EnumWindows(enum_callback, toplist)
-    if dt_process is None or chromedriver_process is None:
+    if dt_process is None or chromedriver_main_process is None:
         for hwnd, title in winlist:
             if 'DTMainWindow' in title:
                 dt_process = hwnd
             if 'chromedriver' in title:
-                chromedriver_process = hwnd
+                chromedriver_main_process = hwnd
     win32gui.ShowWindow(dt_process, win32con.SW_NORMAL)
     pyautogui.press('alt')
     win32gui.SetForegroundWindow(dt_process)
 
 
 def show_window(func):
+    """Декоратор для функций который выводит окно программы на первый план до выполнения и после"""
     def show(*args, **kwargs):
         show_process()
         func(*args, **kwargs)
@@ -39,6 +40,16 @@ def show_window(func):
 
 
 def hide_chrome_console():
+    """Скрываем консоль от Chromedriver.exe при запуске приложения из exe"""
     show_process()
-    if chromedriver_process:
-        win32gui.ShowWindow(chromedriver_process, win32con.SW_HIDE)
+    if chromedriver_main_process:
+        win32gui.ShowWindow(chromedriver_main_process, win32con.SW_HIDE)
+
+
+def close_all_chromedriver():
+    """При запуске программы закрывает все существующие процессы chromedriver.exe в windows"""
+    import psutil
+
+    chromedrivers = [item for item in psutil.process_iter() if item.name() == 'chromedriver.exe']
+    for process in chromedrivers:
+        process.terminate()

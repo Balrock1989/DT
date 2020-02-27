@@ -1,4 +1,15 @@
+from PyQt5.QtCore import QThread
 from pynput import keyboard
+
+class GlobalHotKey(QThread):
+    """Отдельный поток для глобального хоткея"""
+
+    def __init__(self, mainwindow):
+        super(GlobalHotKey, self).__init__()
+        self.mainwindow = mainwindow
+
+    def run(self):
+        hotkey(self.mainwindow)
 
 
 def hotkey(gui):

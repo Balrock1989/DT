@@ -2,7 +2,7 @@ import logging
 
 log = logging.getLogger("gui")
 
-
+"""конфиг для логирования"""
 def configure_logging():
     log.setLevel(logging.DEBUG)
     stream_handler = logging.StreamHandler()
