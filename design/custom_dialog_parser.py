@@ -69,6 +69,13 @@ class Ui_Dialog(object):
         self.label_holodilnik.setGeometry(QtCore.QRect(150, 25, 90, 30))
         self.label_holodilnik.setObjectName('label_holodilnik')
 
+        self.kolesadarom = QtWidgets.QCheckBox(Dialog)
+        self.kolesadarom.setGeometry(QtCore.QRect(130, 50, 20, 20))
+        self.kolesadarom.setObjectName('kolesadarom')
+        self.label_kolesadarom = QtWidgets.QLabel(Dialog)
+        self.label_kolesadarom.setGeometry(QtCore.QRect(150, 45, 90, 30))
+        self.label_kolesadarom.setObjectName('label_kolesadarom')
+
 
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(170, 150, 90, 30))
@@ -101,5 +108,6 @@ class Ui_Dialog(object):
         self.label_butic.setText(_translate('Dialog', 'Бутик'))
         self.label_book.setText(_translate('Dialog', 'Book24'))
         self.label_holodilnik.setText(_translate('Dialog', 'Холодильник'))
+        self.label_kolesadarom.setText(_translate('Dialog', 'Колеса даром'))
 
 

@@ -7,6 +7,7 @@ from parsers.process_akusherstvo import Akusherstvo_process
 from parsers.process_book import Book_process
 from parsers.process_holodilnik import Holodilnik_process
 from parsers.process_ildebote import Ildebote_process
+from parsers.process_kolesadarom import Kolesadarom_process
 from parsers.process_kupivip import Kupivip_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_utkonos import Utkonos_process
@@ -43,6 +44,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Book_process))
         if self.holodilnik.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Holodilnik_process))
+        if self.kolesadarom.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Kolesadarom_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()

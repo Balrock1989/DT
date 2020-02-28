@@ -87,6 +87,7 @@ def get_double_date(first, second):
 
 def get_one_date(text):
     """ принимает 1 дату в формате 1 февраля 2019 или 1 февраля, возвращает 1 дату в формате 01.02.2019"""
+    text = re.search(r'(\d+\s\w+\s?\d*)', text).group(1)
     text = re.sub(r'\xa0', ' ', text).strip()
     try:
         day, month, year = text.split(' ')
@@ -119,6 +120,11 @@ def get_date_end_month():
 def get_date_month_ahead(start):
     """Возвращает дату через 30 дней после даты начала"""
     date_end = datetime.strptime(start, '%d.%m.%Y') + timedelta(days=30)
+    return date_end.strftime('%d.%m.%Y')
+
+def get_date_half_year_ahead(start):
+    """Возвращает дату через полгода после даты начала"""
+    date_end = datetime.strptime(start, '%d.%m.%Y') + timedelta(days=179)
     return date_end.strftime('%d.%m.%Y')
 
 def promotion_is_outdated(end):

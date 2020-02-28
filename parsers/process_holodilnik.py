@@ -98,7 +98,12 @@ class Holodilnik_thread(Thread):
         if len(desc) > 1500:
             desc = desc[:1499]
         code = helper.find_promo_code(desc)
-        action_type = 'купон' if 'требуется' not in code else 'скидка'
+        if 'требуется' not in code:
+            action_type = 'купон'
+        elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+            action_type = 'подарок'
+        else:
+            action_type = 'скидка'
         short_desc = ''
         action = helper.generate_action(partner, self.name, start, end, desc, code, self.url, action_type, short_desc)
         with self.lock:
