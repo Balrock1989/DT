@@ -28,66 +28,67 @@ class Kolesadarom_process(Process):
         page = BeautifulSoup(driver.page_source, 'lxml')
         driver.quit()
         divs = page.find_all("div", class_='tiles__item-inner')
+        threads = []
         for div in divs:
             begin_url = 'https://www.kolesa-darom.ru'
             name = div.find('a', class_='tiles__link').text.strip()
             url = begin_url + div.find('a', class_='tiles__link').get('href')
-
-            start = helper.DATA_NOW
             try:
-                pediod = div.find('div', class_='tiles__period-title').text.strip()
+                pediod = div.find('div', class_='tiles__period-date').text.strip()
                 end = helper.get_one_date(pediod)
             except Exception:
-                end = helper.get_date_half_year_ahead(start)
-            print(name)
-            print(url)
-            print(end)
-        # threads = [Kolesadarom_thread(actions_data, div, lock, self.queue) for div in divs]
-        # for thread in threads:
-        #     thread.start()
-        # for thread in threads:
-        #     thread.join()
-        # self.queue.put((partner_name,))
-        # self.queue.put(helper.write_csv(actions_data))
-        # self.queue.put(actions_data)
-        # self.queue.put('progress')
+                end = helper.get_date_half_year_ahead(helper.DATA_NOW)
+            threads.append(Kolesadarom_thread(actions_data, lock, self.queue, name, url, end))
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        if len(actions_data) == 0:
+            self.queue.put(f'Акции по {partner_name} не найдены ')
+            return
+        self.queue.put((partner_name,))
+        self.queue.put(helper.write_csv(actions_data))
+        self.queue.put(actions_data)
+        self.queue.put('progress')
 
 
 class Kolesadarom_thread(Thread):
 
-    def __init__(self, actions_data, div, lock, print_queue):
+    def __init__(self, actions_data, lock, queue, name, url, date_end):
         super().__init__()
         self.actions_data = actions_data
-        self.div = div
         self.lock = lock
-        self.queue = print_queue
+        self.queue = queue
+        self.name = name
+        self.url = url
+        self.end = date_end
 
     def run(self):
-        persent = self.div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
-        end = self.div.find("strong", class_='date').text.strip()
-        incoming_date = re.search(r'до\s(.*)\s?', end.lower()).group(1)
-        end = helper.get_one_date(incoming_date)
-        if helper.promotion_is_outdated(end):
-            return
-        start = datetime.now().strftime('%d.%m.%Y')
-        link = self.div.find('a').get('href')
-        request = requests.get(link)
-        partner = 'Акушерство'
-        url = 'https://www.akusherstvo.ru/sale.php'
-        action_page = BeautifulSoup(request.text, 'lxml')
-        name = action_page.h1.text.strip()
-        descs = action_page.find('table', class_='centre_header')
-        desc = ''
-        action_type = 'скидка'
-        code = 'Не требуется'
-        short_desc = ''
-        name = f'Скидки {persent} на {name}'
+        s = requests.Session()
+        s.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'}
+        request = s.get(self.url)
+        page = BeautifulSoup(request.text, 'lxml')
+        main_div = page.find('div', class_='article-tiles')
+        partner = 'Колеса Даром'
         try:
-            desc = descs.find_all('p')[0].text.strip()
-            desc = re.sub(r'\n', '', desc)
-            desc = re.sub(r'\r', '', desc)
-        except Exception:
-            pass
-        action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
+            desc = main_div.find('div', class_=False).find_all('p')
+            desc = desc[0].text.strip() + desc[1].text.strip()
+        except IndexError:
+            desc = main_div.find('div', class_=False).find_all('p')
+            if desc:
+                desc = desc[0].text.strip()[:300]
+            else:
+                desc = main_div.find('div', class_=False).text.strip()[:300]
+        desc = re.sub(r'\s{2,}', ' ', desc).strip()
+        desc = re.sub(r'\xa0', '\n', desc).strip()
+        desc = re.sub(r'&nbsp;', ' ', desc).strip()
+        start = helper.DATA_NOW
+        code = 'Не требуется'
+        if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+            action_type = 'подарок'
+        else:
+            action_type = 'скидка'
+        action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type, '')
         with self.lock:
             self.actions_data.append(action)

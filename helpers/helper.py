@@ -87,7 +87,11 @@ def get_double_date(first, second):
 
 def get_one_date(text):
     """ принимает 1 дату в формате 1 февраля 2019 или 1 февраля, возвращает 1 дату в формате 01.02.2019"""
-    text = re.search(r'(\d+\s\w+\s?\d*)', text).group(1)
+    try:
+        text = re.search(r'(\d+\s\w+\s?\d*)', text).group(1)
+    except Exception:
+        text = re.search(r'(\d+.\w+.\d*)', text).group(1)
+        text = text.replace('.', ' ')
     text = re.sub(r'\xa0', ' ', text).strip()
     try:
         day, month, year = text.split(' ')
@@ -211,24 +215,23 @@ def generate_action(partner_name, action_name, date_start, date_end, description
             'Дата окончания': date_end, 'Условия акции': description,
             'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}
 
-
 def check_digit(text):
     """Принимает текст, ищет в нем все цифры и по одному слову слева и справа. Возвращает цифру по шаблону"""
-    list = re.findall(r'[а-я]+\s\d+\s?\d+\s[а-я]+', text)
-    for string in list:
+    lists = re.findall(r'[а-я]+\s\d+\s?\d+\s[а-я]+', text)
+    for string in lists:
         if len(string.split()) == 3:
             digit = string.split()[1]
         elif len(string.split()) == 4:
             digit = string.split()
             digit = digit[1] + " " + digit[2]
         if f'от {digit} руб' in string:
+            print(list(string))
             continue
         if f'{digit} руб' in string:
             return digit.replace(' ', '')
         else:
-            return '0'
+            continue
     return '0'
-
 
 def find_promo_code(text):
     """Принимает текст, по слову промокод ищет код стоящий после слова"""

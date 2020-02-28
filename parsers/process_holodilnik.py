@@ -81,11 +81,11 @@ class Holodilnik_thread(Thread):
         if helper.promotion_is_outdated(end):
             return
         id = 'tblact_' + self.url[21:-1]
-        link = 'http://www.' + self.url
+        self.url = 'http://www.' + self.url
         s = requests.Session()
         s.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'}
-        request = s.get(link)
+        request = s.get(self.url)
         page = BeautifulSoup(request.text, 'lxml')
         main_div = page.find('div', id=id)
         try:

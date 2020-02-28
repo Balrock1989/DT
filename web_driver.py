@@ -196,9 +196,9 @@ class WebDriver:
 
         def get_percent(action):
             try:
-                percent = re.search(r'(\d+)%', action).group(1)
+                percent = re.search(r'(\d+)\s?%', action).group(1)
             except AttributeError:
-                percent = re.search(r'%(\d+)', action).group(1)
+                percent = re.search(r'%\s?(\d+)', action).group(1)
             return percent
 
         def add():
@@ -268,12 +268,16 @@ class WebDriver:
                         vaucher_type.select_by_value('2')
                         code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
                         if '%' in action['Название акции']:
-                            checkbox.click()
                             percent = get_percent(action['Название акции'])
+                            # TODO Проверить ставится ли галочка
+                            if percent != '0':
+                                checkbox.click()
                             discount_amount.send_keys(percent)
                         elif '%' in action['Условия акции']:
-                            checkbox.click()
                             percent = get_percent(action['Условия акции'])
+                            # TODO Проверить ставится ли галочка
+                            if percent != '0':
+                                checkbox.click()
                             discount_amount.send_keys(percent)
                         elif digit_in_name:
                             discount_amount.send_keys(digit_in_name)
