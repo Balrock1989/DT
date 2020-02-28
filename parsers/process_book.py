@@ -79,7 +79,6 @@ class Book_thread(Thread):
         except AttributeError:
             code = 'Не требуется'
         info_divs = page.find_all('div', class_='info-list__item')
-        short_desc = ''
         full_date = ''
         if len(info_divs) == 3:
             short_desc = info_divs[0].find('span', class_='info-list__text').text.strip()
@@ -94,8 +93,6 @@ class Book_thread(Thread):
             end = helper.get_one_date(end)
         except Exception:
             end = helper.get_date_end_month()
-        if helper.promotion_is_outdated(end):
-            return
         try:
             desc = page.find_all('div', class_='text-block-d')[1].text.strip()
             desc = re.sub(r'\s{2,}', '', desc).strip()
@@ -106,14 +103,10 @@ class Book_thread(Thread):
             except Exception:
                 return
         partner = 'Book24'
-        if 'требуется' not in code:
-            action_type = 'купон'
-        elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-            action_type = 'подарок'
-        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-            action_type = 'доставка'
-        else:
-            action_type = 'скидка'
+        if helper.promotion_is_outdated(end):
+            return
+        short_desc = ''
+        action_type = helper.check_action_type(code, name, desc)
         action = helper.generate_action(partner, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

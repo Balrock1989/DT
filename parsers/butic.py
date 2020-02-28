@@ -36,16 +36,16 @@ class Butic_process(Process):
             raise RuntimeError
         if len(result.json()['data']['promotions']['rows']) == 0:
             self.queue.put(f'Акции по {partner} не найдены ')
+            self.queue.put('progress')
             return
         for action in result.json()['data']['promotions']['rows']:
             action_id = int(action['id'])
             name = action['title']
             start = datetime.strptime(action['start'], '%Y-%m-%d').strftime('%d.%m.%Y')
             end = datetime.strptime(action['end'], '%Y-%m-%d').strftime('%d.%m.%Y')
-            if helper.promotion_is_outdated(end):
-                continue
+
             full_description = action['description']
-            short_desc = ''
+
             try:
                 code = re.search(r'([a-zA-Z]+.*)', action['preview']).group(1).strip()
             except Exception:
@@ -54,14 +54,10 @@ class Butic_process(Process):
             url_man = re.search(r'для мужчин:.*(https.*)', full_description).group(1).strip()
             desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
             desc = re.sub(r'\*', '', desc).strip()
-            if 'требуется' not in code:
-                action_type = 'купон'
-            elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-                action_type = 'подарок'
-            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-                action_type = 'доставка'
-            else:
-                action_type = 'скидка'
+            if helper.promotion_is_outdated(end):
+                continue
+            short_desc = ''
+            action_type = helper.check_action_type(code, name, desc)
             action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type, short_desc)
             action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type,
                                                   short_desc)

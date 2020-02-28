@@ -42,21 +42,14 @@ class Kupivip_process(Process):
                 name += f'. Скидки до {persent}%'
             start = datetime.now().strftime('%d.%m.%Y')
             end = datetime.now().strftime('%d.%m.%Y')
-            if helper.promotion_is_outdated(end):
-                continue
-            short_desc = ''
             code = 'Не требуется'
             if 'промокод' in name.lower():
                 code = re.search(r'код\s(.*)\s?', name).group(1)
             url = 'https://www.kupivip.ru/'
-            if 'требуется' not in code:
-                action_type = 'купон'
-            elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-                action_type = 'подарок'
-            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-                action_type = 'доставка'
-            else:
-                action_type = 'скидка'
+            if helper.promotion_is_outdated(end):
+                continue
+            short_desc = ''
+            action_type = helper.check_action_type(code, name, desc)
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         if len(actions_data) == 0:

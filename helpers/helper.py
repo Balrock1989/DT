@@ -36,6 +36,17 @@ result_path = os.path.normpath(result_path)
 DATA_NOW = datetime.now().strftime('%d.%m.%Y')
 
 
+def check_action_type(code, name, desc):
+    if 'требуется' not in code:
+        action_type = 'купон'
+    elif 'подарок' in name.lower() or 'подарок' in name.lower():
+        action_type = 'подарок'
+    elif 'доставка' in desc.lower() or 'доставка' in desc.lower():
+        action_type = 'доставка'
+    else:
+        action_type = 'скидка'
+    return action_type
+
 def generate_csv():
     """Создает пустой CSV на рабочем столе при запуске программы, для хранения акций"""
     with open(actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:

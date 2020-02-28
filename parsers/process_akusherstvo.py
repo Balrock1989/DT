@@ -56,8 +56,6 @@ class Akusherstvo_thread(Thread):
         persent = self.div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
         end = self.div.find("strong", class_='date').text.strip()
         end = helper.get_one_date(end)
-        if helper.promotion_is_outdated(end):
-            return
         start = datetime.now().strftime('%d.%m.%Y')
         link = self.div.find('a').get('href')
         request = requests.get(link)
@@ -68,7 +66,6 @@ class Akusherstvo_thread(Thread):
         descs = action_page.find('table', class_='centre_header')
         desc = ''
         code = 'Не требуется'
-        short_desc = ''
         name = f'Скидки {persent} на {name}'
         try:
             desc = descs.find_all('p')[0].text.strip()
@@ -76,12 +73,10 @@ class Akusherstvo_thread(Thread):
             desc = re.sub(r'\r', '', desc)
         except Exception:
             pass
-        if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-            action_type = 'подарок'
-        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-            action_type = 'доставка'
-        else:
-            action_type = 'скидка'
+        if helper.promotion_is_outdated(end):
+            return
+        short_desc = ''
+        action_type = helper.check_action_type(code, name, desc)
         action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

@@ -16,7 +16,6 @@ class Vseinstrumenti_process(Process):
     def run(self):
         partner = 'Все инструменты'
         actions_data = []
-        # TODO разобраться почему перестал работать headless
         main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
         driver = webdriver.Chrome()
         driver.get(main_url)
@@ -26,7 +25,6 @@ class Vseinstrumenti_process(Process):
         for div in divs:
             name = div.find('div', class_='action_header').a.text.strip()
             code = 'Не требуется'
-            short_desc = ''
             url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
             desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
             incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
@@ -37,12 +35,8 @@ class Vseinstrumenti_process(Process):
                 start, end = helper.get_date_now_to_end_month()
             if helper.promotion_is_outdated(end):
                 continue
-            if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-                action_type = 'подарок'
-            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-                action_type = 'доставка'
-            else:
-                action_type = 'скидка'
+            short_desc = ''
+            action_type = helper.check_action_type(code, name, desc)
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
 

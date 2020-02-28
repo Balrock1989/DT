@@ -78,8 +78,6 @@ class Holodilnik_thread(Thread):
             end = re.search(r'(\d+\.\d+\.\d+)', self.date[1]).group(1)
         else:
             end = helper.get_date_month_ahead(start)
-        if helper.promotion_is_outdated(end):
-            return
         id = 'tblact_' + self.url[21:-1]
         self.url = 'http://www.' + self.url
         s = requests.Session()
@@ -98,15 +96,10 @@ class Holodilnik_thread(Thread):
         if len(desc) > 1500:
             desc = desc[:1499]
         code = helper.find_promo_code(desc)
-        if 'требуется' not in code:
-            action_type = 'купон'
-        elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-            action_type = 'подарок'
-        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-            action_type = 'доставка'
-        else:
-            action_type = 'скидка'
+        if helper.promotion_is_outdated(end):
+            return
         short_desc = ''
+        action_type = helper.check_action_type(code, self.name, desc)
         action = helper.generate_action(partner, self.name, start, end, desc, code, self.url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

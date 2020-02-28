@@ -34,17 +34,13 @@ class Ildebote_process(Process):
             except Exception:
                 start = helper.DATA_NOW
                 end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
-            if helper.promotion_is_outdated(end):
-                continue
+
             desc = div.find("p", class_='desc').text.strip()
             code = 'Не требуется'
-            if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-                action_type = 'подарок'
-            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-                action_type = 'доставка'
-            else:
-                action_type = 'скидка'
+            if helper.promotion_is_outdated(end):
+                continue
             short_desc = ''
+            action_type = helper.check_action_type(code, name, desc)
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         self.queue.put(actions_data)

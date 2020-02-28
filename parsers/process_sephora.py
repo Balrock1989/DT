@@ -158,21 +158,16 @@ class Sephora_thread(Thread):
                         start, end = helper.get_start_date_in_date(desc)
                     except Exception:
                         return
-                if helper.promotion_is_outdated(end):
-                    return
                 url = link
                 name = page.h1.text
                 desc = desc.replace("На этот номер телефона будет отправлено sms с кодом восстановления:Войди или"
-                                    " зарегистрируйся, чтобы получить все преимущества постоянного покупателя! ", '')
+                                    " зарегистрируйся, чтобы получить все преимущества постоянного покупателя!", '').strip()
                 partner = 'Sephora'
                 code = "Не требуется"
+                if helper.promotion_is_outdated(end):
+                    return
                 short_desc = ''
-                if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-                    action_type = 'подарок'
-                elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-                    action_type = 'доставка'
-                else:
-                    action_type = 'скидка'
+                action_type = helper.check_action_type(code, name, desc)
                 action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)

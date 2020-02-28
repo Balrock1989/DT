@@ -27,8 +27,6 @@ class Utkonos_process(Process):
         for div in divs:
             name = div.a.text.strip()
             code = 'Не требуется'
-            action_type = 'скидка'
-            short_desc = ''
             desc = ''
             url = 'https://www.utkonos.ru' + div.a.get('href')
             incoming_date = div.find('div', class_='text').text.strip()
@@ -36,12 +34,8 @@ class Utkonos_process(Process):
             start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
             if helper.promotion_is_outdated(end):
                 continue
-            if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-                action_type = 'подарок'
-            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-                action_type = 'доставка'
-            else:
-                action_type = 'скидка'
+            short_desc = ''
+            action_type = helper.check_action_type(code, name, desc)
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         self.queue.put(actions_data)

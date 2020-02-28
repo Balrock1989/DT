@@ -85,14 +85,10 @@ class Kolesadarom_thread(Thread):
         desc = re.sub(r'&nbsp;', ' ', desc).strip()
         start = helper.DATA_NOW
         code = 'Не требуется'
-        if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
-            action_type = 'подарок'
-        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
-            action_type = 'доставка'
-        else:
-            action_type = 'скидка'
         if helper.promotion_is_outdated(self.end):
             return
-        action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type, '')
+        short_desc = ''
+        action_type = helper.check_action_type(code, self.name, desc)
+        action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)
