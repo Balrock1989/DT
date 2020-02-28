@@ -269,13 +269,11 @@ class WebDriver:
                         code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
                         if '%' in action['Название акции']:
                             percent = get_percent(action['Название акции'])
-                            # TODO Проверить ставится ли галочка
                             if percent != '0':
                                 checkbox.click()
                             discount_amount.send_keys(percent)
                         elif '%' in action['Условия акции']:
                             percent = get_percent(action['Условия акции'])
-                            # TODO Проверить ставится ли галочка
                             if percent != '0':
                                 checkbox.click()
                             discount_amount.send_keys(percent)
