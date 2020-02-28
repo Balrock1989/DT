@@ -67,7 +67,6 @@ class Akusherstvo_thread(Thread):
         name = action_page.h1.text.strip()
         descs = action_page.find('table', class_='centre_header')
         desc = ''
-        action_type = 'скидка'
         code = 'Не требуется'
         short_desc = ''
         name = f'Скидки {persent} на {name}'
@@ -77,6 +76,12 @@ class Akusherstvo_thread(Thread):
             desc = re.sub(r'\r', '', desc)
         except Exception:
             pass
+        if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+            action_type = 'подарок'
+        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+            action_type = 'доставка'
+        else:
+            action_type = 'скидка'
         action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

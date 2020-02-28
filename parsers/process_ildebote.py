@@ -37,8 +37,13 @@ class Ildebote_process(Process):
             if helper.promotion_is_outdated(end):
                 continue
             desc = div.find("p", class_='desc').text.strip()
-            action_type = 'подарок' if 'подарок' in name.lower() else 'скидка'
             code = 'Не требуется'
+            if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+                action_type = 'подарок'
+            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+                action_type = 'доставка'
+            else:
+                action_type = 'скидка'
             short_desc = ''
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)

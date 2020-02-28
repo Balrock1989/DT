@@ -167,7 +167,12 @@ class Sephora_thread(Thread):
                 partner = 'Sephora'
                 code = "Не требуется"
                 short_desc = ''
-                action_type = 'подарок' if 'подарок' in desc.lower() else 'скидка'
+                if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+                    action_type = 'подарок'
+                elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+                    action_type = 'доставка'
+                else:
+                    action_type = 'скидка'
                 action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)

@@ -76,10 +76,8 @@ class Book_thread(Thread):
         start = helper.DATA_NOW
         try:
             code = page.find('input', class_='copy-promocode__code').get('value').strip()
-            action_type = 'купон'
         except AttributeError:
             code = 'Не требуется'
-            action_type = 'скидка'
         info_divs = page.find_all('div', class_='info-list__item')
         short_desc = ''
         full_date = ''
@@ -108,6 +106,14 @@ class Book_thread(Thread):
             except Exception:
                 return
         partner = 'Book24'
+        if 'требуется' not in code:
+            action_type = 'купон'
+        elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+            action_type = 'подарок'
+        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+            action_type = 'доставка'
+        else:
+            action_type = 'скидка'
         action = helper.generate_action(partner, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

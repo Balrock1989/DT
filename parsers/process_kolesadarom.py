@@ -87,6 +87,8 @@ class Kolesadarom_thread(Thread):
         code = 'Не требуется'
         if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
             action_type = 'подарок'
+        elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+            action_type = 'доставка'
         else:
             action_type = 'скидка'
         if helper.promotion_is_outdated(self.end):

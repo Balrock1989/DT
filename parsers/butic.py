@@ -45,17 +45,23 @@ class Butic_process(Process):
             if helper.promotion_is_outdated(end):
                 continue
             full_description = action['description']
-            action_type = 'скидка'
             short_desc = ''
             try:
                 code = re.search(r'([a-zA-Z]+.*)', action['preview']).group(1).strip()
-                action_type = 'купон'
             except Exception:
                 code = "Не требуется"
             url_woman = re.search(r'для женщин:.*(https.*)', full_description).group(1).strip()
             url_man = re.search(r'для мужчин:.*(https.*)', full_description).group(1).strip()
             desc = re.search(r'(?s)Подробные условия:(.*)', full_description).group(1).strip()
             desc = re.sub(r'\*', '', desc).strip()
+            if 'требуется' not in code:
+                action_type = 'купон'
+            elif 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+                action_type = 'подарок'
+            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+                action_type = 'доставка'
+            else:
+                action_type = 'скидка'
             action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type, short_desc)
             action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type,
                                                   short_desc)

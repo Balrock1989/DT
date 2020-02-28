@@ -36,6 +36,12 @@ class Utkonos_process(Process):
             start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
             if helper.promotion_is_outdated(end):
                 continue
+            if 'подарок' in self.name.lower() or 'подарок' in desc.lower():
+                action_type = 'подарок'
+            elif 'доставка' in self.name.lower() or 'доставка' in desc.lower():
+                action_type = 'доставка'
+            else:
+                action_type = 'скидка'
             action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         self.queue.put(actions_data)
