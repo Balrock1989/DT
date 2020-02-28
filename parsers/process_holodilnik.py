@@ -25,14 +25,13 @@ class Holodilnik_process(Process):
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0',
-            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
             'Cache-Control': 'max-age=0',
             'Connection': 'keep-alive',
             'Host': 'ulyanovsk.holodilnik.ru',
             'Upgrade-Insecure-Requests': '1',
-            'Cookie': 'region_position_nn=46; newfilters=0; HRUSID=c8ce839af76f3e9b614db17e0e937376; HRUSIDLONG=e6bad63cea76b551628e325a5907cb7c; csrfnews=5btdljykyrczu0je; _gcl_au=1.1.1521326167.1582824369; path=action; prod_id=0; tmr_reqNum=12; tmr_lvid=6c46003ae84294fd0905e9bb5ad31015; tmr_lvidTS=1582824372251; _ym_uid=1582824372910885530; _ym_d=1582824372; _ga=GA1.2.1012412396.1582824372; _gid=GA1.2.49302205.1582824372; _ym_isad=2; _fbp=fb.1.1582824373999.139412109; cto_bundle=yUZ1uV9BMUpnR09hU0lBdlJDNkx3QmQwSXFIaXVEQiUyQlNFSEdIZ1g2bFFHeEV6dVRid2YxNDB5aG5JalpTRWZQV09MMFFOMVkyeTJ6Z0dWclBsN3pzUFZiQXpVTk9lRTNPZW9uUUVFcUx3b0I3OEp1dTE2JTJCVGV6RGpEM0FoMnFZbyUyRmJxMWhzQzJJaXlUR0NtR1c3YzRybDRnSGclM0QlM0Q; HRUSIDSHORT=d37b310f2e99a683c7f37a2018d98a96; csubsrc=1; banners_rotations=288; flocktory-uuid=d6ff3934-1d0e-4400-a047-8646579ef488-2; mindboxDeviceUUID=3e5ba5a9-146c-40f5-bafc-ff2d12e581ba; directCrm-session=%7B%22deviceGuid%22%3A%223e5ba5a9-146c-40f5-bafc-ff2d12e581ba%22%7D; _gat=1; tmr_detect=1%7C1582829538157; _ym_visorc_42=w',
         })
         main_url = 'https://ulyanovsk.holodilnik.ru/action/'
         request = s.get(main_url)
@@ -94,7 +93,7 @@ class Holodilnik_thread(Thread):
         except Exception:
             return
         partner = 'Холодильник'
-        desc = re.sub(r'\s{2,}', '\n', div[1].text.strip()).strip()
+        desc = re.sub(r'\s{2,}', ' ', div[1].text.strip()).strip()
         desc = re.sub(r'\xa0', '\n', desc).strip()
         if len(desc) > 1500:
             desc = desc[:1499]

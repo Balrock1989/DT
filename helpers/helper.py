@@ -215,8 +215,6 @@ def check_digit(text):
         elif len(string.split()) == 4:
             digit = string.split()
             digit = digit[1] + " " + digit[2]
-        if f'до {digit} руб' in string:
-            continue
         if f'от {digit} руб' in string:
             continue
         if f'{digit} руб' in string:

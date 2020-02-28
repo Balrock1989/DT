@@ -254,7 +254,7 @@ class WebDriver:
                     start_date.send_keys(action['Дата начала'])
                     end_date.clear()
                     end_date.send_keys(action['Дата окончания'])
-                    short_description.send_keys(action['Короткое описание']) if action['Короткое описание']\
+                    short_description.send_keys(action['Короткое описание']) if action['Короткое описание'] + '!'\
                         else short_description.send_keys(action['Название акции'] + '!')
                     digit_in_name = helper.check_digit(action['Название акции'])
                     digit_in_desc = helper.check_digit(action['Условия акции'])
