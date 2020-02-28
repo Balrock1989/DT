@@ -89,6 +89,8 @@ class Kolesadarom_thread(Thread):
             action_type = 'подарок'
         else:
             action_type = 'скидка'
+        if helper.promotion_is_outdated(self.end):
+            return
         action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type, '')
         with self.lock:
             self.actions_data.append(action)
