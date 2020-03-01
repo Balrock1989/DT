@@ -1,9 +1,6 @@
 import re
 from datetime import datetime
 from multiprocessing import Process
-
-import requests
-from bs4 import BeautifulSoup
 import helpers.helper as helper
 
 

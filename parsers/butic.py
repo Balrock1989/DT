@@ -8,6 +8,7 @@ import helpers.helper as helper
 
 class Butic_process(Process):
     """Парсер для партнера Бутик"""
+
     def __init__(self, queue):
         super().__init__()
         self.queue = queue
@@ -58,7 +59,8 @@ class Butic_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            action_man = helper.generate_action(partner_name, name, start, end, desc, code, url_man, action_type, short_desc)
+            action_man = helper.generate_action(partner_name, name, start, end, desc, code, url_man, action_type,
+                                                short_desc)
             action_woman = helper.generate_action(partner_name, name, start, end, desc, code, url_woman, action_type,
                                                   short_desc)
             actions_data.append(action_man)
@@ -77,4 +79,3 @@ class Butic_process(Process):
                 banners_links.append(link)
             helper.banner_downloader(banners_links, self.queue)
             helper.filling_queue(self.queue, actions_data, partner_name)
-

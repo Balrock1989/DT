@@ -1,7 +1,5 @@
 import re
 from multiprocessing import Process
-from selenium import webdriver
-from bs4 import BeautifulSoup
 import helpers.helper as helper
 
 

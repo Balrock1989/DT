@@ -1,4 +1,3 @@
-from datetime import datetime
 import re
 import threading
 import requests
@@ -6,7 +5,6 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
-from selenium import webdriver
 
 
 class Kolesadarom_process(Process):
@@ -76,6 +74,7 @@ class Kolesadarom_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, self.name, desc)
-        action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type, short_desc)
+        action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type,
+                                        short_desc)
         with self.lock:
             self.actions_data.append(action)

@@ -1,8 +1,5 @@
 import re
 from multiprocessing import Process
-
-import requests
-from bs4 import BeautifulSoup
 import helpers.helper as helper
 
 
@@ -34,4 +31,3 @@ class Utkonos_process(Process):
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         helper.filling_queue(self.queue, actions_data, partner_name)
-

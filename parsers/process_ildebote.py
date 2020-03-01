@@ -1,8 +1,5 @@
 from datetime import datetime, timedelta
 from multiprocessing import Process
-
-import requests
-from bs4 import BeautifulSoup
 import helpers.helper as helper
 
 
