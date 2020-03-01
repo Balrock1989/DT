@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
-from selenium import webdriver
 
 
 class Akusherstvo_process(Process):
@@ -22,25 +21,15 @@ class Akusherstvo_process(Process):
         partner_name = 'Акушерство'
         actions_data = []
         lock = threading.Lock()
-        main_url = 'https://www.akusherstvo.ru/sale.php'
-        driver = webdriver.Chrome()
-        driver.get(main_url)
-        page = BeautifulSoup(driver.page_source, 'lxml')
-        driver.quit()
+        page = helper.prepare_parser_data_use_webdriver('https://www.akusherstvo.ru/sale.php')
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
         divs_3 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item')
         divs_4 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item middle')
         divs = divs + divs_2 + divs_3 + divs_4
         threads = [Akusherstvo_thread(actions_data, div, lock, self.queue) for div in divs]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        self.queue.put((partner_name,))
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put(actions_data)
-        self.queue.put('progress')
+        helper.start_join_threads(threads)
+        helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Akusherstvo_thread(Thread):

@@ -15,14 +15,10 @@ class Ildebote_process(Process):
         return "ИльДэБотэ"
 
     def run(self):
-        partner = 'ИльДэБотэ'
+        partner_name = 'ИльДэБотэ'
         actions_data = []
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
         url = 'https://iledebeaute.ru/company/actions/'
-        request = s.get(url)
-        page = BeautifulSoup(request.text, 'lxml')
+        page = helper.prepair_parser_data_use_request(url)
         divs = page.find_all("div", class_='news_block')
         for div in divs:
             date = div.find("p", class_='date')
@@ -41,9 +37,6 @@ class Ildebote_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
+            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
-        self.queue.put(actions_data)
-        self.queue.put((partner,))
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put('progress')
+        helper.filling_queue(self.queue, actions_data, partner_name)

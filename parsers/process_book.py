@@ -1,14 +1,10 @@
 import re
 import threading
-import time
-
 import requests
 from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 class Book_process(Process):
@@ -24,20 +20,7 @@ class Book_process(Process):
         partner_name = 'Book24'
         actions_data = []
         lock = threading.Lock()
-        main_url = 'https://book24.ru/sales/'
-        driver = webdriver.Chrome()
-        driver.get(main_url)
-        scroll_script = \
-            "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
-        lenOfPage = driver.execute_script(scroll_script)
-        while True:
-            lastCount = lenOfPage
-            time.sleep(1)
-            lenOfPage = driver.execute_script(scroll_script)
-            if lastCount == lenOfPage:
-                break
-        page = BeautifulSoup(driver.page_source, 'lxml')
-        driver.quit()
+        page = helper.prepare_parser_data_use_webdriver('https://book24.ru/sales/', scroll=True)
         begin_url = 'https://book24.ru'
         divs = page.find_all('div', class_='stock-list-item__actions')
         links = []
@@ -47,17 +30,8 @@ class Book_process(Process):
             else:
                 pass
         threads = [Book_thread(actions_data, link, lock, self.queue) for link in links]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        if len(actions_data) == 0:
-            self.queue.put(f'Акции по {partner_name} не найдены ')
-            return
-        self.queue.put(actions_data)
-        self.queue.put((partner_name,))
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put('progress')
+        helper.start_join_threads(threads)
+        helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Book_thread(Thread):
@@ -80,6 +54,7 @@ class Book_thread(Thread):
             code = 'Не требуется'
         info_divs = page.find_all('div', class_='info-list__item')
         full_date = ''
+        short_desc = ''
         if len(info_divs) == 3:
             short_desc = info_divs[0].find('span', class_='info-list__text').text.strip()
             full_date = info_divs[2].find('span', class_='info-list__text').text.strip()
@@ -105,7 +80,6 @@ class Book_thread(Thread):
         partner = 'Book24'
         if helper.promotion_is_outdated(end):
             return
-        short_desc = ''
         action_type = helper.check_action_type(code, name, desc)
         action = helper.generate_action(partner, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:

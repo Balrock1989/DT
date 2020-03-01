@@ -5,6 +5,10 @@ import threading
 from calendar import monthrange
 from random import randint
 from datetime import datetime, timedelta
+from time import sleep
+
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 import requests
 
@@ -47,6 +51,31 @@ def check_action_type(code, name, desc):
         action_type = 'скидка'
     return action_type
 
+
+def prepare_parser_data_use_webdriver(url, scroll=False):
+    driver = webdriver.Chrome()
+    driver.get(url)
+    if scroll:
+        scroll_script = \
+            "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
+        lenOfPage = driver.execute_script(scroll_script)
+        while True:
+            lastCount = lenOfPage
+            sleep(1)
+            lenOfPage = driver.execute_script(scroll_script)
+            if lastCount == lenOfPage:
+                break
+    page = BeautifulSoup(driver.page_source, 'lxml')
+    driver.quit()
+    return page
+
+def prepair_parser_data_use_request(url):
+    s = requests.Session()
+    s.headers.update({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
+    request = s.get(url)
+    return BeautifulSoup(request.text, 'lxml')
+
 def generate_csv():
     """Создает пустой CSV на рабочем столе при запуске программы, для хранения акций"""
     with open(actions_csv_path, "w", newline="", encoding="utf-8") as csv_file:
@@ -67,6 +96,23 @@ def write_csv(actions):
         with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
             writer.writerow(action)
+
+
+def filling_queue(queue, actions_data, partner_name):
+    if len(actions_data) == 0:
+        queue.put(f'Акции по {partner_name} не найдены ')
+        return
+    queue.put(actions_data)
+    queue.put(write_csv(actions_data))
+    queue.put((partner_name,))
+    queue.put('progress')
+
+
+def start_join_threads(threads):
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 
 def one_date_return_two(incoming_date):
@@ -132,15 +178,18 @@ def get_date_end_month():
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_end
 
+
 def get_date_month_ahead(start):
     """Возвращает дату через 30 дней после даты начала"""
     date_end = datetime.strptime(start, '%d.%m.%Y') + timedelta(days=30)
     return date_end.strftime('%d.%m.%Y')
 
+
 def get_date_half_year_ahead(start):
     """Возвращает дату через полгода после даты начала"""
     date_end = datetime.strptime(start, '%d.%m.%Y') + timedelta(days=179)
     return date_end.strftime('%d.%m.%Y')
+
 
 def promotion_is_outdated(end):
     """Проверяет кончилась ли акция"""
@@ -226,6 +275,7 @@ def generate_action(partner_name, action_name, date_start, date_end, description
             'Дата окончания': date_end, 'Условия акции': description,
             'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}
 
+
 def check_digit(text):
     """Принимает текст, ищет в нем все цифры и по одному слову слева и справа. Возвращает цифру по шаблону"""
     lists = re.findall(r'[а-я]+\s\d+\s?\d+\s[а-я]+', text)
@@ -244,6 +294,7 @@ def check_digit(text):
             continue
     return '0'
 
+
 def find_promo_code(text):
     """Принимает текст, по слову промокод ищет код стоящий после слова"""
     try:
@@ -251,4 +302,3 @@ def find_promo_code(text):
     except Exception:
         return 'Не требуется'
     return list[0] if list else 'Не требуется'
-

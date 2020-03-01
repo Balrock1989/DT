@@ -105,26 +105,12 @@ class Sephora_process(Process):
         partner_name = 'Sephora'
         actions_data = []
         lock = threading.Lock()
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
         main_url = 'https://sephora.ru/news/'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
+        page = helper.prepair_parser_data_use_request(main_url)
         links = page.find_all("a", class_='b-news-thumb__title')
         threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue) for link in links]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        if len(actions_data) == 0:
-            self.queue.put(f'Акции по {partner_name} не найдены ')
-            return
-        self.queue.put(actions_data)
-        self.queue.put((partner_name,))
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put('progress')
-
+        helper.start_join_threads(threads)
+        helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Sephora_thread(Thread):

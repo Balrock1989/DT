@@ -17,13 +17,8 @@ class Kupivip_process(Process):
 
     def run(self):
         actions_data = []
-        partner = 'КупиВип'
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-        main_url = 'https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
+        partner_name = 'КупиВип'
+        page = helper.prepair_parser_data_use_request('https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL')
         divs = page.find_all("div", attrs={'data-banner': 'campaign'})
 
         for div in divs:
@@ -50,12 +45,6 @@ class Kupivip_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
+            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
-        if len(actions_data) == 0:
-            self.queue.put(f'Акции по {partner} не найдены ')
-            return
-        self.queue.put(actions_data)
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put((partner,))
-        self.queue.put('progress')
+        helper.filling_queue(self.queue, actions_data, partner_name)

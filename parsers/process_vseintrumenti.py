@@ -14,13 +14,9 @@ class Vseinstrumenti_process(Process):
         return "ВсеИнструменты"
 
     def run(self):
-        partner = 'Все инструменты'
+        partner_name = 'Все инструменты'
         actions_data = []
-        main_url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
-        driver = webdriver.Chrome()
-        driver.get(main_url)
-        page = BeautifulSoup(driver.page_source, 'lxml')
-        driver.quit()
+        page = helper.prepare_parser_data_use_webdriver('https://www.vseinstrumenti.ru/our_actions/aktsii')
         divs = page.find_all("div", class_='action_main')
         for div in divs:
             name = div.find('div', class_='action_header').a.text.strip()
@@ -37,10 +33,6 @@ class Vseinstrumenti_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
+            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
-
-        self.queue.put(actions_data)
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put((partner,))
-        self.queue.put('progress')
+        helper.filling_queue(self.queue, actions_data, partner_name)

@@ -16,7 +16,7 @@ class Butic_process(Process):
         return "Бутик"
 
     def run(self):
-        partner = 'Бутик'
+        partner_name = 'Бутик'
         actions_data = []
         session = requests.Session()
         result = session.post(auth.butic_auth_url, data=auth.butic_payload)
@@ -35,7 +35,7 @@ class Butic_process(Process):
         if result.status_code != 200:
             raise RuntimeError
         if len(result.json()['data']['promotions']['rows']) == 0:
-            self.queue.put(f'Акции по {partner} не найдены ')
+            self.queue.put(f'Акции по {partner_name} не найдены ')
             self.queue.put('progress')
             return
         for action in result.json()['data']['promotions']['rows']:
@@ -58,8 +58,8 @@ class Butic_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            action_man = helper.generate_action(partner, name, start, end, desc, code, url_man, action_type, short_desc)
-            action_woman = helper.generate_action(partner, name, start, end, desc, code, url_woman, action_type,
+            action_man = helper.generate_action(partner_name, name, start, end, desc, code, url_man, action_type, short_desc)
+            action_woman = helper.generate_action(partner_name, name, start, end, desc, code, url_woman, action_type,
                                                   short_desc)
             actions_data.append(action_man)
             actions_data.append(action_woman)
@@ -76,7 +76,5 @@ class Butic_process(Process):
                 link = begin_url_banner + banner['path']
                 banners_links.append(link)
             helper.banner_downloader(banners_links, self.queue)
-            self.queue.put('progress')
-            self.queue.put(actions_data)
-            self.queue.put((partner,))
-            self.queue.put(helper.write_csv(actions_data))
+            helper.filling_queue(self.queue, actions_data, partner_name)
+

@@ -22,11 +22,7 @@ class Kolesadarom_process(Process):
         partner_name = 'Колеса Даром'
         actions_data = []
         lock = threading.Lock()
-        main_url = 'https://www.kolesa-darom.ru/actions/'
-        driver = webdriver.Chrome()
-        driver.get(main_url)
-        page = BeautifulSoup(driver.page_source, 'lxml')
-        driver.quit()
+        page = helper.prepare_parser_data_use_webdriver('https://www.kolesa-darom.ru/actions/')
         divs = page.find_all("div", class_='tiles__item-inner')
         threads = []
         for div in divs:
@@ -39,17 +35,8 @@ class Kolesadarom_process(Process):
             except Exception:
                 end = helper.get_date_half_year_ahead(helper.DATA_NOW)
             threads.append(Kolesadarom_thread(actions_data, lock, self.queue, name, url, end))
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        if len(actions_data) == 0:
-            self.queue.put(f'Акции по {partner_name} не найдены ')
-            return
-        self.queue.put((partner_name,))
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put(actions_data)
-        self.queue.put('progress')
+        helper.start_join_threads(threads)
+        helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Kolesadarom_thread(Thread):

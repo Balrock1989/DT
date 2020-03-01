@@ -22,20 +22,7 @@ class Holodilnik_process(Process):
         partner_name = 'Холодильник'
         actions_data = []
         lock = threading.Lock()
-        s = requests.Session()
-        s.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-            'Cache-Control': 'max-age=0',
-            'Connection': 'keep-alive',
-            'Host': 'ulyanovsk.holodilnik.ru',
-            'Upgrade-Insecure-Requests': '1',
-        })
-        main_url = 'https://ulyanovsk.holodilnik.ru/action/'
-        request = s.get(main_url)
-        page = BeautifulSoup(request.text, 'lxml')
+        page = helper.prepair_parser_data_use_request('https://ulyanovsk.holodilnik.ru/action/')
         divs = page.find_all("div", class_='col-4')
         begin_url = 'holodilnik.ru'
         threads = []
@@ -45,17 +32,8 @@ class Holodilnik_process(Process):
             date = div.find('span', class_='text-data').text.strip()
             date = date.split(' - ')
             threads.append(Holodilnik_thread(actions_data, lock, self.queue, name, url, date))
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        if len(actions_data) == 0:
-            self.queue.put(f'Акции по {partner_name} не найдены ')
-            return
-        self.queue.put(actions_data)
-        self.queue.put((partner_name,))
-        self.queue.put(helper.write_csv(actions_data))
-        self.queue.put('progress')
+        helper.start_join_threads(threads)
+        helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Holodilnik_thread(Thread):
