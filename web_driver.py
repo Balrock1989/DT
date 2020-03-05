@@ -37,6 +37,7 @@ class WebThread(QThread):
     def run(self):
         self.web.auth()
 
+
 # TODO Добавить комменты
 
 class WebDriver:
@@ -227,11 +228,16 @@ class WebDriver:
                         self.queue.put(f'Парсер  AD запущен не на той странице')
                         win32.show_process()
                         return
-                    if action['Имя партнера'] != self.gui.partner_name.currentText():
+                    if self.gui.partner_name.count() > 0 \
+                            and action['Имя партнера'] != self.gui.partner_name.currentText():
                         with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
                             writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                             writer.writerow(action)
                         continue
+                    if self.gui.partner_name.count() == 0:
+                        action['Название акции'] = action['Название акции'] + action['Сумма скидки']
+                    if action['Купон'] and action['Купон'] != "-":
+                        action['Тип купона'] = "Купон"
                     partner_name = action['Имя партнера']
                     vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
                     form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
@@ -254,7 +260,7 @@ class WebDriver:
                     start_date.send_keys(action['Дата начала'])
                     end_date.clear()
                     end_date.send_keys(action['Дата окончания'])
-                    short_description.send_keys(action['Короткое описание'] + '!') if action['Короткое описание']\
+                    short_description.send_keys(action['Короткое описание'] + '!') if action['Короткое описание'] \
                         else short_description.send_keys(action['Название акции'] + '!')
                     digit_in_name = helper.check_digit(action['Название акции'])
                     digit_in_desc = helper.check_digit(action['Условия акции'])
@@ -266,7 +272,8 @@ class WebDriver:
                         self.gui.url.toPlainText() else landing_url.send_keys(action['URL'])
                     if 'скидка' in action['Тип купона'].lower():
                         vaucher_type.select_by_value('2')
-                        code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
+                        code.send_keys(action['Купон']) if action['Купон'] and\
+                                                           action['Купон'] != "-" else code.send_keys('Не требуется')
                         if '%' in action['Название акции']:
                             percent = get_percent(action['Название акции'])
                             if percent != '0':
@@ -285,7 +292,8 @@ class WebDriver:
                             discount_amount.send_keys("0")
                     elif 'купон' in action['Тип купона'].lower():
                         vaucher_type.select_by_value('1')
-                        code.send_keys(action['Купон']) if action['Купон'] else code.send_keys('Не требуется')
+                        code.send_keys(action['Купон']) if action['Купон'] and \
+                                                           action['Купон'] != "-" else code.send_keys('Не требуется')
                         if '%' in action['Название акции']:
                             checkbox.click()
                             percent = get_percent(action['Название акции'])
