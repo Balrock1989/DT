@@ -18,8 +18,8 @@ MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
               "09": "сен", "10": "окт", "11": "ноя", "12": "дек", }
 
 """Заголовки для CSV"""
-HEADERS = ['Имя партнера', 'Название акции', 'Дата начала', 'Дата окончания',
-           'Условия акции', 'Купон', 'URL', 'Тип купона', 'Короткое описание']
+HEADERS = ['Тип купона', 'Имя партнера', 'Сумма скидки', 'Название акции', 'Дата начала', 'Дата окончания',
+           'Минимальная сумма', 'Условия акции', 'Купон', 'URL', 'Короткое описание']
 
 
 def exception_hook(exctype, value, tb):
@@ -69,12 +69,14 @@ def prepare_parser_data_use_webdriver(url, scroll=False):
     driver.quit()
     return page
 
+
 def prepair_parser_data_use_request(url):
     s = requests.Session()
     s.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
     request = s.get(url)
     return BeautifulSoup(request.text, 'lxml')
+
 
 def generate_csv():
     """Создает пустой CSV на рабочем столе при запуске программы, для хранения акций"""
