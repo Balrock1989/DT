@@ -1,9 +1,10 @@
 import os
 import shutil
 import zipfile
+from random import randint
+
 from PIL import Image
 # Нужно ставить Pillow
-
 
 class Rename:
 
@@ -27,9 +28,10 @@ class Rename:
             return
         if not os.path.exists(result) and checkbox:
             os.mkdir(result)
-        dir_num = 1
+
         with zipfile.ZipFile(zip_target, 'w') as zip:
             for root, dirs, files in os.walk(path):
+                dir_num = randint(1000000, 9999999)
                 for file in files:
                     path = os.path.join(root, file)
                     try:
@@ -63,7 +65,6 @@ class Rename:
                             zip.write(os.path.join(root, new_name), os.path.join(str(dir_num), new_name))
                             i += 1
                         else:
-                            gui.chat_print_signal.emit(f'не могу переместить это {os.path.join(root, file)}')
-                dir_num += 1
-            gui.chat_print_signal.emit(f'Процесс успешно завершен. Было удалено {remove} файлов')
+                            gui.chat_print_signal.emit(f'не могу переместить этот файл {os.path.join(root, file)}')
+            gui.chat_print_signal.emit(f'Процесс успешно завершен. Удалено {remove} файлов')
             gui.chat_print_signal.emit(f'Всего было обработано {i - 1} файлов')
