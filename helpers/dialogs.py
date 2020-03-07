@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
-from helpers import win32
 from parsers.butic import Butic_process
 from parsers.process_akusherstvo import Akusherstvo_process
 from parsers.process_book import Book_process
@@ -13,6 +12,7 @@ from parsers.process_sephora import Sephora_process
 from parsers.process_utkonos import Utkonos_process
 from parsers.process_vseintrumenti import Vseinstrumenti_process
 from helpers.start_new_process import StartNewProcess
+from parsers.volt import Volt_process
 
 
 class CustomDialog_parser(QDialog, Ui_Dialog_parser):
@@ -46,6 +46,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Holodilnik_process))
         if self.kolesadarom.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Kolesadarom_process))
+        if self.volt.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Volt_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()

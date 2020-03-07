@@ -213,12 +213,12 @@ class WebDriver:
             with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
+                    self.driver.switch_to_window(self.dt_window)
+                    url = self.driver.current_url
                     if self.exit:
                         self.queue.put('Процесс был прерван пользователем.')
                         win32.show_process()
                         return
-                    self.driver.switch_to_window(self.dt_window)
-                    url = self.driver.current_url
                     try:
                         id = re.search(r'Id=(\d+)', url).group(1)
                         self.driver.switch_to_frame('ifrm')

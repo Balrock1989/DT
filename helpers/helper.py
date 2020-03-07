@@ -75,6 +75,7 @@ def prepair_parser_data_use_request(url):
     s.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
     request = s.get(url)
+    print(request.text)
     return BeautifulSoup(request.text, 'lxml')
 
 
@@ -129,6 +130,14 @@ def one_date_return_two(incoming_date):
     return date_start, end_data
 
 
+def convert_text_date(incoming_date):
+    """ принимает текст с датами в формате '01.12 по 31.03' Возвращает 2 даты начала и окончания"""
+    date = re.findall(r'\d+\.\d+\.*\d*', incoming_date)
+    start = get_one_date(date[0])
+    end = get_one_date(date[1])
+    return start, end
+
+
 def get_double_date(first, second):
     """ принимает 2 даты в формате 1 февраля 2019, возвращает 2 даты в формате 01.02.2019 03.02.2019 """
     try:
@@ -160,8 +169,13 @@ def get_one_date(text):
     for num, name in MONTH_NAME.items():
         if name in month.lower():
             month = num
-    date = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
-    return date
+    date = datetime(day=int(day), month=int(month), year=int(year))
+    if (date - datetime.now()).days > 200:
+        if datetime.now().month > 6:
+            date = datetime(day=int(day), month=int(month), year=int(year+1))
+        else:
+            date = datetime(day=int(day), month=int(month), year=int(year - 1))
+    return date.strftime('%d.%m.%Y')
 
 
 def get_date_now_to_end_month():

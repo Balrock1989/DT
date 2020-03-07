@@ -76,6 +76,13 @@ class Ui_Dialog(object):
         self.label_kolesadarom.setGeometry(QtCore.QRect(150, 45, 90, 30))
         self.label_kolesadarom.setObjectName('label_kolesadarom')
 
+        self.volt = QtWidgets.QCheckBox(Dialog)
+        self.volt.setGeometry(QtCore.QRect(130, 70, 20, 20))
+        self.volt.setObjectName('volt')
+        self.label_volt = QtWidgets.QLabel(Dialog)
+        self.label_volt.setGeometry(QtCore.QRect(150, 65, 90, 30))
+        self.label_volt.setObjectName('label_volt')
+
 
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(170, 150, 90, 30))
@@ -109,5 +116,6 @@ class Ui_Dialog(object):
         self.label_book.setText(_translate('Dialog', 'Book24'))
         self.label_holodilnik.setText(_translate('Dialog', 'Холодильник'))
         self.label_kolesadarom.setText(_translate('Dialog', 'Колеса даром'))
+        self.label_volt.setText(_translate('Dialog', '220 Volt'))
 
 
