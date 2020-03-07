@@ -194,21 +194,9 @@ class WebDriver:
     @win32.show_window
     def add_actions(self):
         """Добавление акций на основе полученных данных"""
-
-        def get_percent(action):
-            try:
-                percent = re.search(r'(\d+)\s?%', action).group(1)
-            except AttributeError:
-                percent = re.search(r'%\s?(\d+)', action).group(1)
-            return percent
-
         def add():
             partner_name = ''
-            with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
-                csv_data = csv.DictReader(csv_file, delimiter=';')
-                suitable_actions = [action for action in csv_data if
-                                    action['Имя партнера'] == self.gui.partner_name.currentText()]
-            count = len(suitable_actions)
+            count = helper.get_count_suitable_actions(self.gui)
             self.gui.change_progress_signal.emit(count)
             with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
@@ -234,86 +222,9 @@ class WebDriver:
                             writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                             writer.writerow(action)
                         continue
-                    if self.gui.partner_name.count() == 0:
-                        action['Название акции'] = action['Название акции'] + action['Сумма скидки']
-                    if action['Купон'] and action['Купон'] != "-":
-                        action['Тип купона'] = "Купон"
-                    partner_name = action['Имя партнера']
-                    vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
                     form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
-                    checkbox = self.driver.find_element_by_id('isPercentage')
-                    description = self.driver.find_element_by_id('description')
-                    short_description = self.driver.find_element_by_name('shortDescription')
-                    discount_amount = self.driver.find_element_by_id('discountAmount')
-                    valid_from = self.driver.find_element_by_id('id_startDate')
-                    valid_to = self.driver.find_element_by_id('id_endDate')
-                    start_date = self.driver.find_element_by_id('id_publishStartDate')
-                    end_date = self.driver.find_element_by_id('id_publishEndDate')
-                    code = self.driver.find_element_by_id('code')
-                    landing_url = self.driver.find_element_by_id('landingUrl')
-                    header.send_keys(action['Название акции'] + '!')
-                    valid_from.clear()
-                    valid_from.send_keys(action['Дата начала'])
-                    valid_to.clear()
-                    valid_to.send_keys(action['Дата окончания'])
-                    start_date.clear()
-                    start_date.send_keys(action['Дата начала'])
-                    end_date.clear()
-                    end_date.send_keys(action['Дата окончания'])
-                    short_description.send_keys(action['Короткое описание'] + '!') if action['Короткое описание'] \
-                        else short_description.send_keys(action['Название акции'] + '!')
-                    digit_in_name = helper.check_digit(action['Название акции'])
-                    digit_in_desc = helper.check_digit(action['Условия акции'])
-                    if action['Условия акции']:
-                        description.send_keys(action['Условия акции'] + '!')
-                    else:
-                        description.send_keys(action['Название акции'] + '!')
-                    landing_url.send_keys(self.gui.url.toPlainText()) if \
-                        self.gui.url.toPlainText() else landing_url.send_keys(action['URL'])
-                    if 'скидка' in action['Тип купона'].lower():
-                        vaucher_type.select_by_value('2')
-                        code.send_keys(action['Купон']) if action['Купон'] and\
-                                                           action['Купон'] != "-" else code.send_keys('Не требуется')
-                        if '%' in action['Название акции']:
-                            percent = get_percent(action['Название акции'])
-                            if percent != '0':
-                                checkbox.click()
-                            discount_amount.send_keys(percent)
-                        elif '%' in action['Условия акции']:
-                            percent = get_percent(action['Условия акции'])
-                            if percent != '0':
-                                checkbox.click()
-                            discount_amount.send_keys(percent)
-                        elif digit_in_name:
-                            discount_amount.send_keys(digit_in_name)
-                        elif digit_in_desc:
-                            discount_amount.send_keys(digit_in_desc)
-                        else:
-                            discount_amount.send_keys("0")
-                    elif 'купон' in action['Тип купона'].lower():
-                        vaucher_type.select_by_value('1')
-                        code.send_keys(action['Купон']) if action['Купон'] and \
-                                                           action['Купон'] != "-" else code.send_keys('Не требуется')
-                        if '%' in action['Название акции']:
-                            checkbox.click()
-                            percent = get_percent(action['Название акции'])
-                            discount_amount.send_keys(percent)
-                        elif '%' in action['Условия акции']:
-                            checkbox.click()
-                            percent = get_percent(action['Условия акции'])
-                            discount_amount.send_keys(percent)
-                        elif digit_in_name in action['Название акции']:
-                            discount_amount.send_keys(digit_in_name)
-                        elif digit_in_desc in action['Условия акции']:
-                            discount_amount.send_keys(digit_in_desc)
-                        else:
-                            discount_amount.send_keys("0")
-                    elif 'подарок' in action['Тип купона'].lower():
-                        vaucher_type.select_by_value('3')
-                        code.send_keys('Не требуется')
-                    elif 'доставка' in action['Тип купона'].lower():
-                        vaucher_type.select_by_value('4')
-                        code.send_keys('Не требуется')
+                    partner_name = action['Имя партнера']
+                    self.fill_field_actions(action, header)
                     form.submit()
                     self.driver.switch_to_default_content()
                     sleep(1)
@@ -323,7 +234,7 @@ class WebDriver:
             os.remove(helper.actions_csv_path)
             shutil.move('actions_temp.csv', helper.actions_csv_path)
             self.gui.del_partner_name_signal.emit(partner_name)
-            self.queue.put(f'Акции успешно добавлены ({count}шт.)') if count else \
+            self.queue.put(f'Акции успешно добавлены ({count} шт.)') if count else \
                 self.queue.put('Нет акций выбранного партнера')
             self.gui.reset_progress_signal.emit()
             win32.show_process()
@@ -351,3 +262,90 @@ class WebDriver:
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
         helper.banner_downloader(links, self.gui.queue.queue)
+
+    def fill_field_actions(self, action, header):
+
+        def get_percent(action):
+            try:
+                return re.search(r'(\d+)\s?%', action).group(1)
+            except AttributeError:
+                return re.search(r'%\s?(\d+)', action).group(1)
+
+        if self.gui.partner_name.count() == 0:
+            action['Название акции'] = action['Название акции'] + action['Сумма скидки']
+        if action['Купон'] and action['Купон'] != "-":
+            action['Тип купона'] = "Купон"
+        vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
+        checkbox = self.driver.find_element_by_id('isPercentage')
+        description = self.driver.find_element_by_id('description')
+        short_description = self.driver.find_element_by_name('shortDescription')
+        discount_amount = self.driver.find_element_by_id('discountAmount')
+        valid_from = self.driver.find_element_by_id('id_startDate')
+        valid_to = self.driver.find_element_by_id('id_endDate')
+        start_date = self.driver.find_element_by_id('id_publishStartDate')
+        end_date = self.driver.find_element_by_id('id_publishEndDate')
+        code = self.driver.find_element_by_id('code')
+        landing_url = self.driver.find_element_by_id('landingUrl')
+        header.send_keys(action['Название акции'] + '!')
+        valid_from.clear()
+        valid_from.send_keys(action['Дата начала'])
+        valid_to.clear()
+        valid_to.send_keys(action['Дата окончания'])
+        start_date.clear()
+        start_date.send_keys(action['Дата начала'])
+        end_date.clear()
+        end_date.send_keys(action['Дата окончания'])
+        short_description.send_keys(action['Короткое описание'] + '!') if action['Короткое описание'] \
+            else short_description.send_keys(action['Название акции'] + '!')
+        digit_in_name = helper.check_digit(action['Название акции'])
+        digit_in_desc = helper.check_digit(action['Условия акции'])
+        if action['Условия акции']:
+            description.send_keys(action['Условия акции'] + '!')
+        else:
+            description.send_keys(action['Название акции'] + '!')
+        landing_url.send_keys(self.gui.url.toPlainText()) if \
+            self.gui.url.toPlainText() else landing_url.send_keys(action['URL'])
+        if 'скидка' in action['Тип купона'].lower():
+            vaucher_type.select_by_value('2')
+            code.send_keys(action['Купон']) if action['Купон'] and \
+                                               action['Купон'] != "-" else code.send_keys('Не требуется')
+            if '%' in action['Название акции']:
+                percent = get_percent(action['Название акции'])
+                if percent != '0':
+                    checkbox.click()
+                discount_amount.send_keys(percent)
+            elif '%' in action['Условия акции']:
+                percent = get_percent(action['Условия акции'])
+                if percent != '0':
+                    checkbox.click()
+                discount_amount.send_keys(percent)
+            elif digit_in_name:
+                discount_amount.send_keys(digit_in_name)
+            elif digit_in_desc:
+                discount_amount.send_keys(digit_in_desc)
+            else:
+                discount_amount.send_keys("0")
+        elif 'купон' in action['Тип купона'].lower():
+            vaucher_type.select_by_value('1')
+            code.send_keys(action['Купон']) if action['Купон'] and \
+                                               action['Купон'] != "-" else code.send_keys('Не требуется')
+            if '%' in action['Название акции']:
+                checkbox.click()
+                percent = get_percent(action['Название акции'])
+                discount_amount.send_keys(percent)
+            elif '%' in action['Условия акции']:
+                checkbox.click()
+                percent = get_percent(action['Условия акции'])
+                discount_amount.send_keys(percent)
+            elif digit_in_name in action['Название акции']:
+                discount_amount.send_keys(digit_in_name)
+            elif digit_in_desc in action['Условия акции']:
+                discount_amount.send_keys(digit_in_desc)
+            else:
+                discount_amount.send_keys("0")
+        elif 'подарок' in action['Тип купона'].lower():
+            vaucher_type.select_by_value('3')
+            code.send_keys('Не требуется')
+        elif 'доставка' in action['Тип купона'].lower():
+            vaucher_type.select_by_value('4')
+            code.send_keys('Не требуется')

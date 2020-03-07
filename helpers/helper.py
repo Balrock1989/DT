@@ -100,6 +100,14 @@ def write_csv(actions):
             writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
             writer.writerow(action)
 
+def get_count_suitable_actions(gui):
+    """Возвращает количество акций из списка CSV имя которых выбрано в селекте"""
+    with open(actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
+        csv_data = csv.DictReader(csv_file, delimiter=';')
+        suitable_actions = [action for action in csv_data if
+                            action['Имя партнера'] == gui.partner_name.currentText()]
+    return len(suitable_actions)
+
 
 def filling_queue(queue, actions_data, partner_name):
     if len(actions_data) == 0:
