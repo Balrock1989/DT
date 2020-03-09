@@ -106,7 +106,7 @@ class Sephora_process(Process):
         actions_data = []
         lock = threading.Lock()
         main_url = 'https://sephora.ru/news/'
-        page = helper.prepair_parser_data_use_request(main_url)
+        page = helper.get_page_use_request(main_url)
         links = page.find_all("a", class_='b-news-thumb__title')
         threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue) for link in links]
         helper.start_join_threads(threads)

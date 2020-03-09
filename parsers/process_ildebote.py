@@ -15,7 +15,7 @@ class Ildebote_process(Process):
         partner_name = 'ИльДэБотэ'
         actions_data = []
         url = 'https://iledebeaute.ru/company/actions/'
-        page = helper.prepair_parser_data_use_request(url)
+        page = helper.get_page_use_request(url)
         divs = page.find_all("div", class_='news_block')
         for div in divs:
             date = div.find("p", class_='date')

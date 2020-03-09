@@ -14,7 +14,7 @@ class Utkonos_process(Process):
     def run(self):
         partner_name = 'Утконос'
         actions_data = []
-        page = helper.prepair_parser_data_use_request('https://www.utkonos.ru/action')
+        page = helper.get_page_use_request('https://www.utkonos.ru/action')
         divs = page.find_all("div", class_='action_wrapper')
         for div in divs:
             name = div.a.text.strip()

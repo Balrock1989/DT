@@ -14,7 +14,7 @@ class Vseinstrumenti_process(Process):
     def run(self):
         partner_name = 'Все инструменты'
         actions_data = []
-        page = helper.prepare_parser_data_use_webdriver('https://www.vseinstrumenti.ru/our_actions/aktsii')
+        page = helper.get_page_use_webdriver('https://www.vseinstrumenti.ru/our_actions/aktsii')
         divs = page.find_all("div", class_='action_main')
         for div in divs:
             name = div.find('div', class_='action_header').a.text.strip()

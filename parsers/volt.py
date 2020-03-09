@@ -15,7 +15,7 @@ class Volt_process(Process):
         partner_name = '220Volt'
         actions_data = []
         main_url = 'https://ulyanovsk.220-volt.ru/share/0/'
-        page = helper.prepare_parser_data_use_webdriver(main_url)
+        page = helper.get_page_use_webdriver(main_url)
         divs = page.find_all('div', class_='actionContainer rel')
         for div in divs:
             date = div.find('div', class_='actionPeriod').text.strip()

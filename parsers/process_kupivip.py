@@ -15,7 +15,7 @@ class Kupivip_process(Process):
     def run(self):
         actions_data = []
         partner_name = 'КупиВип'
-        page = helper.prepair_parser_data_use_request('https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL')
+        page = helper.get_page_use_request('https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL')
         divs = page.find_all("div", attrs={'data-banner': 'campaign'})
 
         for div in divs:

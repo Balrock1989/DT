@@ -20,7 +20,7 @@ class Book_process(Process):
         partner_name = 'Book24'
         actions_data = []
         lock = threading.Lock()
-        page = helper.prepare_parser_data_use_webdriver('https://book24.ru/sales/', scroll=True)
+        page = helper.get_page_use_webdriver('https://book24.ru/sales/', scroll=True)
         begin_url = 'https://book24.ru'
         divs = page.find_all('div', class_='stock-list-item__actions')
         links = []

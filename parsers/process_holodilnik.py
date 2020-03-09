@@ -20,7 +20,7 @@ class Holodilnik_process(Process):
         partner_name = 'Холодильник'
         actions_data = []
         lock = threading.Lock()
-        page = helper.prepair_parser_data_use_request('https://ulyanovsk.holodilnik.ru/action/')
+        page = helper.get_page_use_request('https://ulyanovsk.holodilnik.ru/action/')
         divs = page.find_all("div", class_='col-4')
         begin_url = 'holodilnik.ru'
         threads = []

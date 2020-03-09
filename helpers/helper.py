@@ -52,7 +52,8 @@ def check_action_type(code, name, desc):
     return action_type
 
 
-def prepare_parser_data_use_webdriver(url, scroll=False):
+def get_page_use_webdriver(url, scroll=False):
+    """Делает запрос на URL и возвращает BS объект страницы используя webdriver, с возможностью скролить страницу"""
     driver = webdriver.Chrome()
     driver.get(url)
     if scroll:
@@ -70,12 +71,12 @@ def prepare_parser_data_use_webdriver(url, scroll=False):
     return page
 
 
-def prepair_parser_data_use_request(url):
+def get_page_use_request(url):
+    """Делает запрос на URL и возвращает BS объект страницы используя библиотеку request"""
     s = requests.Session()
     s.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
     request = s.get(url)
-    print(request.text)
     return BeautifulSoup(request.text, 'lxml')
 
 
@@ -99,6 +100,7 @@ def write_csv(actions):
         with open(actions_csv_path, "a", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=HEADERS, delimiter=";")
             writer.writerow(action)
+
 
 def get_count_suitable_actions(gui):
     """Возвращает количество акций из списка CSV имя которых выбрано в селекте"""
@@ -180,7 +182,7 @@ def get_one_date(text):
     date = datetime(day=int(day), month=int(month), year=int(year))
     if (date - datetime.now()).days > 200:
         if datetime.now().month > 6:
-            date = datetime(day=int(day), month=int(month), year=int(year+1))
+            date = datetime(day=int(day), month=int(month), year=int(year + 1))
         else:
             date = datetime(day=int(day), month=int(month), year=int(year - 1))
     return date.strftime('%d.%m.%Y')

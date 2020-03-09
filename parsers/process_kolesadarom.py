@@ -20,7 +20,7 @@ class Kolesadarom_process(Process):
         partner_name = 'Колеса Даром'
         actions_data = []
         lock = threading.Lock()
-        page = helper.prepare_parser_data_use_webdriver('https://www.kolesa-darom.ru/actions/')
+        page = helper.get_page_use_webdriver('https://www.kolesa-darom.ru/actions/')
         divs = page.find_all("div", class_='tiles__item-inner')
         threads = []
         for div in divs:
