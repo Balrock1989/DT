@@ -246,7 +246,6 @@ class WebDriver:
     @win32.show_window
     def download_banners(self):
         """Загрузка баннеров с сайта"""
-
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
@@ -273,7 +272,7 @@ class WebDriver:
 
         if self.gui.partner_name.count() == 0:
             action['Название акции'] = action['Название акции'] + action['Сумма скидки']
-        if action['Купон'] and action['Купон'] != "-":
+        if "не требуется" not in action['Купон'].lower() and action['Купон'] != "-":
             action['Тип купона'] = "Купон"
         vaucher_type = Select(self.driver.find_element_by_id('voucherTypeId'))
         checkbox = self.driver.find_element_by_id('isPercentage')
