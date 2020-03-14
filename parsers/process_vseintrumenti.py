@@ -20,7 +20,11 @@ class Vseinstrumenti_process(Process):
             name = div.find('div', class_='action_header').a.text.strip()
             code = 'Не требуется'
             url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
-            desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
+            try:
+                desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
+            except Exception:
+                desc = div.find('div', class_='act_descr').find('p').text.strip()
+                desc = re.search(r'.*\n.*\n.*\n(.*)', desc).group(1).strip()
             incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
             incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
             try:

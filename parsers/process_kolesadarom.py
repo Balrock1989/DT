@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from helpers import win32
 
 
 class Kolesadarom_process(Process):
@@ -20,7 +21,7 @@ class Kolesadarom_process(Process):
         partner_name = 'Колеса Даром'
         actions_data = []
         lock = threading.Lock()
-        page = helper.get_page_use_webdriver('https://www.kolesa-darom.ru/actions/')
+        page = helper.get_page_use_webdriver('https://www.kolesa-darom.ru/actions/', hidden=True)
         divs = page.find_all("div", class_='tiles__item-inner')
         threads = []
         for div in divs:

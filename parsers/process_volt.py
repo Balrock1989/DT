@@ -1,5 +1,7 @@
 import re
 from multiprocessing import Process
+from bs4 import BeautifulSoup
+
 import helpers.helper as helper
 
 
@@ -15,20 +17,24 @@ class Volt_process(Process):
         partner_name = '220Volt'
         actions_data = []
         main_url = 'https://ulyanovsk.220-volt.ru/share/0/'
-        page = helper.get_page_use_webdriver(main_url)
+        page, driver = helper.get_page_use_webdriver(main_url, quit=False)
         divs = page.find_all('div', class_='actionContainer rel')
         for div in divs:
             date = div.find('div', class_='actionPeriod').text.strip()
             start, end = helper.convert_text_date(date)
             name = div.find('div', class_='actionText').h4.text.strip()
-            desc = div.find('div', class_='text').text.strip()
-            desc = re.sub(r'\s{2,}', ' ', desc).strip()
             url = 'https://220-volt.ru' + div.find('a', class_='activeButton').get('href')
+            driver.get(url)
+            action_page = BeautifulSoup(driver.page_source, 'lxml')
+            desc_block = action_page.find('div', class_='seoText')
+            desc = desc_block.text.strip()
+            desc = re.sub(r'\s{2,}', ' ', desc).strip()
             code = 'Не требуется'
-            if helper.promotion_is_outdated(end):
-                continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
+            if helper.promotion_is_outdated(end):
+                continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+        driver.quit()
         helper.filling_queue(self.queue, actions_data, partner_name)

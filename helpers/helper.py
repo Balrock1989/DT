@@ -11,6 +11,9 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 
 import requests
+from selenium.webdriver.chrome.options import Options
+
+from helpers import win32
 
 """Даты для преобразования 02 февраля в 02.02 и тд."""
 MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
@@ -52,9 +55,17 @@ def check_action_type(code, name, desc):
     return action_type
 
 
-def get_page_use_webdriver(url, scroll=False):
+def get_page_use_webdriver(url, scroll=False, quit=True, hidden=False):
     """Делает запрос на URL и возвращает BS объект страницы используя webdriver, с возможностью скролить страницу"""
-    driver = webdriver.Chrome()
+    if hidden:
+        chrome_options = Options()
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(chrome_options=chrome_options)
+    else:
+        driver = webdriver.Chrome()
+    win32.hide_all_chromedriver()
     driver.get(url)
     if scroll:
         scroll_script = \
@@ -67,8 +78,11 @@ def get_page_use_webdriver(url, scroll=False):
             if lastCount == lenOfPage:
                 break
     page = BeautifulSoup(driver.page_source, 'lxml')
-    driver.quit()
-    return page
+    if quit:
+        driver.quit()
+        return page
+    else:
+        return page, driver
 
 
 def get_page_use_request(url):

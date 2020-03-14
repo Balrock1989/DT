@@ -21,7 +21,7 @@ class Akusherstvo_process(Process):
         partner_name = 'Акушерство'
         actions_data = []
         lock = threading.Lock()
-        page = helper.get_page_use_webdriver('https://www.akusherstvo.ru/sale.php')
+        page = helper.get_page_use_webdriver('https://www.akusherstvo.ru/sale.php', hidden=True)
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
         divs_3 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item')

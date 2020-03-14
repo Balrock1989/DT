@@ -31,6 +31,7 @@ def show_process():
 
 def show_window(func):
     """Декоратор для функций который выводит окно программы на первый план до выполнения и после"""
+
     def show(*args, **kwargs):
         show_process()
         func(*args, **kwargs)
@@ -53,3 +54,16 @@ def close_all_chromedriver():
     chromedrivers = [item for item in psutil.process_iter() if item.name() == 'chromedriver.exe']
     for process in chromedrivers:
         process.terminate()
+
+
+def hide_all_chromedriver():
+    toplist = []
+    winlist = []
+
+    def enum_callback(hwnd, results):
+        winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
+
+    win32gui.EnumWindows(enum_callback, toplist)
+    chromedrivers = [hwnd for hwnd, title in winlist if 'chromedriver' in title]
+    for process in chromedrivers:
+        win32gui.ShowWindow(process, win32con.SW_HIDE)

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
-from parsers.butic import Butic_process
+from parsers.process_butic import Butic_process
 from parsers.process_akusherstvo import Akusherstvo_process
 from parsers.process_book import Book_process
 from parsers.process_holodilnik import Holodilnik_process
@@ -12,7 +12,7 @@ from parsers.process_sephora import Sephora_process
 from parsers.process_utkonos import Utkonos_process
 from parsers.process_vseintrumenti import Vseinstrumenti_process
 from helpers.start_new_process import StartNewProcess
-from parsers.volt import Volt_process
+from parsers.process_volt import Volt_process
 
 
 class CustomDialog_parser(QDialog, Ui_Dialog_parser):
