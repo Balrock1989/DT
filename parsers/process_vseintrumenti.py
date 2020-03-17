@@ -22,14 +22,20 @@ class Vseinstrumenti_process(Process):
             url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
             try:
                 desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
-            except Exception:
-                desc = div.find('div', class_='act_descr').find('p').text.strip()
-                desc = re.search(r'.*\n.*\n.*\n(.*)', desc).group(1).strip()
-            incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
+            except:
+                try:
+                    desc = div.find('div', class_='act_descr').text.strip()
+                    desc = re.search(r'.*\n.*\n.*\n(.*)', desc).group(1).strip()
+                except:
+                    desc = div.find('div', class_='act_descr').find('p').text.strip()
+            try:
+                incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
+            except:
+                incoming_date = div.find('div', class_='act_descr').find_all('div')[0].text.strip()
             incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
             try:
                 start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
-            except Exception:
+            except:
                 start, end = helper.get_date_now_to_end_month()
             if helper.promotion_is_outdated(end):
                 continue

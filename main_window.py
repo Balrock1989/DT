@@ -27,11 +27,11 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.dir_name = ''
-        self.sb_num1 = QSpinBox()
+        # self.sb_num1 = QSpinBox()
         self.log = logger.log
         self.web_thread = None
         self.sizer = None
-        self.web_thread_run = False
+        # self.web_thread_run = False
         self.ghk = global_hotkey.GlobalHotKey(self)
         self.ghk.start()
         self.try_start_browser = 0
