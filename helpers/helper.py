@@ -277,6 +277,13 @@ def get_start_date_in_date(text):
     end = get_date_end_month()
     return start, end
 
+def search_data_in_text(text):
+    """ Принимает текст, ищет 2 даты в формате 20.12.2020 и вовзращает их как старт и конец """
+    income_data = re.findall(r'(\d+.\d+.\d+)', text)
+    start = income_data[0]
+    end = income_data[1]
+    return start, end
+
 
 def banner_downloader(links, queue):
     """Загрузка баннеров с сайта"""
