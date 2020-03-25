@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from multiprocessing import Process
 import helpers.helper as helper
-
+# TODO Добавить акции с главной станицы.
 
 class Kupivip_process(Process):
     def __init__(self, queue):
@@ -17,11 +17,14 @@ class Kupivip_process(Process):
         partner_name = 'КупиВип'
         page = helper.get_page_use_request('https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL')
         divs = page.find_all("div", attrs={'data-banner': 'campaign'})
-
         for div in divs:
             persent = ''
             desc = ''
-            name = div.find("div", class_='brands').text.strip()
+            try:
+                name = div.find("div", class_='brands').text.strip()
+            except:
+                self.queue.put("Пропущена одна акция без названия")
+                continue
             try:
                 persent = div.find("div", class_='percent').text.strip()
             except Exception:

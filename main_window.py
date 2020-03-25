@@ -4,7 +4,7 @@ from multiprocessing import freeze_support
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QFileDialog, QSpinBox
+from PyQt5.QtWidgets import QFileDialog
 
 import web_driver
 from helpers.my_queue import MyQueue
