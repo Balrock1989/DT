@@ -22,6 +22,7 @@ class Akusherstvo_process(Process):
         actions_data = []
         lock = threading.Lock()
         page = helper.get_page_use_webdriver('https://www.akusherstvo.ru/sale.php', hidden=True)
+        # page = helper.get_page_use_html_request('https://www.akusherstvo.ru/sale.php', encoding='windows-1251')
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
         divs_3 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item')

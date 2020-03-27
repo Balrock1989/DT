@@ -6,7 +6,7 @@ from calendar import monthrange
 from random import randint
 from datetime import datetime, timedelta
 from time import sleep
-
+from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
@@ -92,6 +92,13 @@ def get_page_use_request(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
     request = s.get(url)
     return BeautifulSoup(request.text, 'lxml')
+
+
+def get_page_use_html_request(url, encoding='utf-8'):
+    session = HTMLSession()
+    r = session.get(url)
+    r.html.render(encoding=encoding)
+    return BeautifulSoup(r.html.html, 'lxml')
 
 
 def generate_csv():
@@ -277,6 +284,7 @@ def get_start_date_in_date(text):
     end = get_date_end_month()
     return start, end
 
+
 def search_data_in_text(text):
     """ Принимает текст, ищет 2 даты в формате 20.12.2020 и вовзращает их как старт и конец """
     income_data = re.findall(r'(\d+.\d+.\d+)', text)
@@ -325,17 +333,20 @@ def generate_action(partner_name, action_name, date_start, date_end, description
 
 def check_digit(text):
     """Принимает текст, ищет в нем все цифры и по одному слову слева и справа. Возвращает цифру по шаблону"""
-    lists = re.findall(r'[а-я]+\s\d+\s?\d+\s[а-я]+', text)
+    """ Возможные комбинации Скидка 1000 ₽, Скидка 1000₽, Скидка 1 000 руб, Скидка 1000 руб, Скидка 1000руб"""
+    lists = re.findall(r'\w+\s\d+\s?\d+\s?\w+', text)
+    lists2 = re.findall(r'\w+\s\d+\s?\d+\s?\W', text)
+    lists = lists + lists2
     for string in lists:
-        if len(string.split()) == 3:
-            digit = string.split()[1]
-        elif len(string.split()) == 4:
+        digit = re.sub(r'\D', '', string)
+        if len(string.split()) == 4:
             digit = string.split()
             digit = digit[1] + " " + digit[2]
         if f'от {digit} руб' in string:
-            print(list(string))
             continue
-        if f'{digit} руб' in string:
+        if f'{digit} руб' in string or f'{digit}руб' in string:
+            return digit.replace(' ', '')
+        elif f'{digit} ₽' in string or f'{digit}₽' in string:
             return digit.replace(' ', '')
         else:
             continue
