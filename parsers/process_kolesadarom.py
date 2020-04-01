@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
-from helpers import win32
+from database.data_base import actions_exists_in_db
 
 
 class Kolesadarom_process(Process):
@@ -57,7 +57,7 @@ class Kolesadarom_thread(Thread):
         request = s.get(self.url)
         page = BeautifulSoup(request.text, 'lxml')
         main_div = page.find('div', class_='article-tiles')
-        partner = 'Колеса Даром'
+        partner_name = 'Колеса Даром'
         try:
             desc = main_div.find('div', class_=False).find_all('p')
             desc = desc[0].text.strip() + desc[1].text.strip()
@@ -76,7 +76,10 @@ class Kolesadarom_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, self.name, desc)
-        action = helper.generate_action(partner, self.name, start, self.end, desc, code, self.url, action_type,
+        with self.lock:
+            if actions_exists_in_db(partner_name, self.name, start, self.end):
+                return
+        action = helper.generate_action(partner_name, self.name, start, self.end, desc, code, self.url, action_type,
                                         short_desc)
         with self.lock:
             self.actions_data.append(action)

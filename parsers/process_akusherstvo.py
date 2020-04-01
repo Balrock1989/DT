@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Akusherstvo_process(Process):
@@ -49,7 +50,7 @@ class Akusherstvo_thread(Thread):
         start = datetime.now().strftime('%d.%m.%Y')
         link = self.div.find('a').get('href')
         request = requests.get(link)
-        partner = 'Акушерство'
+        partner_name = 'Акушерство'
         url = 'https://www.akusherstvo.ru/sale.php'
         action_page = BeautifulSoup(request.text, 'lxml')
         name = action_page.h1.text.strip()
@@ -67,6 +68,9 @@ class Akusherstvo_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, name, desc)
-        action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
+        with self.lock:
+            if actions_exists_in_db(partner_name, name, start, end):
+                return
+        action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

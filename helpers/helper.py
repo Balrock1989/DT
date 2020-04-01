@@ -39,6 +39,7 @@ home_path = os.getenv('HOMEPATH')
 actions_csv_path = os.path.join('C:\\', home_path, 'Desktop', "actions.csv")
 actions_csv_path = os.path.normpath(actions_csv_path)
 result_path = os.path.join('C:\\', home_path, 'Desktop', 'result')
+database_path = os.path.join('C:\\', home_path, 'Documents', "Actions.db")
 result_path = os.path.normpath(result_path)
 DATA_NOW = datetime.now().strftime('%d.%m.%Y')
 
@@ -133,13 +134,13 @@ def get_count_suitable_actions(gui):
 
 
 def filling_queue(queue, actions_data, partner_name):
+    queue.put('progress')
     if len(actions_data) == 0:
         queue.put(f'Акции по {partner_name} не найдены ')
         return
     queue.put(actions_data)
     queue.put(write_csv(actions_data))
     queue.put((partner_name,))
-    queue.put('progress')
 
 
 def start_join_threads(threads):

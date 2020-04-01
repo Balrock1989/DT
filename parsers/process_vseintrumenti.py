@@ -1,6 +1,7 @@
 import re
 from multiprocessing import Process
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Vseinstrumenti_process(Process):
@@ -41,6 +42,8 @@ class Vseinstrumenti_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
+            if actions_exists_in_db(partner_name, name, start, end):
+                continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         helper.filling_queue(self.queue, actions_data, partner_name)

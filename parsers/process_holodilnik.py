@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Holodilnik_process(Process):
@@ -66,7 +67,7 @@ class Holodilnik_thread(Thread):
             div = main_div.find_all('div')
         except Exception:
             return
-        partner = 'Холодильник'
+        partner_name = 'Холодильник'
         desc = re.sub(r'\s{2,}', ' ', div[1].text.strip()).strip()
         desc = re.sub(r'\xa0', '\n', desc).strip()
         if len(desc) > 1500:
@@ -76,6 +77,9 @@ class Holodilnik_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, self.name, desc)
-        action = helper.generate_action(partner, self.name, start, end, desc, code, self.url, action_type, short_desc)
+        with self.lock:
+            if actions_exists_in_db(partner_name, self.name, start, end):
+                return
+        action = helper.generate_action(partner_name, self.name, start, end, desc, code, self.url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

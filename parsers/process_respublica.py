@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Respublica_process(Process):
@@ -46,7 +47,7 @@ class Respulica_thread(Thread):
         self.lock = lock
 
     def run(self):
-        partner = 'Республика'
+        partner_name = 'Республика'
         page = helper.get_page_use_request(self.link)
         common_block = page.findAll('div')[14]
         test = re.sub(r'(?s)<script>.*?</script>', '',  str(common_block))
@@ -62,7 +63,10 @@ class Respulica_thread(Thread):
             start = helper.DATA_NOW
             end = helper.get_date_end_month()
         action_type = helper.check_action_type(code, name, desc)
-        action = helper.generate_action(partner, name, start, end, desc, code, self.link, action_type, short_desc)
+        with self.lock:
+            if actions_exists_in_db(partner_name, name, start, end):
+                return
+        action = helper.generate_action(partner_name, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)
 

@@ -90,6 +90,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Sephora_process(Process):
@@ -148,12 +149,15 @@ class Sephora_thread(Thread):
                 name = page.h1.text
                 desc = desc.replace("На этот номер телефона будет отправлено sms с кодом восстановления:Войди или"
                                     " зарегистрируйся, чтобы получить все преимущества постоянного покупателя!", '').strip()
-                partner = 'Sephora'
+                partner_name = 'Sephora'
                 code = "Не требуется"
                 if helper.promotion_is_outdated(end):
                     return
                 short_desc = ''
                 action_type = helper.check_action_type(code, name, desc)
-                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
+                with self.lock:
+                    if actions_exists_in_db(partner_name, name, start, end):
+                        return
+                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)

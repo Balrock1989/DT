@@ -3,6 +3,7 @@ from multiprocessing import Process
 from bs4 import BeautifulSoup
 
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Volt_process(Process):
@@ -33,6 +34,8 @@ class Volt_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                continue
+            if actions_exists_in_db(partner_name, name, start, end):
                 continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)

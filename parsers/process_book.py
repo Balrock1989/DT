@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import Process
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Book_process(Process):
@@ -77,10 +78,13 @@ class Book_thread(Thread):
                 desc = re.sub(r'\s{2,}', '', desc).strip()
             except Exception:
                 return
-        partner = 'Book24'
+        partner_name = 'Book24'
         if helper.promotion_is_outdated(end):
             return
         action_type = helper.check_action_type(code, name, desc)
-        action = helper.generate_action(partner, name, start, end, desc, code, self.link, action_type, short_desc)
+        with self.lock:
+            if actions_exists_in_db(partner_name, name, start, end):
+                return
+        action = helper.generate_action(partner_name, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

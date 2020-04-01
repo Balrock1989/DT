@@ -18,6 +18,7 @@ from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutE
     NoSuchFrameException, NoSuchElementException
 import auth
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 from helpers import win32
 
@@ -161,7 +162,6 @@ class WebDriver:
                 except AttributeError:
                     end = now + timedelta(days=180)
                     full_date = str(now.strftime('%d.%m.%Y')) + "-" + end.strftime('%d.%m.%Y')
-                print(full_date)
                 temp = ''.join(str(full_date).split())
                 url = ''
                 code = ''
@@ -176,6 +176,8 @@ class WebDriver:
                 action_type = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()
                 desc = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
+                if actions_exists_in_db(partner, name, start, end):
+                    continue
                 action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 self.actions_data.append(action)
                 self.queue.put('progress')

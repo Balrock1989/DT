@@ -4,6 +4,7 @@ from multiprocessing import Process
 import requests
 import auth
 import helpers.helper as helper
+from database.data_base import actions_exists_in_db
 
 
 class Butic_process(Process):
@@ -59,6 +60,8 @@ class Butic_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
+            if actions_exists_in_db(partner_name, name, start, end):
+                continue
             action_man = helper.generate_action(partner_name, name, start, end, desc, code, url_man, action_type,
                                                 short_desc)
             action_woman = helper.generate_action(partner_name, name, start, end, desc, code, url_woman, action_type,
