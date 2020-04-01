@@ -1,6 +1,8 @@
 import re
 from datetime import datetime
 from multiprocessing import Process
+from pprint import pprint
+
 import requests
 import auth
 import helpers.helper as helper
@@ -78,4 +80,4 @@ class Butic_process(Process):
                 link = begin_url_banner + banner['path']
                 banners_links.append(link)
             helper.banner_downloader(banners_links, self.queue)
-            helper.filling_queue(self.queue, actions_data, partner_name)
+        helper.filling_queue(self.queue, actions_data, partner_name)
