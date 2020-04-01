@@ -1,14 +1,9 @@
-from collections import defaultdict
-from pprint import pprint
-
 import peewee
 from datetime import datetime
 
 from helpers.helper import database_path
 
 database = peewee.SqliteDatabase(database_path)
-# database = peewee.SqliteDatabase("database/Actions.db")
-
 
 
 class BaseTable(peewee.Model):
@@ -17,6 +12,7 @@ class BaseTable(peewee.Model):
 
 
 class Actions(BaseTable):
+    """Генерация таблицы"""
     partner = peewee.CharField()
     name = peewee.CharField()
     start_date = peewee.DateTimeField()
@@ -25,10 +21,12 @@ class Actions(BaseTable):
 
 
 def create_database():
+    """Создание таблиц, если их еще нет"""
     database.create_tables([Actions, ])
 
 
 def add_to_database(partner, name, start_date, end_date, last_update=None):
+    """Добавление новой записи в БД"""
     if isinstance(start_date, str):
         start_date = datetime.strptime(start_date, '%d.%m.%Y')
     if isinstance(end_date, str):
@@ -42,16 +40,19 @@ def add_to_database(partner, name, start_date, end_date, last_update=None):
 
 
 def check_actions_on_name(name):
+    """Проверка, существует ли акция с таким именем в базе"""
     for action in Actions.select():
         if action.name == name:
             return True
 
 
-def delete_expired_actions():
-    print(f'Было удалено устаревших акций: {Actions.delete().where(Actions.end_date < datetime.now()).execute()}')
+def delete_expired_actions(queue):
+    """Удаление акций если дата окончания уже прошла"""
+    queue.put(f'Было удалено устаревших акций из БД: {Actions.delete().where(Actions.end_date < datetime.now()).execute()}')
 
 
 def show_expired_actions():
+    """Вывести на экран устаревшие акции"""
     partner = Actions.select().where(Actions.end_date < datetime.now()).get().partner
     name = Actions.select().where(Actions.end_date < datetime.now()).get().name
     start_date = Actions.select().where(Actions.end_date < datetime.now()).get().start_date.strftime('%d.%m.%Y')
@@ -60,6 +61,7 @@ def show_expired_actions():
 
 
 def print_stat(queue):
+    """Вывод статистики последнего обновления на экран"""
     try:
         query = Actions.select(Actions.partner, Actions.last_update).order_by(Actions.last_update)
         statistics = {}
@@ -72,6 +74,7 @@ def print_stat(queue):
 
 
 def show_actions():
+    """Вывести на экран все существующие акции в БД"""
     for row in Actions.select().tuples():
         row = list(row)
         row[3] = row[3].strftime('%d.%m.%Y')
@@ -81,6 +84,7 @@ def show_actions():
 
 
 def actions_exists_in_db(partner, name, start_date, end_date):
+    """Если акции нет в базе то добавляем ее, если есть то пропускаем ее при надобности"""
     if check_actions_on_name(name) is None:
         add_to_database(partner, name, start_date, end_date)
         return False
@@ -90,8 +94,6 @@ def actions_exists_in_db(partner, name, start_date, end_date):
 
 
 def clear_partner_info(partner):
+    """Удалить все записи по партнеру"""
     print(f'Было удалено {Actions.delete().where(Actions.partner == partner).execute()} акций для партнера {partner}')
 
-
-# clear_partner_info("Утконос")
-# show_actions()
