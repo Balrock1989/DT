@@ -1,8 +1,6 @@
 import re
 from datetime import datetime
 from multiprocessing import Process
-from pprint import pprint
-
 import requests
 import auth
 import helpers.helper as helper

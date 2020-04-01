@@ -1,10 +1,8 @@
 import re
 from datetime import datetime
 from multiprocessing import Process
-
 import requests
 from bs4 import BeautifulSoup
-
 import helpers.helper as helper
 
 
@@ -76,13 +74,13 @@ class Kupivip_process(Process):
             except:
                 desc = ""
             if title == name:
-                name = ''
+                title = ''
             if percent:
                 name += f'. Скидки до {percent}'
             start = datetime.now().strftime('%d.%m.%Y')
             end = datetime.now().strftime('%d.%m.%Y')
             code = 'Не требуется'
-            desc = title + desc
+            desc = title + ' ' + desc
             url = "https://www.kupivip.ru/" + div.find('a').get("href")
             if helper.promotion_is_outdated(end):
                 continue
