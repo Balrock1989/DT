@@ -14,6 +14,7 @@ class Actions(BaseTable):
     name = peewee.CharField()
     start_date = peewee.DateTimeField()
     end_date = peewee.DateTimeField()
+    last_update = peewee.DateTimeField()
 
 
 database.create_tables([Actions, ])
@@ -27,7 +28,8 @@ def add_to_database(partner, name, start_date, end_date):
     Actions.create(partner=partner,
                    name=name,
                    start_date=start_date,
-                   end_date=end_date)
+                   end_date=end_date,
+                   last_update=datetime.now())
 
 
 def actions_exists_in_db(name):
@@ -38,8 +40,12 @@ def actions_exists_in_db(name):
 def delete_expired_actions():
     Actions.delete().where(Actions.end_date < datetime.now()).execute()
 
+def print_stat():
+    pass
+# add_to_database("Партнер", "Новая акция", "12.12.2020", "12.02.2019")
+# delete_expired_actions()  # TODO запускать при старте программы
 
-add_to_database("Партнер", "Новая акция", "12.12.2020", "12.02.2019")
-# delete_expired_actions()
-if actions_exists_in_db("Новая акция"):
+if actions_exists_in_db("Новая акция") is None:
+    add_to_database("Партнер", "Новая акция", "12.12.2020", "12.02.2019")
+else:
     print('акция с таким названием есть в базе')
