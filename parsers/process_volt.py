@@ -7,9 +7,10 @@ from database.data_base import actions_exists_in_db
 
 
 class Volt_process(Process):
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "220Volt"
@@ -35,8 +36,9 @@ class Volt_process(Process):
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
                 continue
-            if actions_exists_in_db(partner_name, name, start, end):
-                continue
+            if not self.ignore:
+                if actions_exists_in_db(partner_name, name, start, end):
+                    continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         driver.quit()

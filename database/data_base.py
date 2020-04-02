@@ -3,7 +3,7 @@ from datetime import datetime
 
 from helpers.helper import database_path
 
-database = peewee.SqliteDatabase(database_path)
+database = peewee.SqliteDatabase(database_path, timeout=3, pragmas={'journal_mode': 'wal'})
 
 
 class BaseTable(peewee.Model):
@@ -48,7 +48,8 @@ def check_actions_on_name(name):
 
 def delete_expired_actions(queue):
     """Удаление акций если дата окончания уже прошла"""
-    queue.put(f'Было удалено устаревших акций из БД: {Actions.delete().where(Actions.end_date < datetime.now()).execute()}')
+    queue.put(
+        f'Было удалено устаревших акций из БД: {Actions.delete().where(Actions.end_date < datetime.now()).execute()}')
 
 
 def show_expired_actions():
@@ -96,4 +97,3 @@ def actions_exists_in_db(partner, name, start_date, end_date):
 def clear_partner_info(partner):
     """Удалить все записи по партнеру"""
     print(f'Было удалено {Actions.delete().where(Actions.partner == partner).execute()} акций для партнера {partner}')
-

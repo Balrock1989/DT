@@ -1,88 +1,3 @@
-# import re
-# import threading
-# import requests
-# from bs4 import BeautifulSoup
-# from threading import Thread
-# from multiprocessing import Process
-# import helpers.helper as helper
-#
-#
-# class Sephora_process(Process):
-#
-#     def __init__(self, queue):
-#         super().__init__()
-#         self.queue = queue
-#
-#     def __str__(self):
-#         return "Сефора"
-#
-#     def run(self):
-#         partner_name = 'Sephora'
-#         actions_data = []
-#         lock = threading.Lock()
-#         s = requests.Session()
-#         s.headers.update({
-#             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'})
-#         main_url = 'https://sephora.ru/news/'
-#         request = s.get(main_url)
-#         page = BeautifulSoup(request.text, 'lxml')
-#         links = page.find_all("a", class_='b-news-thumb__title')
-#         threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue) for link in links]
-#         for thread in threads:
-#             thread.start()
-#         for thread in threads:
-#             thread.join()
-#         if len(actions_data) == 0:
-#             self.queue.put(f'Акции по {partner_name} не найдены ')
-#             return
-#         self.queue.put(actions_data)
-#         self.queue.put((partner_name,))
-#         self.queue.put(helper.write_csv(actions_data))
-#         self.queue.put('progress')
-#
-#
-# class Sephora_thread(Thread):
-#
-#     def __init__(self, actions_data, main_url, link, lock, print_queue):
-#         super().__init__()
-#         self.actions_data = actions_data
-#         self.main_url = main_url
-#         self.link = link
-#         self.lock = lock
-#         self.queue = print_queue
-#
-#     def run(self):
-#         link = self.main_url[:-5] + self.link['href'][1:]
-#         request = requests.get(link)
-#         page = BeautifulSoup(request.text, 'lxml')
-#         div = page.find('div', class_='b-news-detailed')
-#         if div:
-#             try:
-#                 incoming_date = re.search(r'Срок проведения Акции: с (\d.*\d+)', div.text)[1]
-#                 start, end = helper.one_date_return_two(incoming_date)
-#             except TypeError:
-#                 return
-#             code = "Не требуется"
-#             name = div.h1.text
-#             partner = 'Sephora'
-#             short_desc = ''
-#             action_type = 'подарок' if 'подар' in name.lower() else 'скидка'
-#             paragraphs = div.findAll('p')
-#             url = 'https://sephora.ru/news/'
-#             descriptions = []
-#             for p in paragraphs:
-#                 text = p.text.strip()
-#                 if 'При' in text:
-#                     descriptions.append(text)
-#             for desc in descriptions:
-#                 action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
-#                 with self.lock:
-#                     self.actions_data.append(action)
-
-
-
-
-
 import re
 import threading
 import requests
@@ -95,9 +10,10 @@ from database.data_base import actions_exists_in_db
 
 class Sephora_process(Process):
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Сефора"
@@ -109,20 +25,21 @@ class Sephora_process(Process):
         main_url = 'https://sephora.ru/news/'
         page = helper.get_page_use_request(main_url)
         links = page.find_all("a", class_='b-news-thumb__title')
-        threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue) for link in links]
+        threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue, self.ignore) for link in links]
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Sephora_thread(Thread):
 
-    def __init__(self, actions_data, main_url, link, lock, print_queue):
+    def __init__(self, actions_data, main_url, link, lock, print_queue, ignore):
         super().__init__()
         self.actions_data = actions_data
         self.main_url = main_url
         self.link = link
         self.lock = lock
         self.queue = print_queue
+        self.ignore = ignore
 
     def run(self):
         link = self.main_url[:-5] + self.link['href'][1:]
@@ -155,9 +72,10 @@ class Sephora_thread(Thread):
                     return
                 short_desc = ''
                 action_type = helper.check_action_type(code, name, desc)
-                with self.lock:
-                    if actions_exists_in_db(partner_name, name, start, end):
-                        return
+                if not self.ignore:
+                    with self.lock:
+                        if actions_exists_in_db(partner_name, name, start, end):
+                            return
                 action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)

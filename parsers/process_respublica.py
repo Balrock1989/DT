@@ -12,9 +12,10 @@ from database.data_base import actions_exists_in_db
 
 class Respublica_process(Process):
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Республика"
@@ -33,18 +34,19 @@ class Respublica_process(Process):
                 divs_work.append(div)
         for div in divs_work:
             links.append('https://www.respublica.ru/' + div.find('a', text='Подробнее').get('href'))
-        threads = [Respulica_thread(actions_data, link, lock) for link in links]
+        threads = [Respulica_thread(actions_data, link, lock, self.ignore) for link in links]
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Respulica_thread(Thread):
 
-    def __init__(self, actions_data, link, lock):
+    def __init__(self, actions_data, link, lock, ignore):
         super().__init__()
         self.actions_data = actions_data
         self.link = link
         self.lock = lock
+        self.ignore = ignore
 
     def run(self):
         partner_name = 'Республика'
@@ -63,9 +65,10 @@ class Respulica_thread(Thread):
             start = helper.DATA_NOW
             end = helper.get_date_end_month()
         action_type = helper.check_action_type(code, name, desc)
-        with self.lock:
-            if actions_exists_in_db(partner_name, name, start, end):
-                return
+        if not self.ignore:
+            with self.lock:
+                if actions_exists_in_db(partner_name, name, start, end):
+                    return
         action = helper.generate_action(partner_name, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

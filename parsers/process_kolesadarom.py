@@ -10,9 +10,10 @@ from database.data_base import actions_exists_in_db
 
 class Kolesadarom_process(Process):
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Колеса Даром"
@@ -34,14 +35,14 @@ class Kolesadarom_process(Process):
                 end = helper.get_one_date(pediod)
             except Exception:
                 end = helper.get_date_half_year_ahead(helper.DATA_NOW)
-            threads.append(Kolesadarom_thread(actions_data, lock, self.queue, name, url, end))
+            threads.append(Kolesadarom_thread(actions_data, lock, self.queue, name, url, end, self.ignore))
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Kolesadarom_thread(Thread):
 
-    def __init__(self, actions_data, lock, queue, name, url, date_end):
+    def __init__(self, actions_data, lock, queue, name, url, date_end, ignore):
         super().__init__()
         self.actions_data = actions_data
         self.lock = lock
@@ -49,6 +50,7 @@ class Kolesadarom_thread(Thread):
         self.name = name
         self.url = url
         self.end = date_end
+        self.ignore = ignore
 
     def run(self):
         s = requests.Session()
@@ -76,9 +78,10 @@ class Kolesadarom_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, self.name, desc)
-        with self.lock:
-            if actions_exists_in_db(partner_name, self.name, start, self.end):
-                return
+        if not self.ignore:
+            with self.lock:
+                if actions_exists_in_db(partner_name, self.name, start, self.end):
+                    return
         action = helper.generate_action(partner_name, self.name, start, self.end, desc, code, self.url, action_type,
                                         short_desc)
         with self.lock:

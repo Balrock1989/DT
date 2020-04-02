@@ -11,9 +11,10 @@ from database.data_base import actions_exists_in_db
 
 class Akusherstvo_process(Process):
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Акушерство"
@@ -29,19 +30,20 @@ class Akusherstvo_process(Process):
         divs_3 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item')
         divs_4 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item middle')
         divs = divs + divs_2 + divs_3 + divs_4
-        threads = [Akusherstvo_thread(actions_data, div, lock, self.queue) for div in divs]
+        threads = [Akusherstvo_thread(actions_data, div, lock, self.queue, self.ignore) for div in divs]
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Akusherstvo_thread(Thread):
 
-    def __init__(self, actions_data, div, lock, print_queue):
+    def __init__(self, actions_data, div, lock, print_queue, ignore):
         super().__init__()
         self.actions_data = actions_data
         self.div = div
         self.lock = lock
         self.queue = print_queue
+        self.ignore = ignore
 
     def run(self):
         persent = self.div.find("span", class_='banner-sale-list-item-discount-percent').text.strip()
@@ -68,9 +70,10 @@ class Akusherstvo_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, name, desc)
-        with self.lock:
-            if actions_exists_in_db(partner_name, name, start, end):
-                return
+        if not self.ignore:
+            with self.lock:
+                if actions_exists_in_db(partner_name, name, start, end):
+                    return
         action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

@@ -10,9 +10,10 @@ from database.data_base import actions_exists_in_db
 
 class Holodilnik_process(Process):
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Холодильник"
@@ -30,14 +31,14 @@ class Holodilnik_process(Process):
             name = div.find('span', class_='link').text.strip()
             date = div.find('span', class_='text-data').text.strip()
             date = date.split(' - ')
-            threads.append(Holodilnik_thread(actions_data, lock, self.queue, name, url, date))
+            threads.append(Holodilnik_thread(actions_data, lock, self.queue, name, url, date, self.ignore))
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Holodilnik_thread(Thread):
 
-    def __init__(self, actions_data, lock, queue, name, url, date):
+    def __init__(self, actions_data, lock, queue, name, url, date, ignore):
         super().__init__()
         self.actions_data = actions_data
         self.lock = lock
@@ -45,6 +46,7 @@ class Holodilnik_thread(Thread):
         self.name = name
         self.url = url
         self.date = date
+        self.ignore = ignore
 
     def run(self):
         if len(self.date[0]) > 1:
@@ -77,9 +79,10 @@ class Holodilnik_thread(Thread):
             return
         short_desc = ''
         action_type = helper.check_action_type(code, self.name, desc)
-        with self.lock:
-            if actions_exists_in_db(partner_name, self.name, start, end):
-                return
+        if not self.ignore:
+            with self.lock:
+                if actions_exists_in_db(partner_name, self.name, start, end):
+                    return
         action = helper.generate_action(partner_name, self.name, start, end, desc, code, self.url, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

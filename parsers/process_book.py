@@ -10,9 +10,10 @@ from database.data_base import actions_exists_in_db
 
 class Book_process(Process):
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Book24"
@@ -30,19 +31,20 @@ class Book_process(Process):
                 links.append(begin_url + div.find("div", class_='stock-list-item__more').a.get('href'))
             else:
                 pass
-        threads = [Book_thread(actions_data, link, lock, self.queue) for link in links]
+        threads = [Book_thread(actions_data, link, lock, self.queue, self.ignore) for link in links]
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Book_thread(Thread):
 
-    def __init__(self, actions_data, link, lock, print_queue):
+    def __init__(self, actions_data, link, lock, print_queue, ignore):
         super().__init__()
         self.actions_data = actions_data
         self.link = link
         self.lock = lock
         self.queue = print_queue
+        self.ignore = ignore
 
     def run(self):
         request = requests.get(self.link)
@@ -82,9 +84,10 @@ class Book_thread(Thread):
         if helper.promotion_is_outdated(end):
             return
         action_type = helper.check_action_type(code, name, desc)
-        with self.lock:
-            if actions_exists_in_db(partner_name, name, start, end):
-                return
+        if not self.ignore:
+            with self.lock:
+                if actions_exists_in_db(partner_name, name, start, end):
+                    return
         action = helper.generate_action(partner_name, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)

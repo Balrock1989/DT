@@ -1,4 +1,5 @@
 import re
+import threading
 from datetime import datetime
 from multiprocessing import Process
 import requests
@@ -8,9 +9,10 @@ from database.data_base import actions_exists_in_db
 
 
 class Kupivip_process(Process):
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "КупиВип"
@@ -18,6 +20,7 @@ class Kupivip_process(Process):
     def run(self):
         actions_data = []
         partner_name = 'КупиВип'
+        lock = threading.Lock()
         page = helper.get_page_use_request('https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL')
         divs = page.find_all("div", attrs={'data-banner': 'campaign'})
         # Акции дня
@@ -49,8 +52,10 @@ class Kupivip_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            if actions_exists_in_db(partner_name, name, start, end):
-                continue
+            if not self.ignore:
+                with lock:
+                    if actions_exists_in_db(partner_name, name, start, end):
+                        continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         # Акции с баннера на главной старнице
@@ -89,8 +94,10 @@ class Kupivip_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            if actions_exists_in_db(partner_name, name, start, end):
-                continue
+            if not self.ignore:
+                with lock:
+                    if actions_exists_in_db(partner_name, name, start, end):
+                        continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
         helper.filling_queue(self.queue, actions_data, partner_name)

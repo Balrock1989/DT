@@ -1,4 +1,5 @@
 import re
+import threading
 from datetime import datetime
 from multiprocessing import Process
 import requests
@@ -10,9 +11,10 @@ from database.data_base import actions_exists_in_db
 class Butic_process(Process):
     """Парсер для партнера Бутик"""
 
-    def __init__(self, queue):
+    def __init__(self, queue, ignore):
         super().__init__()
-        self.queue = queue
+        self.queue = queue.queue
+        self.ignore = ignore
 
     def __str__(self):
         return "Бутик"
@@ -60,8 +62,11 @@ class Butic_process(Process):
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
-            if actions_exists_in_db(partner_name, name, start, end):
-                continue
+            lock = threading.Lock()
+            if not self.ignore:
+                with lock:
+                    if actions_exists_in_db(partner_name, name, start, end):
+                        continue
             action_man = helper.generate_action(partner_name, name, start, end, desc, code, url_man, action_type,
                                                 short_desc)
             action_woman = helper.generate_action(partner_name, name, start, end, desc, code, url_woman, action_type,

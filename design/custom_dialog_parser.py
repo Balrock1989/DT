@@ -86,9 +86,9 @@ class Ui_Dialog(object):
         self.respublica = QtWidgets.QCheckBox(Dialog)
         self.respublica.setGeometry(QtCore.QRect(130, 90, 20, 20))
         self.respublica.setObjectName('respublica')
-        self.respublica_volt = QtWidgets.QLabel(Dialog)
-        self.respublica_volt.setGeometry(QtCore.QRect(150, 85, 90, 30))
-        self.respublica_volt.setObjectName('respublica_volt')
+        self.label_respublica = QtWidgets.QLabel(Dialog)
+        self.label_respublica.setGeometry(QtCore.QRect(150, 85, 90, 30))
+        self.label_respublica.setObjectName('label_respublica')
 
 
         self.ok = QtWidgets.QPushButton(Dialog)
@@ -124,5 +124,5 @@ class Ui_Dialog(object):
         self.label_holodilnik.setText(_translate('Dialog', 'Холодильник'))
         self.label_kolesadarom.setText(_translate('Dialog', 'Колеса даром'))
         self.label_volt.setText(_translate('Dialog', '220 Volt'))
-        self.respublica_volt.setText(_translate('Dialog', 'Республика'))
+        self.label_respublica.setText(_translate('Dialog', 'Республика'))
 

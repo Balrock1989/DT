@@ -103,6 +103,10 @@ class Ui_MainWindow(object):
         self.rename_checbox.setGeometry(QtCore.QRect(580, 375, 161, 20))
         self.rename_checbox.setObjectName('rename_checbox')
 
+        self.ignore_database = QtWidgets.QCheckBox(self.centralwidget)
+        self.ignore_database.setGeometry(QtCore.QRect(592, 61, 161, 20))
+        self.ignore_database.setObjectName('ignore_database')
+
         self.run_browser = QtWidgets.QPushButton(self.centralwidget)
         self.run_browser.setGeometry(QtCore.QRect(580, 80, 131, 51))
         font = QtGui.QFont()
@@ -176,8 +180,10 @@ class Ui_MainWindow(object):
         self.hint_hotkey_4.setText(_translate('MainWindow', '4 - Загрузить акции'))
         self.rename_button.setText(_translate('MainWindow', 'Переименовать'))
         self.rename_checbox.setText(_translate('MainWindow', 'В одну папку'))
+        self.ignore_database.setText(_translate('MainWindow', 'Игнорировать базу данных'))
         self.run_browser.setText(_translate('MainWindow', 'Браузер'))
         self.parser_button.setText(_translate('MainWindow', 'Парсер'))
         self.command_window.setPlaceholderText(_translate('MainWindow', ''))
         self.path_label.setText(_translate('MainWindow', 'Путь до папки с баннерами:'))
         self.resize_buttom.setText(_translate('MainWindow', 'Изменить размер'))
+
