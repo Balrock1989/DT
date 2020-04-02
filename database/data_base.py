@@ -31,6 +31,7 @@ def add_to_database(partner, name, start_date, end_date, last_update=None):
         start_date = datetime.strptime(start_date, '%d.%m.%Y')
     if isinstance(end_date, str):
         end_date = datetime.strptime(end_date, '%d.%m.%Y')
+        end_date = end_date.replace(hour=23, minute=59, second=59)
     last_update = datetime.strptime(last_update, '%d.%m.%Y') if isinstance(last_update, str) else datetime.now()
     Actions.create(partner=partner,
                    name=name,
