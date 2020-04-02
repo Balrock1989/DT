@@ -7,7 +7,7 @@ from PyQt5.QtCore import QDir, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
 import web_driver
-from database.data_base import create_database, print_stat, delete_expired_actions
+from database.data_base import create_database, print_stat, delete_expired_actions, show_expired_actions
 from helpers.my_queue import MyQueue
 from design.custom_design import Ui_MainWindow
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
@@ -104,6 +104,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.reset_progress_signal.connect(self.reset_progress_slot)
         print_stat(self.queue.queue)
         delete_expired_actions(self.queue.queue)
+
 
     def init_buttons(self):
         """Инициализация кнопок интерфейса"""

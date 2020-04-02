@@ -53,6 +53,7 @@ class WebDriver:
         self.ad_window = None
         self.actions_data = []
         self.gui = gui
+        self.ignore = gui.ignore_database
         self.queue = gui.queue.queue
 
     def auth(self):
@@ -142,6 +143,7 @@ class WebDriver:
     def parser(self):
         """Сбор и форамтирование информации об акциях"""
         self.driver.switch_to_window(self.dt_window)
+        lock = threading.Lock()
         for window in self.driver.window_handles:
             if window != self.dt_window and window != self.ad_window:
                 self.driver.switch_to.window(window)
@@ -176,19 +178,23 @@ class WebDriver:
                 action_type = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()
                 desc = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
-                if actions_exists_in_db(partner, name, start, end):
-                    continue
+                if not self.ignore.isChecked():
+                    with lock:
+                        if actions_exists_in_db(partner, name, start, end):
+                            continue
                 action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
                 self.actions_data.append(action)
                 self.queue.put('progress')
-            self.queue.put(helper.write_csv(self.actions_data))
-            self.queue.put((partner,))
-            self.queue.put(self.actions_data)
+            if len(self.actions_data) == 0:
+                self.queue.put(f'Акции по {partner} не найдены ')
+            else:
+                self.queue.put(helper.write_csv(self.actions_data))
+                self.queue.put((partner,))
+                self.queue.put(self.actions_data)
             if self.driver.current_window_handle != self.ad_window and \
                     self.driver.current_window_handle != self.dt_window:
                 self.driver.close()
             self.driver.switch_to.window(self.ad_window)
-            self.queue.put('Акции успешно загружены')
             self.actions_data.clear()
         else:
             self.queue.put('Нужно зайти на страницу с акциями')

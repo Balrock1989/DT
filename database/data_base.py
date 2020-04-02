@@ -1,5 +1,5 @@
 import peewee
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from helpers.helper import database_path
 
@@ -48,18 +48,22 @@ def check_actions_on_name(name):
 
 def delete_expired_actions(queue):
     """Удаление акций если дата окончания уже прошла"""
+    yesterday = datetime.now() - timedelta(days=2)
     queue.put(
-        f'Было удалено устаревших акций из БД: {Actions.delete().where(Actions.end_date < datetime.now()).execute()}')
+        f'Было удалено устаревших акций из БД: {Actions.delete().where(Actions.end_date < yesterday).execute()}')
 
 
 def show_expired_actions():
     """Вывести на экран устаревшие акции"""
-    partner = Actions.select().where(Actions.end_date < datetime.now()).get().partner
-    name = Actions.select().where(Actions.end_date < datetime.now()).get().name
-    start_date = Actions.select().where(Actions.end_date < datetime.now()).get().start_date.strftime('%d.%m.%Y')
-    end_date = Actions.select().where(Actions.end_date < datetime.now()).get().end_date.strftime('%d.%m.%Y')
-    print(f'Акция устарела: {partner}: {name}, {start_date} - {end_date}')
-
+    try:
+        yesterday = datetime.now()-timedelta(days=2)
+        partner = Actions.select().where(Actions.end_date < yesterday).get().partner
+        name = Actions.select().where(Actions.end_date < datetime.now()).get().name
+        start_date = Actions.select().where(Actions.end_date < datetime.now()).get().start_date.strftime('%d.%m.%Y')
+        end_date = Actions.select().where(Actions.end_date < datetime.now()).get().end_date.strftime('%d.%m.%Y')
+        print(f'Акция устарела: {partner}: {name}, {start_date} - {end_date}')
+    except:
+        pass
 
 def print_stat(queue):
     """Вывод статистики последнего обновления на экран"""
