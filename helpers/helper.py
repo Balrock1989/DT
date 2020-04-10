@@ -6,7 +6,7 @@ from calendar import monthrange
 from random import randint
 from datetime import datetime, timedelta
 from time import sleep
-from requests_html import HTMLSession
+# from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
@@ -95,11 +95,11 @@ def get_page_use_request(url):
     return BeautifulSoup(request.text, 'lxml')
 
 
-def get_page_use_html_request(url, encoding='utf-8'):
-    session = HTMLSession()
-    r = session.get(url)
-    r.html.render(encoding=encoding)
-    return BeautifulSoup(r.html.html, 'lxml')
+# def get_page_use_html_request(url, encoding='utf-8'):
+#     session = HTMLSession()
+#     r = session.get(url)
+#     r.html.render(encoding=encoding)
+#     return BeautifulSoup(r.html.html, 'lxml')
 
 
 def generate_csv():

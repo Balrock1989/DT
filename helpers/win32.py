@@ -1,8 +1,10 @@
 import pyautogui
 import win32con
 import win32gui
-
 # нужно ставить pywin32
+import psutil
+
+
 
 dt_process = None
 chromedriver_main_process = None
@@ -49,7 +51,6 @@ def hide_chrome_console():
 
 def close_all_chromedriver():
     """При запуске программы закрывает все существующие процессы chromedriver.exe в windows"""
-    import psutil
 
     chromedrivers = [item for item in psutil.process_iter() if item.name() == 'chromedriver.exe']
     for process in chromedrivers:
