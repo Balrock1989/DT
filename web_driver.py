@@ -224,8 +224,8 @@ class WebDriver:
                         self.queue.put(f'Парсер  AD запущен не на той странице')
                         win32.show_process()
                         return
-                    if self.gui.partner_name.count() > 0 \
-                            and action['Имя партнера'] != self.gui.partner_name.currentText():
+                    # Акции которые есть в CSV но не подходят по партнеру записываем во временный файл, чтобы сохранить.
+                    if self.gui.partner_name.count() > 0 and action['Имя партнера'] != self.gui.partner_name.currentText():
                         with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
                             writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                             writer.writerow(action)
