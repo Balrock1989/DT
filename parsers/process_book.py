@@ -72,14 +72,10 @@ class Book_thread(Thread):
         except Exception:
             end = helper.get_date_end_month()
         try:
-            desc = page.find_all('div', class_='text-block-d')[1].text.strip()
+            desc = page.find_all('div', class_='text-block-d')[0].text.strip()
             desc = re.sub(r'\s{2,}', '', desc).strip()
         except Exception:
-            try:
-                desc = page.find_all('div', class_='text-block-d')[0].text.strip()
-                desc = re.sub(r'\s{2,}', '', desc).strip()
-            except Exception:
-                return
+            desc = name
         partner_name = 'Book24'
         if helper.promotion_is_outdated(end):
             return

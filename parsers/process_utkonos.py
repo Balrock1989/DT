@@ -29,7 +29,7 @@ class Utkonos_process(Process):
             desc = ''
             url = 'https://www.utkonos.ru' + div.a.get('href')
             incoming_date = div.find('div', class_='text').text.strip()
-            incoming_date = re.search(r'с\s(\d+\s[а-яА-Я]+).*по\s(\d+\s[а-яА-Я]+)', incoming_date.lower())
+            incoming_date = re.search(r'со?\s(\d+\s[а-яА-Я]+).*по\s(\d+\s[а-яА-Я]+)', incoming_date.lower())
             start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
             if helper.promotion_is_outdated(end):
                 continue
