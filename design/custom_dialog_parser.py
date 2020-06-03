@@ -90,6 +90,12 @@ class Ui_Dialog(object):
         self.label_respublica.setGeometry(QtCore.QRect(150, 85, 90, 30))
         self.label_respublica.setObjectName('label_respublica')
 
+        self.svyaznoy = QtWidgets.QCheckBox(Dialog)
+        self.svyaznoy.setGeometry(QtCore.QRect(130, 110, 20, 20))
+        self.svyaznoy.setObjectName('svyaznoy')
+        self.label_svyaznoy = QtWidgets.QLabel(Dialog)
+        self.label_svyaznoy.setGeometry(QtCore.QRect(150, 105, 90, 30))
+        self.label_svyaznoy.setObjectName('label_svyaznoy')
 
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(170, 150, 90, 30))
@@ -125,4 +131,5 @@ class Ui_Dialog(object):
         self.label_kolesadarom.setText(_translate('Dialog', 'Колеса даром'))
         self.label_volt.setText(_translate('Dialog', '220 Volt'))
         self.label_respublica.setText(_translate('Dialog', 'Республика'))
+        self.label_svyaznoy.setText(_translate('Dialog', 'Связной'))
 

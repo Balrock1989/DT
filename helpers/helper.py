@@ -47,7 +47,7 @@ DATA_NOW = datetime.now().strftime('%d.%m.%Y')
 def check_action_type(code, name, desc):
     if 'требуется' not in code:
         action_type = 'купон'
-    elif 'подарок' in name.lower() or 'подарок' in name.lower():
+    elif 'подарок' in name.lower() or 'подарок' in desc.lower():
         action_type = 'подарок'
     elif 'доставка' in desc.lower() or 'доставка' in desc.lower():
         action_type = 'доставка'
