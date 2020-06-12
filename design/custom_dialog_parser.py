@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName('Dialog')
-        Dialog.resize(280, 200)
+        Dialog.resize(400, 200)
 
         self.sephora = QtWidgets.QCheckBox(Dialog)
         self.sephora.setGeometry(QtCore.QRect(10, 10, 20, 20))
@@ -97,8 +97,15 @@ class Ui_Dialog(object):
         self.label_svyaznoy.setGeometry(QtCore.QRect(150, 105, 90, 30))
         self.label_svyaznoy.setObjectName('label_svyaznoy')
 
+        self.pharmacosmetica = QtWidgets.QCheckBox(Dialog)
+        self.pharmacosmetica.setGeometry(QtCore.QRect(130, 130, 20, 20))
+        self.pharmacosmetica.setObjectName('svyaznoy')
+        self.label_pharmacosmetica = QtWidgets.QLabel(Dialog)
+        self.label_pharmacosmetica.setGeometry(QtCore.QRect(150, 125, 90, 30))
+        self.label_pharmacosmetica.setObjectName('label_pharmacosmetica')
+
         self.ok = QtWidgets.QPushButton(Dialog)
-        self.ok.setGeometry(QtCore.QRect(170, 150, 90, 30))
+        self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -132,4 +139,5 @@ class Ui_Dialog(object):
         self.label_volt.setText(_translate('Dialog', '220 Volt'))
         self.label_respublica.setText(_translate('Dialog', 'Республика'))
         self.label_svyaznoy.setText(_translate('Dialog', 'Связной'))
+        self.label_pharmacosmetica.setText(_translate('Dialog', 'ФармКосметика'))
 

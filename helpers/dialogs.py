@@ -8,6 +8,7 @@ from parsers.process_holodilnik import Holodilnik_process
 from parsers.process_ildebote import Ildebote_process
 from parsers.process_kolesadarom import Kolesadarom_process
 from parsers.process_kupivip import Kupivip_process
+from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_respublica import Respublica_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
@@ -54,6 +55,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Respublica_process))
         if self.svyaznoy.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Svyaznoy_process))
+        if self.pharmacosmetica.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Pharmacosmetica_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()
