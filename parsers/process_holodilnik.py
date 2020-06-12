@@ -64,13 +64,16 @@ class Holodilnik_thread(Thread):
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'}
         request = s.get(self.url)
         page = BeautifulSoup(request.text, 'lxml')
-        main_div = page.find('div', id=id)
         try:
-            div = main_div.find_all('div')
+            main_div = page.find('div', id=id).find('div', class_='ah-text')
+            divs = main_div.find_all('div')
         except Exception:
             return
         partner_name = 'Холодильник'
-        desc = re.sub(r'\s{2,}', ' ', div[1].text.strip()).strip()
+        try:
+            desc = re.sub(r'\s{2,}', ' ', divs[1].text.strip()).strip()
+        except:
+            desc = re.sub(r'\s{2,}', ' ', main_div.text.strip()).strip()
         desc = re.sub(r'\xa0', '\n', desc).strip()
         if len(desc) > 1500:
             desc = desc[:1499]
