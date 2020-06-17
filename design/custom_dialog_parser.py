@@ -104,6 +104,13 @@ class Ui_Dialog(object):
         self.label_pharmacosmetica.setGeometry(QtCore.QRect(150, 125, 90, 30))
         self.label_pharmacosmetica.setObjectName('label_pharmacosmetica')
 
+        self.mts = QtWidgets.QCheckBox(Dialog)
+        self.mts.setGeometry(QtCore.QRect(250, 10, 20, 20))
+        self.mts.setObjectName('mts')
+        self.label_mts = QtWidgets.QLabel(Dialog)
+        self.label_mts.setGeometry(QtCore.QRect(270, 5, 90, 30))
+        self.label_mts.setObjectName('label_mts')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -140,4 +147,5 @@ class Ui_Dialog(object):
         self.label_respublica.setText(_translate('Dialog', 'Республика'))
         self.label_svyaznoy.setText(_translate('Dialog', 'Связной'))
         self.label_pharmacosmetica.setText(_translate('Dialog', 'ФармКосметика'))
+        self.label_mts.setText(_translate('Dialog', 'МТС'))
 

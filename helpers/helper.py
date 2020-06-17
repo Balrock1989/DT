@@ -287,10 +287,15 @@ def get_start_date_in_date(text):
 
 
 def search_data_in_text(text):
-    """ Принимает текст, ищет 2 даты в формате 20.12.2020 и вовзращает их как старт и конец """
-    income_data = re.findall(r'(\d+.\d+.\d+)', text)
-    start = income_data[0]
-    end = income_data[1]
+    """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и вовзращает их как старт и конец """
+    try:
+        income_data = re.findall(r'(\d+.\d+.\d+)', text)
+        start = income_data[0]
+        end = income_data[1]
+    except:
+        income_data = re.findall(r'(\d+\s\w+\s?\d*)', text)
+        start = get_one_date(income_data[0])
+        end = get_one_date(income_data[1])
     return start, end
 
 
