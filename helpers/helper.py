@@ -226,6 +226,12 @@ def get_date_end_month():
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_end
 
+def get_first_day_month():
+    """Возвращает первый день текущего месяца"""
+    date_start = datetime.strptime(DATA_NOW, '%d.%m.%Y')
+    date_start = datetime(day=1, month=date_start.month, year=date_start.year).strftime('%d.%m.%Y')
+    return date_start
+
 
 def get_date_month_ahead(start):
     """Возвращает дату через 30 дней после даты начала"""

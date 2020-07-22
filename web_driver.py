@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import threading
+from http.cookiejar import Cookie
 from time import sleep
 
 from PyQt5.QtCore import QThread
@@ -58,12 +59,13 @@ class WebDriver:
 
     def auth(self):
         """Запуск браузера и авторизация на сайтах"""
-        options = Options()
+        options = webdriver.ChromeOptions()
         options.add_argument('--start-maximized')
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-notifications')
         options.add_argument('--disable-gpu')
-        self.driver = webdriver.Chrome(options=options)
+        options.add_argument("--user-data-dir=selenium")
+        self.driver = webdriver.Chrome(chrome_options=options)
         win32.hide_chrome_console()
         self.driver.get(auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
@@ -74,9 +76,9 @@ class WebDriver:
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
         self.driver.get(auth.auth_url_ad)
-        self.driver.find_element_by_name('login').send_keys(auth.username_ad)
-        self.driver.find_element_by_name('password').send_keys(auth.password_ad)
-        self.driver.find_element_by_id("id_sign_in").click()
+        # self.driver.find_element_by_name('login').send_keys(auth.username_ad)
+        # self.driver.find_element_by_name('password').send_keys(auth.password_ad)
+        # self.driver.find_element_by_id("id_sign_in").click()
 
     @win32.show_window
     def add_banner(self):

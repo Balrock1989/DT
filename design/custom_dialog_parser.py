@@ -111,6 +111,13 @@ class Ui_Dialog(object):
         self.label_mts.setGeometry(QtCore.QRect(270, 5, 90, 30))
         self.label_mts.setObjectName('label_mts')
 
+        self.rivegauche = QtWidgets.QCheckBox(Dialog)
+        self.rivegauche.setGeometry(QtCore.QRect(250, 30, 20, 20))
+        self.rivegauche.setObjectName('rivegauche')
+        self.label_rivegauche = QtWidgets.QLabel(Dialog)
+        self.label_rivegauche.setGeometry(QtCore.QRect(270, 25, 90, 30))
+        self.label_rivegauche.setObjectName('label_rivegauche')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -148,4 +155,5 @@ class Ui_Dialog(object):
         self.label_svyaznoy.setText(_translate('Dialog', 'Связной'))
         self.label_pharmacosmetica.setText(_translate('Dialog', 'ФармКосметика'))
         self.label_mts.setText(_translate('Dialog', 'МТС'))
+        self.label_rivegauche.setText(_translate('Dialog', 'Ривгош'))
 
