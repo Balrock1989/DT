@@ -140,7 +140,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def launch_thread_dt(self):
         """Запуск потока для браузера"""
-        win32.close_all_chromedriver()
+        # win32.close_all_chromedriver()
         if self.web_thread is None:
             self.web_thread = web_driver.WebThread(mainwindow=self)
             self.web_thread.start()
@@ -179,6 +179,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 def main():
+    win32.close_all_chromedriver()
     logger.configure_logging()
     create_database()
     app = QtWidgets.QApplication(sys.argv)

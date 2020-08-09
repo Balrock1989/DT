@@ -8,6 +8,7 @@ from parsers.process_holodilnik import Holodilnik_process
 from parsers.process_ildebote import Ildebote_process
 from parsers.process_kolesadarom import Kolesadarom_process
 from parsers.process_kupivip import Kupivip_process
+from parsers.process_la_roche import La_roche_process
 from parsers.process_mts import Mts_process
 from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_respublica import Respublica_process
@@ -63,6 +64,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Mts_process))
         if self.rivegauche.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Rivegauche_process))
+        if self.la_roche.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, La_roche_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()

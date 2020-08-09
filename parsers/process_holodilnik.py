@@ -65,15 +65,15 @@ class Holodilnik_thread(Thread):
         request = s.get(self.url)
         page = BeautifulSoup(request.text, 'lxml')
         try:
-            main_div = page.find('div', id=id).find('div', class_='ah-text')
+            main_div = page.find('div', id=id).find('span', class_='item-txt')
             divs = main_div.find_all('div')
         except Exception:
             return
         partner_name = 'Холодильник'
         try:
-            desc = re.sub(r'\s{2,}', ' ', divs[1].text.strip()).strip()
-        except:
             desc = re.sub(r'\s{2,}', ' ', main_div.text.strip()).strip()
+        except:
+            desc = re.sub(r'\s{2,}', ' ', divs[1].text.strip()).strip()
         desc = re.sub(r'\xa0', '\n', desc).strip()
         if len(desc) > 1500:
             desc = desc[:1499]

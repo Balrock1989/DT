@@ -65,6 +65,8 @@ class WebDriver:
         options.add_argument('--disable-notifications')
         options.add_argument('--disable-gpu')
         options.add_argument("--user-data-dir=selenium")
+        # options.add_argument("--user-data-dir=C:\\Users\\SMOKE\\AppData\\Local\\Google\\Chrome\\User Data")
+        # options.add_argument("--profile-directory=Profile 5")
         self.driver = webdriver.Chrome(chrome_options=options)
         win32.hide_chrome_console()
         self.driver.get(auth.auth_url_dt)
@@ -75,7 +77,7 @@ class WebDriver:
         self.driver.execute_script('window.open('');')
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
-        self.driver.get(auth.auth_url_ad)
+        self.driver.get(auth.coupon_ad)
         # self.driver.find_element_by_name('login').send_keys(auth.username_ad)
         # self.driver.find_element_by_name('password').send_keys(auth.password_ad)
         # self.driver.find_element_by_id("id_sign_in").click()
