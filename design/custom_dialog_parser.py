@@ -125,6 +125,13 @@ class Ui_Dialog(object):
         self.label_la_roche.setGeometry(QtCore.QRect(270, 45, 90, 30))
         self.label_la_roche.setObjectName('label_la_roche')
 
+        self.rozetka = QtWidgets.QCheckBox(Dialog)
+        self.rozetka.setGeometry(QtCore.QRect(250, 70, 20, 20))
+        self.rozetka.setObjectName('rozetka')
+        self.label_rozetka = QtWidgets.QLabel(Dialog)
+        self.label_rozetka.setGeometry(QtCore.QRect(270, 65, 90, 30))
+        self.label_rozetka.setObjectName('label_rozetka')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -164,4 +171,5 @@ class Ui_Dialog(object):
         self.label_mts.setText(_translate('Dialog', 'МТС'))
         self.label_rivegauche.setText(_translate('Dialog', 'Ривгош'))
         self.label_la_roche.setText(_translate('Dialog', 'La Roche Posay'))
+        self.label_rozetka.setText(_translate('Dialog', 'Розетка'))
 

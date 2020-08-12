@@ -13,6 +13,7 @@ from parsers.process_mts import Mts_process
 from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_respublica import Respublica_process
 from parsers.process_rivegauche import Rivegauche_process
+from parsers.process_rozetka import Rozetka_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
 from parsers.process_utkonos import Utkonos_process
@@ -66,6 +67,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Rivegauche_process))
         if self.la_roche.isChecked():
             processes.append(StartNewProcess(self.mainwindow, La_roche_process))
+        if self.rozetka.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Rozetka_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()
