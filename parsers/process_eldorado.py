@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 from multiprocessing import Process
 import helpers.helper as helper
