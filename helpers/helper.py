@@ -329,11 +329,15 @@ def downloader_run(link, queue):
     format = re.search(r'(\w+)$', link).group(1)
     name = str(name) + "." + format
     path = os.path.join(result_path, name)
-    p = requests.get(link)
-    out = open(path, 'wb')
-    out.write(p.content)
-    out.close()
-    queue.put(f'{name} успешно скачан')
+    try:
+        p = requests.get(link, timeout=5)
+        out = open(path, 'wb')
+        out.write(p.content)
+        out.close()
+        queue.put(f'{name} успешно скачан')
+    except Exception as exc:
+        queue.put(f'Не удалось скачать баннер: {link}')
+        print(exc)
 
 
 def generate_action(partner_name, action_name, date_start, date_end, description, code, url, action_type, short_desc):
