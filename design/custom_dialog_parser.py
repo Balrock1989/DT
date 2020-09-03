@@ -132,6 +132,20 @@ class Ui_Dialog(object):
         self.label_rozetka.setGeometry(QtCore.QRect(270, 65, 90, 30))
         self.label_rozetka.setObjectName('label_rozetka')
 
+        self.eldorado = QtWidgets.QCheckBox(Dialog)
+        self.eldorado.setGeometry(QtCore.QRect(250, 90, 20, 20))
+        self.eldorado.setObjectName('eldorado')
+        self.label_eldorado = QtWidgets.QLabel(Dialog)
+        self.label_eldorado.setGeometry(QtCore.QRect(270, 85, 90, 30))
+        self.label_eldorado.setObjectName('label_eldorado')
+
+        self.bethoven = QtWidgets.QCheckBox(Dialog)
+        self.bethoven.setGeometry(QtCore.QRect(250, 110, 20, 20))
+        self.bethoven.setObjectName('bethoven')
+        self.label_bethoven = QtWidgets.QLabel(Dialog)
+        self.label_bethoven.setGeometry(QtCore.QRect(270, 105, 90, 30))
+        self.label_bethoven.setObjectName('label_bethoven')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -172,4 +186,6 @@ class Ui_Dialog(object):
         self.label_rivegauche.setText(_translate('Dialog', 'Ривгош'))
         self.label_la_roche.setText(_translate('Dialog', 'La Roche Posay'))
         self.label_rozetka.setText(_translate('Dialog', 'Розетка'))
+        self.label_eldorado.setText(_translate('Dialog', 'Эльдорадо'))
+        self.label_bethoven.setText(_translate('Dialog', 'Бетховен'))
 

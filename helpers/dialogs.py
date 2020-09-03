@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
+from parsers.process_bethoven import Bethoven_process
 from parsers.process_butic import Butic_process
 from parsers.process_akusherstvo import Akusherstvo_process
 from parsers.process_book import Book_process
+from parsers.process_eldorado import Eldorado_process
 from parsers.process_holodilnik import Holodilnik_process
 from parsers.process_ildebote import Ildebote_process
 from parsers.process_kolesadarom import Kolesadarom_process
@@ -69,6 +71,10 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, La_roche_process))
         if self.rozetka.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Rozetka_process))
+        if self.eldorado.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Eldorado_process))
+        if self.bethoven.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Bethoven_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()
