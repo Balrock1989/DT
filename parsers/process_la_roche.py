@@ -16,7 +16,7 @@ class La_roche_process(Process):
     def run(self):
         partner_name = 'La Roche posay'
         actions_data = []
-        base_url = 'https://www.laroche-posay.ru/'
+        base_url = 'https://www.laroche-posay.ru'
         main_url = base_url + 'special-offers/'
         page = helper.get_page_use_request(main_url)
         divs1 = page.findAll('div', class_='special-offers-banner')

@@ -27,30 +27,45 @@ def hotkey(gui):
                 func(*args, **kwargs)
             else:
                 gui.chat_print_signal.emit('Браузер закрыт')
-
         return check
 
     @browser_checker
     def execute_tab1():
-        gui.web_thread.web.start_data = gui.date_start.toPlainText()
-        gui.web_thread.web.end_data = gui.date_end.toPlainText()
-        gui.web_thread.web.url = gui.url.toPlainText()
-        gui.web_thread.web.add_banner()
+        try:
+            gui.web_thread.web.start_data = gui.date_start.toPlainText()
+            gui.web_thread.web.end_data = gui.date_end.toPlainText()
+            gui.web_thread.web.url = gui.url.toPlainText()
+            gui.web_thread.web.add_banner()
+        except Exception as exc:
+            gui.log.error('Возникла ошибка при загрузке баннеров')
+            gui.log.error(exc)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 1 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab2():
-        gui.web_thread.web.parser()
+        try:
+            gui.web_thread.web.parser()
+        except Exception as exc:
+            gui.log.error('Возникла ошибка при выгрузке акций')
+            gui.log.error(exc)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 2 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab3():
-        gui.web_thread.web.download_banners()
+        try:
+            gui.web_thread.web.download_banners()
+        except Exception as exc:
+            gui.log.error('Возникла ошибка при выгрузке баннеров')
+            gui.log.error(exc)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 3 \n *** Должна вызваться функция :)')
 
     @browser_checker
     def execute_tab4():
-        gui.web_thread.web.add_actions()
+        try:
+            gui.web_thread.web.add_actions()
+        except Exception as exc:
+            gui.log.error('Возникла ошибка при загрузке акций')
+            gui.log.error(exc)
         gui.log.info('\n *** Нажата комбинация клавиш: tab + 4 \n *** Должна вызваться функция :)')
 
     def get_key_name(key):
@@ -62,18 +77,18 @@ def hotkey(gui):
 
     def on_press(key):
         """Проверка на комбинацию"""
-        key_name = get_key_name(key)
+        # key_name = get_key_name(key)
         if key == keyboard.Key.esc:
-            gui.log.info(f'--- Нажата клавиша: {key_name}')
+            # gui.log.info(f'--- Нажата клавиша: {key_name}')
             gui.set_exit_signal.emit()
         elif key == keyboard.Key.tab:
             current.add(key)
-            gui.log.info(f'--- Нажата клавиша: {key_name}')
-        elif (key == keyboard.KeyCode.from_char('1')) or (key == keyboard.KeyCode.from_char('2')) or \
-                (key == keyboard.KeyCode.from_char('3')) or (key == keyboard.KeyCode.from_char('4')):
-            gui.log.info(f'--- Нажата клавиша: {key_name}')
+            # gui.log.info(f'--- Нажата клавиша: {key_name}')
+        # elif (key == keyboard.KeyCode.from_char('1')) or (key == keyboard.KeyCode.from_char('2')) or \
+        #         (key == keyboard.KeyCode.from_char('3')) or (key == keyboard.KeyCode.from_char('4')):
+        #     gui.log.info(f'--- Нажата клавиша: {key_name}')
         else:
-            gui.log.info(f'Информационно. Вы нажали: {key_name}')
+            # gui.log.info(f'Информационно. Вы нажали: {key_name}')
             current.clear()
         if any([key in COMBO_1 + COMBO_2 + COMBO_3 + COMBO_4]):
             current.add(key)

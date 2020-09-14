@@ -21,7 +21,7 @@ class Holodilnik_process(Process):
         actions_data = []
         page = helper.get_page_use_request('https://ulyanovsk.holodilnik.ru/action/')
         divs = page.find_all("div", class_='col-4')
-        begin_url = 'holodilnik.ru'
+        begin_url = 'https://holodilnik.ru'
         for div in divs:
             url = begin_url + div.a.get('href').strip()
             name = div.find('span', class_='link').text.strip()

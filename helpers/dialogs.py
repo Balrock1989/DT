@@ -18,6 +18,7 @@ from parsers.process_rivegauche import Rivegauche_process
 from parsers.process_rozetka import Rozetka_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
+from parsers.process_toy import Toy_process
 from parsers.process_utkonos import Utkonos_process
 from parsers.process_vseintrumenti import Vseinstrumenti_process
 from helpers.start_new_process import StartNewProcess
@@ -75,6 +76,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Eldorado_process))
         if self.bethoven.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Bethoven_process))
+        if self.toy.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Toy_process))
         [process.start() for process in processes]
         self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()

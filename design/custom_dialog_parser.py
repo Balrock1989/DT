@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName('Dialog')
-        Dialog.resize(400, 200)
+        Dialog.resize(500, 200)
 
         self.sephora = QtWidgets.QCheckBox(Dialog)
         self.sephora.setGeometry(QtCore.QRect(10, 10, 20, 20))
@@ -146,6 +146,13 @@ class Ui_Dialog(object):
         self.label_bethoven.setGeometry(QtCore.QRect(270, 105, 90, 30))
         self.label_bethoven.setObjectName('label_bethoven')
 
+        self.toy = QtWidgets.QCheckBox(Dialog)
+        self.toy.setGeometry(QtCore.QRect(250, 130, 20, 20))
+        self.toy.setObjectName('toy')
+        self.label_toy = QtWidgets.QLabel(Dialog)
+        self.label_toy.setGeometry(QtCore.QRect(270, 125, 90, 30))
+        self.label_toy.setObjectName('label_toy')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -188,4 +195,5 @@ class Ui_Dialog(object):
         self.label_rozetka.setText(_translate('Dialog', 'Розетка'))
         self.label_eldorado.setText(_translate('Dialog', 'Эльдорадо'))
         self.label_bethoven.setText(_translate('Dialog', 'Бетховен'))
+        self.label_toy.setText(_translate('Dialog', 'Toy'))
 
