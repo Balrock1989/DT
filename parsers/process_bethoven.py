@@ -31,7 +31,12 @@ class Bethoven_process(Process):
             name = div.find('img').get('title')
             name = re.sub('_.*$', '', name).strip()
             date = div.find('div', class_='text-period').text.strip()
-            start, end = helper.convert_list_to_date(helper.get_range_date(date))
+            if "осталось" in date.lower():
+                days = re.search(r'(\d)', date.lower()).group(1)
+                start = helper.DATA_NOW
+                end = helper.get_date_plus_days(int(days))
+            else:
+                start, end = helper.convert_list_to_date(helper.get_range_date(date))
             code = "Не требуется"
             desc = name
             short_desc = ''

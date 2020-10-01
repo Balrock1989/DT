@@ -27,9 +27,9 @@ class Rozetka_process(Process):
                     continue
                 url = div.find('a').get('href')
                 name = div.find('div', class_='promo-cat-i-summary').text.strip()
-                date = div.find('time', class_='promo-cat-i-date').text.strip()
-                date = re.sub(r'\xa0', ' ', date).strip()
                 try:
+                    date = div.find('time', class_='promo-cat-i-date').text.strip()
+                    date = re.sub(r'\xa0', ' ', date).strip()
                     start, end = helper.search_data_in_text(date)
                 except:
                     start, end = helper.get_date_now_to_end_month()

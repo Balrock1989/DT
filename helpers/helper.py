@@ -209,6 +209,12 @@ def get_one_date(text):
             date = datetime(day=int(day), month=int(month), year=int(year - 1))
     return date.strftime('%d.%m.%Y')
 
+def get_date_plus_days(count):
+    """ Прибавляет к текущей дате count дней"""
+    date_now = datetime.strptime(DATA_NOW, '%d.%m.%Y')
+    date = datetime(day=int(date_now.day + count), month=int(date_now.month), year=int(date_now.year))
+    return date.strftime('%d.%m.%Y')
+
 
 def get_date_now_to_end_month():
     """Возвращает start с текущего дня и end  конец текущего месяца"""
