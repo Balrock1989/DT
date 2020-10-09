@@ -78,9 +78,6 @@ class WebDriver:
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
         self.driver.get(auth.coupon_ad)
-        # self.driver.find_element_by_name('login').send_keys(auth.username_ad)
-        # self.driver.find_element_by_name('password').send_keys(auth.password_ad)
-        # self.driver.find_element_by_id("id_sign_in").click()
 
     @win32.show_window
     def add_banner(self):

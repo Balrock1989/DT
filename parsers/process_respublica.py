@@ -34,18 +34,20 @@ class Respublica_process(Process):
                 divs_work.append(div)
         for div in divs_work:
             links.append('https://www.respublica.ru/' + div.find('a', text='Подробнее').get('href'))
-        threads = [Respulica_thread(actions_data, link, lock, self.ignore) for link in links]
+        threads = [Respulica_thread(actions_data, link, lock, self.ignore, self.queue) for link in links]
+        self.queue.put(f'set {len(threads)}')
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
 class Respulica_thread(Thread):
 
-    def __init__(self, actions_data, link, lock, ignore):
+    def __init__(self, actions_data, link, lock, ignore, queue):
         super().__init__()
         self.actions_data = actions_data
         self.link = link
         self.lock = lock
+        self.queue = queue
         self.ignore = ignore
 
     def run(self):
@@ -65,11 +67,16 @@ class Respulica_thread(Thread):
             start = helper.DATA_NOW
             end = helper.get_date_end_month()
         action_type = helper.check_action_type(code, name, desc)
+        if helper.promotion_is_outdated(end):
+            self.queue.put('progress')
+            return
         if not self.ignore:
             with self.lock:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     return
         action = helper.generate_action(partner_name, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)
+            self.queue.put('progress')
 

@@ -21,9 +21,11 @@ class Ildebote_process(Process):
         url = 'https://iledebeaute.ru/company/actions/'
         page = helper.get_page_use_request(url)
         divs = page.find_all("div", class_='news_block')
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             date = div.find("p", class_='date')
             if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
+                self.queue.put('progress')
                 continue
             name = div.h2.text
             try:
@@ -35,13 +37,16 @@ class Ildebote_process(Process):
             desc = div.find("p", class_='desc').text.strip()
             code = 'Не требуется'
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if not self.ignore:
                 with lock:
                     if actions_exists_in_db(partner_name, name, start, end):
+                        self.queue.put('progress')
                         continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

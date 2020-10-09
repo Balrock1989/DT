@@ -26,6 +26,7 @@ class Sephora_process(Process):
         page = helper.get_page_use_request(main_url)
         links = page.find_all("a", class_='b-news-thumb__title')
         threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue, self.ignore) for link in links]
+        self.queue.put(f'set {len(threads)}')
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
@@ -61,6 +62,7 @@ class Sephora_thread(Thread):
                     try:
                         start, end = helper.get_start_date_in_date(desc)
                     except Exception:
+                        self.queue.put('progress')
                         return
                 url = link
                 name = page.h1.text
@@ -69,13 +71,20 @@ class Sephora_thread(Thread):
                 partner_name = 'Sephora'
                 code = "Не требуется"
                 if helper.promotion_is_outdated(end):
+                    self.queue.put('progress')
                     return
                 short_desc = ''
                 action_type = helper.check_action_type(code, name, desc)
                 if not self.ignore:
                     with self.lock:
                         if actions_exists_in_db(partner_name, name, start, end):
+                            self.queue.put('progress')
                             return
                 action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
                     self.actions_data.append(action)
+                    self.queue.put('progress')
+            else:
+                self.queue.put('progress')
+        else:
+            self.queue.put('progress')

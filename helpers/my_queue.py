@@ -41,8 +41,15 @@ class MyQueue(QThread):
             elif isinstance(income_data, tuple):
                 self.mainwindow.set_partner_name_signal.emit(income_data[0])
             elif isinstance(income_data, str):
+                if 'set' in income_data:
+                    value = income_data.split(' ')
+                    self.mainwindow.change_progress_signal.emit(int(value[1]))
+                    continue
                 if 'progress' in income_data:
                     self.change_progress_bar()
+                    continue
+                if 'clear' in income_data:
+                    self.mainwindow.reset_progress_signal.emit()
                     continue
                 if income_data:
                     self.mainwindow.chat_print_signal.emit(income_data)

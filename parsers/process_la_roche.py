@@ -21,6 +21,7 @@ class La_roche_process(Process):
         page = helper.get_page_use_request(main_url)
         divs1 = page.findAll('div', class_='special-offers-banner')
         divs1 = divs1
+        self.queue.put(f'set {len(divs1)}')
         for div in divs1:
             url = main_url
             text = div.findAll('div', class_='special-offers-banner__text')
@@ -38,14 +39,18 @@ class La_roche_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
 
         divs2 = page.findAll('div', class_='special-offers-promo__content')
+        self.queue.put(f'set {len(divs2)}')
         for div in divs2:
             url = base_url + div.find('a').get('href')
             name = div.find(class_='special-offers-promo__text').text.strip()
@@ -56,10 +61,13 @@ class La_roche_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

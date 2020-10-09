@@ -21,6 +21,7 @@ class Volt_process(Process):
         main_url = 'https://ulyanovsk.220-volt.ru/share/0/'
         page, driver = helper.get_page_use_webdriver(main_url, quit=False)
         divs = page.find_all('div', class_='actionContainer rel')
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             date = div.find('div', class_='actionPeriod').text.strip()
             start, end = helper.convert_text_date(date)
@@ -35,11 +36,14 @@ class Volt_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         driver.quit()
         helper.filling_queue(self.queue, actions_data, partner_name)

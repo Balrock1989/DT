@@ -23,7 +23,6 @@ class Kolesadarom_process(Process):
         actions_data = []
         lock = threading.Lock()
         page = helper.get_page_use_webdriver('https://www.kolesa-darom.ru/actions/', hidden=True)
-        # page = helper.get_page_use_html_request('https://www.kolesa-darom.ru/actions/')
         divs = page.find_all("div", class_='tiles__item-inner')
         threads = []
         for div in divs:
@@ -31,14 +30,14 @@ class Kolesadarom_process(Process):
             name = div.find('a', class_='tiles__link').text.strip()
             url = begin_url + div.find('a', class_='tiles__link').get('href')
             try:
-                pediod = div.find('div', class_='tiles__period-date').text.strip()
-                end = helper.get_one_date(pediod)
+                period = div.find('div', class_='tiles__period-date').text.strip()
+                end = helper.get_one_date(period)
             except Exception:
                 end = helper.get_date_half_year_ahead(helper.DATA_NOW)
             threads.append(Kolesadarom_thread(actions_data, lock, self.queue, name, url, end, self.ignore))
+        self.queue.put(f'set {len(threads)}')
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
-
 
 class Kolesadarom_thread(Thread):
 
@@ -75,14 +74,17 @@ class Kolesadarom_thread(Thread):
         start = helper.DATA_NOW
         code = 'Не требуется'
         if helper.promotion_is_outdated(self.end):
+            self.queue.put('progress')
             return
         short_desc = ''
         action_type = helper.check_action_type(code, self.name, desc)
         if not self.ignore:
             with self.lock:
                 if actions_exists_in_db(partner_name, self.name, start, self.end):
+                    self.queue.put('progress')
                     return
         action = helper.generate_action(partner_name, self.name, start, self.end, desc, code, self.url, action_type,
                                         short_desc)
         with self.lock:
             self.actions_data.append(action)
+            self.queue.put('progress')

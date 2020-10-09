@@ -34,6 +34,7 @@ class Mts_process(Process):
                 threads.append(Holodilnik_thread(actions_data, lock, self.queue, base_url + div.find('a').get('href'),
                                                  self.ignore))
         helper.start_join_threads(threads)
+        self.queue.put(f'set {len(threads)}')
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
@@ -61,11 +62,14 @@ class Holodilnik_thread(Thread):
         short_desc = ''
         action_type = helper.check_action_type(code, name, desc)
         if helper.promotion_is_outdated(end):
+            self.queue.put('progress')
             return
         if not self.ignore:
             if actions_exists_in_db(partner_name, name, start, end):
+                self.queue.put('progress')
                 return
         action = helper.generate_action(partner_name, name, start, end, desc, code, self.url, action_type,short_desc)
 
         with self.lock:
             self.actions_data.append(action)
+            self.queue.put('progress')

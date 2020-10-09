@@ -24,16 +24,17 @@ class Akusherstvo_process(Process):
         actions_data = []
         lock = threading.Lock()
         page = helper.get_page_use_webdriver('https://www.akusherstvo.ru/sale.php', hidden=True)
-        # page = helper.get_page_use_html_request('https://www.akusherstvo.ru/sale.php', encoding='windows-1251')
         divs = page.find_all("li", class_='banner-sale-list-item js-banner-sale-list-item')
         divs_2 = page.find_all('li', class_='banner-sale-list-item js-banner-sale-list-item middle')
         divs_3 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item')
         divs_4 = page.find_all("li", class_='banner-sale-list-item fire js-banner-sale-list-item middle')
         divs = divs + divs_2 + divs_3 + divs_4
+
         threads = [Akusherstvo_thread(actions_data, div, lock, self.queue, self.ignore) for div in divs]
         helper.start_join_threads(threads)
+        self.queue.put(f'set {len(threads)}')
         helper.filling_queue(self.queue, actions_data, partner_name)
-
+        self.queue.put('clear')
 
 class Akusherstvo_thread(Thread):
 
@@ -67,13 +68,16 @@ class Akusherstvo_thread(Thread):
         except Exception:
             pass
         if helper.promotion_is_outdated(end):
+            self.queue.put('progress')
             return
         short_desc = ''
         action_type = helper.check_action_type(code, name, desc)
         if not self.ignore:
             with self.lock:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     return
         action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
         with self.lock:
+            self.queue.put('progress')
             self.actions_data.append(action)

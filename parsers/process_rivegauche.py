@@ -25,6 +25,7 @@ class Rivegauche_process(Process):
             except:
                 continue
             divs = page.find_all('div', class_='name')
+            self.queue.put(f'set {len(divs)}')
             for div in divs:
                 url = base_url + div.find('a').get('href')
                 name = div.text.strip()
@@ -36,10 +37,13 @@ class Rivegauche_process(Process):
                 short_desc = ''
                 action_type = helper.check_action_type(code, name, desc)
                 if helper.promotion_is_outdated(end):
+                    self.queue.put('progress')
                     continue
                 if not self.ignore:
                     if actions_exists_in_db(partner_name, name, start, end):
+                        self.queue.put('progress')
                         continue
                 action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
                 actions_data.append(action)
+                self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

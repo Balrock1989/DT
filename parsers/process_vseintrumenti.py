@@ -20,6 +20,7 @@ class Vseinstrumenti_process(Process):
         page = helper.get_page_use_webdriver('https://www.vseinstrumenti.ru/our_actions/aktsii')
         divs = page.find_all("div", class_='action_main')
         lock = threading.Lock()
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             name = div.find('div', class_='action_header').a.text.strip()
             code = 'Не требуется'
@@ -42,13 +43,16 @@ class Vseinstrumenti_process(Process):
             except:
                 start, end = helper.get_date_now_to_end_month()
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if not self.ignore:
                 with lock:
                     if actions_exists_in_db(partner_name, name, start, end):
+                        self.queue.put('progress')
                         continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

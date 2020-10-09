@@ -78,11 +78,13 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     @pyqtSlot(int)
     def change_progress_slot(self, max_value):
         """Слот для изменения прогресс бара"""
-        value = self.progress_bar.value() + 1
-        self.progress_bar.setValue(value)
+
         if max_value:
-            self.progress_bar.setValue(0)
             self.progress_bar.setMaximum(max_value)
+            self.progress_bar.setValue(0)
+        else:
+            value = self.progress_bar.value() + 1
+            self.progress_bar.setValue(value)
         if self.progress_bar.value() == self.progress_bar.maximum():
             self.reset_progress_signal.emit()
 

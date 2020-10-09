@@ -18,6 +18,7 @@ class Toy_process(Process):
         partner_name = 'Toy'
         actions_data = []
         base_url = 'https://www.toy.ru'
+        self.queue.put(f'set 10')
         for i in range(1, 11):
             main_url = f'https://www.toy.ru/company/akcii/?PAGEN_5={i}'
             page = helper.get_page_use_request(main_url)
@@ -42,4 +43,5 @@ class Toy_process(Process):
                         continue
                 action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
                 actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

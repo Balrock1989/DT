@@ -32,6 +32,7 @@ class Book_process(Process):
             else:
                 pass
         threads = [Book_thread(actions_data, link, lock, self.queue, self.ignore) for link in links]
+        self.queue.put(f'set {len(threads)}')
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
@@ -78,12 +79,15 @@ class Book_thread(Thread):
             desc = name
         partner_name = 'Book24'
         if helper.promotion_is_outdated(end):
+            self.queue.put('progress')
             return
         action_type = helper.check_action_type(code, name, desc)
         if not self.ignore:
             with self.lock:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     return
         action = helper.generate_action(partner_name, name, start, end, desc, code, self.link, action_type, short_desc)
         with self.lock:
             self.actions_data.append(action)
+            self.queue.put('progress')

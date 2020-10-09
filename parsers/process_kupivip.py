@@ -23,6 +23,7 @@ class Kupivip_process(Process):
         lock = threading.Lock()
         page = helper.get_page_use_request('https://www.kupivip.ru/campaigns?showIn=FEMALE&filter=ALL')
         divs = page.find_all("div", attrs={'data-banner': 'campaign'})
+        self.queue.put(f'set {len(divs)}')
         # Акции дня
         for div in divs:
             percent_actions = ''
@@ -31,6 +32,7 @@ class Kupivip_process(Process):
                 name = div.find("div", class_='brands').text.strip()
             except:
                 self.queue.put("Пропущена одна акция без названия")
+                self.queue.put('progress')
                 continue
             try:
                 percent_actions = div.find("div", class_='percent').text.strip()
@@ -49,15 +51,18 @@ class Kupivip_process(Process):
                 code = re.search(r'код\s(.*)\s?', name).group(1)
             url = 'https://www.kupivip.ru/'
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if not self.ignore:
                 with lock:
                     if actions_exists_in_db(partner_name, name, start, end):
+                        self.queue.put('progress')
                         continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         # Акции с баннера на главной старнице
         s = requests.Session()
         s.headers.update({
@@ -67,6 +72,7 @@ class Kupivip_process(Process):
         request = s.get("https://www.kupivip.ru/", verify=False)
         page = BeautifulSoup(request.text, 'lxml')
         divs = page.find_all('div', class_="banner-primary")
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             name = div.get("data-id")
             try:
@@ -91,13 +97,16 @@ class Kupivip_process(Process):
             desc = title + ' ' + desc
             url = "https://www.kupivip.ru/" + div.find('a').get("href")
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if not self.ignore:
                 with lock:
                     if actions_exists_in_db(partner_name, name, start, end):
+                        self.queue.put('progress')
                         continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

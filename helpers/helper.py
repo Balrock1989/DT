@@ -6,7 +6,7 @@ from calendar import monthrange
 from random import randint
 from datetime import datetime, timedelta
 from time import sleep
-# from requests_html import HTMLSession
+import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
@@ -24,6 +24,19 @@ MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
 HEADERS = ['Тип купона', 'Название акции', 'Сумма скидки', 'Дата начала', 'Дата окончания',
            'Минимальная сумма', 'Условия акции', 'Купон', 'URL', 'Имя партнера', 'Короткое описание']
 
+
+def time_track(func):
+    def surrogate(*args, **kwargs):
+        started_at = time.time()
+
+        result = func(*args, **kwargs)
+
+        ended_at = time.time()
+        elapsed = round(ended_at - started_at, 4)
+        print(f'Функция работала {elapsed} секунд(ы)')
+        return result
+
+    return surrogate
 
 def exception_hook(exctype, value, tb):
     """Переопределяем вывод ошибок"""
@@ -209,6 +222,7 @@ def get_one_date(text):
             date = datetime(day=int(day), month=int(month), year=int(year - 1))
     return date.strftime('%d.%m.%Y')
 
+
 def get_date_plus_days(count):
     """ Прибавляет к текущей дате count дней"""
     date_now = datetime.strptime(DATA_NOW, '%d.%m.%Y')
@@ -231,6 +245,7 @@ def get_date_end_month():
     day_on_month = monthrange(year=int(date_end.year), month=int(date_end.month))
     date_end = datetime(day=day_on_month[1], month=date_end.month, year=date_end.year).strftime('%d.%m.%Y')
     return date_end
+
 
 def get_first_day_month():
     """Возвращает первый день текущего месяца"""
@@ -382,3 +397,4 @@ def find_promo_code(text):
     except Exception:
         return 'Не требуется'
     return list[0] if list else 'Не требуется'
+

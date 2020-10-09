@@ -21,12 +21,14 @@ class Eldorado_process(Process):
         main_url = 'https://www.eldorado.ru/actions.php?type=online'
         page = helper.get_page_use_request(main_url)
         divs = page.find_all('a', class_='promotion__promotion')
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             try:
                 url = str(div.get('href'))
                 url = div.get('href') if 'www' in url else base_url + div.get('href')
             except TypeError:
                 print("Отсутствуют данные по акции")
+                self.queue.put('progress')
                 continue
             name = div.find('div', class_='promotion__promotion-title').text.strip()
             start = helper.DATA_NOW
@@ -35,16 +37,20 @@ class Eldorado_process(Process):
                 end = datetime.strptime(end, '%Y-%m-%d').strftime('%d.%m.%Y')
             except ValueError:
                 print("Отсутствует дата окончания акции")
+                self.queue.put('progress')
                 continue
             code = "Не требуется"
             desc = name
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

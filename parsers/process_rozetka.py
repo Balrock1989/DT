@@ -18,7 +18,8 @@ class Rozetka_process(Process):
     def run(self):
         partner_name = 'Розетка'
         actions_data = []
-        for i in range(1, 41):
+        self.queue.put(f'set 20')
+        for i in range(1, 21):
             main_url = f'https://rozetka.com.ua/news-articles-promotions/promotions/page={i}'
             page = helper.get_page_use_request(main_url)
             divs = page.find_all('div', class_='promo-cat-i')
@@ -42,6 +43,7 @@ class Rozetka_process(Process):
                 if not self.ignore:
                     if actions_exists_in_db(partner_name, name, start, end):
                         continue
-                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
+                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
                 actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

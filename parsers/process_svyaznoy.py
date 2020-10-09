@@ -27,6 +27,7 @@ class Svyaznoy_process(Process):
         links = []
         for div in divs:
             links.append(div.find('a', class_='b-article-preview__link').get('href'))
+        self.queue.put(f'set {len(links)}')
         for link in links:
             driver.get(link)
             page = BeautifulSoup(driver.page_source, 'lxml')
@@ -41,12 +42,15 @@ class Svyaznoy_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         driver.quit()
         helper.filling_queue(self.queue, actions_data, partner_name)
 

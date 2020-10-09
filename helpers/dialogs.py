@@ -79,7 +79,6 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         if self.toy.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Toy_process))
         [process.start() for process in processes]
-        self.mainwindow.change_progress_signal.emit(len(processes))
         self.close()
 
     def exit_func(self):

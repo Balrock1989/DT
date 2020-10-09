@@ -21,12 +21,14 @@ class Bethoven_process(Process):
         main_url = 'https://www.bethowen.ru/sale'
         page = helper.get_page_use_request(main_url)
         divs = page.find_all('a', class_='no-decor')
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             try:
                 url = str(div.get('href'))
                 url = div.get('href') if 'www' in url else base_url + div.get('href')
             except TypeError:
                 print("Отсутствуют данные по акции")
+                self.queue.put('progress')
                 continue
             name = div.find('img').get('title')
             name = re.sub('_.*$', '', name).strip()
@@ -42,10 +44,13 @@ class Bethoven_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)

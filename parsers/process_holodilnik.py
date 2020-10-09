@@ -22,6 +22,7 @@ class Holodilnik_process(Process):
         page = helper.get_page_use_request('https://ulyanovsk.holodilnik.ru/action/')
         divs = page.find_all("div", class_='col-4')
         begin_url = 'https://holodilnik.ru'
+        self.queue.put(f'set {len(divs)}')
         for div in divs:
             url = begin_url + div.a.get('href').strip()
             name = div.find('span', class_='link').text.strip()
@@ -31,6 +32,7 @@ class Holodilnik_process(Process):
                 start = re.search(r'(\d+\.\d+\.\d+)', date[0]).group(1)
             else:
                 print(f'{name} нет даты date')
+                self.queue.put('progress')
                 continue
             if len(date) == 2:
                 end = re.search(r'(\d+\.\d+\.\d+)', date[1]).group(1)
@@ -41,10 +43,13 @@ class Holodilnik_process(Process):
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)
             if helper.promotion_is_outdated(end):
+                self.queue.put('progress')
                 continue
             if not self.ignore:
                 if actions_exists_in_db(partner_name, name, start, end):
+                    self.queue.put('progress')
                     continue
             action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
             actions_data.append(action)
+            self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)
