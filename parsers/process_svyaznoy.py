@@ -32,9 +32,15 @@ class Svyaznoy_process(Process):
             driver.get(link)
             page = BeautifulSoup(driver.page_source, 'lxml')
             name = page.h1.text
-            date = page.find_all('span', class_='b-event-info__date')
-            start = helper.get_one_date(date[0].text.strip())
-            end = helper.get_one_date(date[1].text.strip())
+            date = page.find('div', class_='b-event-info__item').find_all('span', class_='b-event-info__date')
+            if len(date) == 2:
+                start = helper.get_one_date(date[0].text.strip())
+                end = helper.get_one_date(date[1].text.strip())
+            elif len(date) == 1:
+                start = helper.get_one_date(date[0].text.strip())
+                end = helper.get_date_end_month()
+            else:
+                print(date)
             url = link
             desc = page.find('div', class_='b-article').text.strip()
             desc = re.sub(r'\s{2,}', ' ', desc).strip()

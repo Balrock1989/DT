@@ -200,6 +200,7 @@ def get_double_date(first, second):
 
 def get_one_date(text):
     """ принимает 1 дату в формате 1 февраля 2019 или 1 февраля, возвращает 1 дату в формате 01.02.2019"""
+    flag = False
     try:
         text = re.search(r'(\d+\s\w+\s?\d*)', text).group(1)
     except Exception:
@@ -211,15 +212,17 @@ def get_one_date(text):
     except Exception:
         day, month = text.split(" ")
         year = datetime.now().year
+        flag = True
     for num, name in MONTH_NAME.items():
         if name in month.lower():
             month = num
     date = datetime(day=int(day), month=int(month), year=int(year))
-    if (date - datetime.now()).days > 200:
-        if datetime.now().month > 6:
-            date = datetime(day=int(day), month=int(month), year=int(year + 1))
-        else:
-            date = datetime(day=int(day), month=int(month), year=int(year - 1))
+    if flag:
+        if (date - datetime.now()).days > 200:
+            if datetime.now().month > 6:
+                date = datetime(day=int(day), month=int(month), year=int(year) + 1)
+            else:
+                date = datetime(day=int(day), month=int(month), year=int(year) - 1)
     return date.strftime('%d.%m.%Y')
 
 
