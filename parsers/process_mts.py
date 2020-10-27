@@ -21,7 +21,6 @@ class Mts_process(Process):
         lock = threading.Lock()
         actions_data = []
         base_url = 'https://shop.mts.ru'
-        links = []
         threads = []
         for i in range(1, 4):
             main_url = f'https://shop.mts.ru/actions/{i}/'
@@ -33,8 +32,8 @@ class Mts_process(Process):
             for div in divs:
                 threads.append(Holodilnik_thread(actions_data, lock, self.queue, base_url + div.find('a').get('href'),
                                                  self.ignore))
-        helper.start_join_threads(threads)
         self.queue.put(f'set {len(threads)}')
+        helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
@@ -69,7 +68,6 @@ class Holodilnik_thread(Thread):
                 self.queue.put('progress')
                 return
         action = helper.generate_action(partner_name, name, start, end, desc, code, self.url, action_type,short_desc)
-
         with self.lock:
             self.actions_data.append(action)
             self.queue.put('progress')

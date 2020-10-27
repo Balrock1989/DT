@@ -33,7 +33,7 @@ class Bethoven_process(Process):
             name = div.find('img').get('title')
             name = re.sub('_.*$', '', name).strip()
             date = div.find('div', class_='text-period').text.strip()
-            if "осталось" in date.lower():
+            if "остал" in date.lower():
                 days = re.search(r'(\d)', date.lower()).group(1)
                 start = helper.DATA_NOW
                 end = helper.get_date_plus_days(int(days))
