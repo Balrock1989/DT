@@ -1,8 +1,9 @@
 import pyautogui
 import win32con
 import win32gui
-# нужно ставить pywin32
+# нужно ставить pywin32 pip install pywin32
 import psutil
+#pip install psutil  (Необходма установка BuildTools C++)
 
 
 
