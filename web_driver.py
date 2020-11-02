@@ -226,8 +226,7 @@ class WebDriver:
                         win32.show_process()
                         return
                     # Акции которые есть в CSV но не подходят по партнеру записываем во временный файл, чтобы сохранить.
-                    # TODO Проверить заполнение из таблицы если заполнить ее вручную
-                    if self.gui.partner_name.count() > 0 and action['Имя партнера'] != self.gui.partner_name.currentText():
+                    if self.gui.partner_name.count() > 1 and action['Имя партнера'] != self.gui.partner_name.currentText() and self.gui.partner_name.currentText() != 'actions.csv':
                         with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
                             writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
                             writer.writerow(action)

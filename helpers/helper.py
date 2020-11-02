@@ -141,8 +141,7 @@ def get_count_suitable_actions(gui):
     """Возвращает количество акций из списка CSV имя которых выбрано в селекте"""
     with open(actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
         csv_data = csv.DictReader(csv_file, delimiter=';')
-        suitable_actions = [action for action in csv_data if
-                            action['Имя партнера'] == gui.partner_name.currentText()]
+        suitable_actions = [action for action in csv_data if action['Имя партнера'] == gui.partner_name.currentText()]
     return len(suitable_actions)
 
 

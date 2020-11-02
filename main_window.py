@@ -69,7 +69,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def set_exit_slot(self):
-        """Слот для прерывания процесса кнопкой ESQ"""
+        """Слот для прерывания процесса кнопкой ESC"""
         if self.web_thread:
             self.web_thread.web.exit = True
         if self.sizer:
@@ -98,6 +98,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
     def init_signals(self):
         """Инициализация слотов для сигналов"""
         self.set_partner_name_signal.connect(self.set_partner_name_slot)
+        self.set_partner_name_signal.emit('actions.csv')
         self.del_partner_name_signal.connect(self.del_partner_name_slot)
         self.chat_print_signal.connect(self.chat_print_slot)
         self.set_exit_signal.connect(self.set_exit_slot)

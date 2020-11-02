@@ -29,8 +29,13 @@ class Volt_process(Process):
             url = 'https://220-volt.ru' + div.find('a', class_='activeButton').get('href')
             driver.get(url)
             action_page = BeautifulSoup(driver.page_source, 'lxml')
-            desc_block = action_page.find('div', class_='seoText')
-            desc = desc_block.text.strip()
+            try:
+                desc_block = action_page.find('div', class_='seoText')
+                desc = desc_block.text.strip()
+            except Exception:
+                print(f'Не удаолось открыть страницу {url}')
+                self.queue.put('progress')
+                continue
             desc = re.sub(r'\s{2,}', ' ', desc).strip()
             code = 'Не требуется'
             short_desc = ''
