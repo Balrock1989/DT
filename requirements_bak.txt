@@ -21,7 +21,7 @@ psutil==5.7.0
 py==1.8.1
 PyAutoGUI==0.9.48
 PyGetWindow==0.0.8
-PyInstaller==3.5
+PyInstaller==3.6
 PyMsgBox==1.0.7
 pynput==1.6.0
 pyparsing==2.4.6
