@@ -153,6 +153,13 @@ class Ui_Dialog(object):
         self.label_toy.setGeometry(QtCore.QRect(270, 125, 90, 30))
         self.label_toy.setObjectName('label_toy')
 
+        self.labirint = QtWidgets.QCheckBox(Dialog)
+        self.labirint.setGeometry(QtCore.QRect(370, 10, 20, 20))
+        self.labirint.setObjectName('labirint')
+        self.label_labirint = QtWidgets.QLabel(Dialog)
+        self.label_labirint.setGeometry(QtCore.QRect(390, 5, 90, 30))
+        self.label_labirint.setObjectName('label_labirint')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -196,4 +203,5 @@ class Ui_Dialog(object):
         self.label_eldorado.setText(_translate('Dialog', 'Эльдорадо'))
         self.label_bethoven.setText(_translate('Dialog', 'Бетховен'))
         self.label_toy.setText(_translate('Dialog', 'Toy'))
+        self.label_labirint.setText(_translate('Dialog', 'Лабиринт'))
 

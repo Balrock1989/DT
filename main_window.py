@@ -3,6 +3,7 @@ import sys
 from multiprocessing import freeze_support
 # pip install PyQt5
 # pip install pillow
+# pip install pyinstaller
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
