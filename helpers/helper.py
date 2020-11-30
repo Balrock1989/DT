@@ -228,7 +228,15 @@ def get_one_date(text):
 def get_date_plus_days(count):
     """ Прибавляет к текущей дате count дней"""
     date_now = datetime.strptime(DATA_NOW, '%d.%m.%Y')
-    date = datetime(day=int(date_now.day + count), month=int(date_now.month), year=int(date_now.year))
+    day_on_month = monthrange(year=int(date_now.year), month=int(date_now.month))[1]
+    if date_now.day + count > day_on_month:
+        count = abs(day_on_month - (date_now.day + count))
+        if date_now.month != 12:
+            date = datetime(day=int(count), month=int(date_now.month + 1), year=int(date_now.year))
+        else:
+            date = datetime(day=int(count), month=int(1), year=int(date_now.year + 1))
+    else:
+        date = datetime(day=int(date_now.day + count), month=int(date_now.month), year=int(date_now.year))
     return date.strftime('%d.%m.%Y')
 
 
