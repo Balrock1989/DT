@@ -18,17 +18,24 @@ class Utkonos_process(Process):
         partner_name = 'Утконос'
         actions_data = []
         lock = threading.Lock()
-        page = helper.get_page_use_request('https://www.utkonos.ru/action')
-        divs = page.find_all("div", class_='action_wrapper')
+        page = helper.get_page_use_webdriver('https://www.utkonos.ru/action', True, hidden=True)
+        divs = page.find_all("utk-list-item", class_='list-group__item')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
             name = div.a.text.strip()
             code = 'Не требуется'
             desc = ''
             url = 'https://www.utkonos.ru' + div.a.get('href')
-            incoming_date = div.find('div', class_='text').text.strip()
-            incoming_date = re.search(r'со?\s(\d+\s[а-яА-Я]+).*по\s(\d+\s[а-яА-Я]+)', incoming_date.lower())
-            start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
+            incoming_date = div.find('div', class_='template__content-status').text.strip()
+            if incoming_date != "":
+                if "остал" in incoming_date.lower():
+                    days = re.search(r'(\d+)', incoming_date.lower()).group(1)
+                    start = helper.DATA_NOW
+                    end = helper.get_date_plus_days(int(days))
+                else:
+                    start, end = helper.get_do_period(incoming_date)
+            else:
+                start, end = helper.get_date_now_to_end_month()
             if helper.promotion_is_outdated(end):
                 self.queue.put('progress')
                 continue

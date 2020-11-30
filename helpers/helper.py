@@ -301,6 +301,22 @@ def get_range_date(text):
                 data = text.split('-')
     return data
 
+def get_do_period(text):
+    """ Принимает текст в формате 'До 1 декабря', возвращает дату начала - сегодня, дату окончания 01.12.2020"""
+    start = datetime.now()
+    result = re.search(r'(\d+)\s([а-яА-Я]+)', text)
+    day = result.group(1).strip()
+    month = result.group(2).strip().lower()
+    for num, name in MONTH_NAME.items():
+        if name in month:
+            month = int(num)
+            break
+    year = start.year
+    if start.month > 6 and month <= 6:
+        year = year + 1
+    end = datetime(day=int(day), month=month, year=year).strftime('%d.%m.%Y')
+    return start.strftime('%d.%m.%Y'), end
+
 
 def convert_list_to_date(my_list):
     """принимает не отформатированный список [дата начала, дата окончания] [1, 20 февраля] [1 марта, 20 марта 2020]"""
