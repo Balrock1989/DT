@@ -22,7 +22,7 @@ class Utkonos_process(Process):
         divs = page.find_all("utk-list-item", class_='list-group__item')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
-            name = div.a.text.strip()
+            name = div.find('div', class_='template__content-text').text.strip()
             code = 'Не требуется'
             desc = ''
             url = 'https://www.utkonos.ru' + div.a.get('href')
