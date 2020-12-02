@@ -167,7 +167,7 @@ class WebDriver:
                     full_date = str(now.strftime('%d.%m.%Y')) + "-" + end.strftime('%d.%m.%Y')
                 temp = ''.join(str(full_date).split())
                 url = ''
-                code = ''
+                code = 'Не требуется'
                 short_desc = ''
                 start = datetime.strptime(re.search(r'^(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
                 end = datetime.strptime(re.search(r'-(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
@@ -176,7 +176,7 @@ class WebDriver:
                     end = start + timedelta(days=180)
                 start = start.strftime('%d.%m.%Y')
                 end = end.strftime('%d.%m.%Y')
-                action_type = re.sub(r'\s+', ' ', act.findAll('td', text=True)[4].text).strip()
+                action_type = 'скидка'
                 desc = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 if not self.ignore.isChecked():
