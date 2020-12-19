@@ -17,6 +17,7 @@ from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_respublica import Respublica_process
 from parsers.process_rivegauche import Rivegauche_process
 from parsers.process_rozetka import Rozetka_process
+from parsers.process_santehnika_tut import Santehnika_tut_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
 from parsers.process_toy import Toy_process
@@ -82,7 +83,7 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         if self.labirint.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Labirint_process))
         if self.santehnika_tut.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Labirint_process))
+            processes.append(StartNewProcess(self.mainwindow, Santehnika_tut_process))
         [process.start() for process in processes]
         self.close()
 
