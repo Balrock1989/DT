@@ -81,6 +81,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Toy_process))
         if self.labirint.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Labirint_process))
+        if self.santehnika_tut.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Labirint_process))
         [process.start() for process in processes]
         self.close()
 

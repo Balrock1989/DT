@@ -18,22 +18,17 @@ class Ildebote_process(Process):
         partner_name = 'ИльДэБотэ'
         actions_data = []
         lock = threading.Lock()
-        url = 'https://iledebeaute.ru/company/actions/'
+        url = 'https://iledebeaute.ru/company/actions'
         page = helper.get_page_use_request(url)
         divs = page.find_all("div", class_='news_block')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
-            date = div.find("p", class_='date')
-            if 'сегодня' not in date.text.strip().lower() and 'вчера' not in date.text.strip().lower():
-                self.queue.put('progress')
-                continue
             name = div.h2.text
             try:
-                start, end = helper.convert_list_to_date(helper.get_range_date(name))
+                start = helper.get_start_date_in_date(div.find("p", class_='date').text.strip(), False)
             except Exception:
                 start = helper.DATA_NOW
-                end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
-
+            end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
             desc = div.find("p", class_='desc').text.strip()
             code = 'Не требуется'
             if helper.promotion_is_outdated(end):

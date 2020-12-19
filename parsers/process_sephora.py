@@ -60,7 +60,7 @@ class Sephora_thread(Thread):
                     start, end = helper.convert_list_to_date(range)
                 except Exception:
                     try:
-                        start, end = helper.get_start_date_in_date(desc)
+                        start, end = helper.get_start_date_in_date(desc, True)
                     except Exception:
                         self.queue.put('progress')
                         return

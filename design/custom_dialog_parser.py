@@ -160,6 +160,13 @@ class Ui_Dialog(object):
         self.label_labirint.setGeometry(QtCore.QRect(390, 5, 90, 30))
         self.label_labirint.setObjectName('label_labirint')
 
+        self.santehnika_tut = QtWidgets.QCheckBox(Dialog)
+        self.santehnika_tut.setGeometry(QtCore.QRect(370, 30, 20, 20))
+        self.santehnika_tut.setObjectName('santehnika_tut')
+        self.label_santehnika_tut = QtWidgets.QLabel(Dialog)
+        self.label_santehnika_tut.setGeometry(QtCore.QRect(390, 25, 90, 30))
+        self.label_santehnika_tut.setObjectName('label_santehnika_tut')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -204,4 +211,5 @@ class Ui_Dialog(object):
         self.label_bethoven.setText(_translate('Dialog', 'Бетховен'))
         self.label_toy.setText(_translate('Dialog', 'Toy'))
         self.label_labirint.setText(_translate('Dialog', 'Лабиринт'))
+        self.label_santehnika_tut.setText(_translate('Dialog', 'СантехникаТут'))
 
