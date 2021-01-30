@@ -185,7 +185,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 def main():
-    win32.close_all_chromedriver()
+    # win32.close_all_chromedriver()
     logger.configure_logging()
     create_database()
     app = QtWidgets.QApplication(sys.argv)
@@ -198,4 +198,4 @@ if __name__ == '__main__':
     """Без freeze_support дублируются процессы"""
     freeze_support()
     main()
-    win32.close_all_chromedriver()
+    # win32.close_all_chromedriver()
