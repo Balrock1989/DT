@@ -232,9 +232,12 @@ def get_date_plus_days(count):
     if date_now.day + count > day_on_month:
         count = abs(day_on_month - (date_now.day + count))
         if date_now.month != 12:
+            day_on_next_month = monthrange(year=int(date_now.year), month=int(int(date_now.month + 1)))
+            if count > day_on_next_month[1]:
+                count = day_on_next_month[1]
             date = datetime(day=int(count), month=int(date_now.month + 1), year=int(date_now.year))
         else:
-            date = datetime(day=int(count), month=int(1), year=int(date_now.year + 1))
+            date = datetime(day=int(count), month=1, year=int(date_now.year + 1))
     else:
         date = datetime(day=int(date_now.day + count), month=int(date_now.month), year=int(date_now.year))
     return date.strftime('%d.%m.%Y')
@@ -349,9 +352,16 @@ def search_data_in_text(text):
         start = income_data[0]
         end = income_data[1]
     except:
-        income_data = re.findall(r'(\d+\s\w+\s?\d*)', text)
+        income_data = re.findall(r'(\d+.\d+)', text)
         start = get_one_date(income_data[0])
         end = get_one_date(income_data[1])
+    return start, end
+
+def search_data_in_text_without_year(text):
+    """ Принимает текст, ищет 2 даты в формате 20.12 или в формате 20 декабря по 25 декабря, добавляет текущий год и вовзращает их как старт и конец """
+    income_data = re.findall(r'(\d+.\d+)', text)
+    start = income_data[0] + '.' + str(datetime.now().year)
+    end = income_data[1] + '.' + str(datetime.now().year)
     return start, end
 
 

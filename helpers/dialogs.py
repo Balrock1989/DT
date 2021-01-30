@@ -12,6 +12,7 @@ from parsers.process_kolesadarom import Kolesadarom_process
 from parsers.process_kupivip import Kupivip_process
 from parsers.process_la_roche import La_roche_process
 from parsers.process_labirint import Labirint_process
+from parsers.process_maxi_pro import Maxi_pro_process
 from parsers.process_mts import Mts_process
 from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_respublica import Respublica_process
@@ -84,6 +85,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Labirint_process))
         if self.santehnika_tut.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Santehnika_tut_process))
+        if self.maxi_pro.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Maxi_pro_process))
         [process.start() for process in processes]
         self.close()
 

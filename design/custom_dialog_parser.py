@@ -167,6 +167,13 @@ class Ui_Dialog(object):
         self.label_santehnika_tut.setGeometry(QtCore.QRect(390, 25, 90, 30))
         self.label_santehnika_tut.setObjectName('label_santehnika_tut')
 
+        self.maxi_pro = QtWidgets.QCheckBox(Dialog)
+        self.maxi_pro.setGeometry(QtCore.QRect(370, 50, 20, 20))
+        self.maxi_pro.setObjectName('maxi_pro')
+        self.label_maxi_pro = QtWidgets.QLabel(Dialog)
+        self.label_maxi_pro.setGeometry(QtCore.QRect(390, 45, 90, 30))
+        self.label_maxi_pro.setObjectName('label_maxi_pro')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -212,4 +219,5 @@ class Ui_Dialog(object):
         self.label_toy.setText(_translate('Dialog', 'Toy'))
         self.label_labirint.setText(_translate('Dialog', 'Лабиринт'))
         self.label_santehnika_tut.setText(_translate('Dialog', 'СантехникаТут'))
+        self.label_maxi_pro.setText(_translate('Dialog', 'МаксиПро'))
 
