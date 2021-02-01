@@ -20,7 +20,7 @@ from helpers import global_hotkey, logger
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
-# pyinstaller main_window.spec
+# pyinstaller main_window.spec --noconfirm
 sys.excepthook = helper.exception_hook
 
 
