@@ -181,6 +181,13 @@ class Ui_Dialog(object):
         self.label_interes_1c.setGeometry(QtCore.QRect(390, 65, 90, 30))
         self.label_interes_1c.setObjectName('label_interes_1c')
 
+        self.philips = QtWidgets.QCheckBox(Dialog)
+        self.philips.setGeometry(QtCore.QRect(370, 90, 20, 20))
+        self.philips.setObjectName('philips')
+        self.label_philips = QtWidgets.QLabel(Dialog)
+        self.label_philips.setGeometry(QtCore.QRect(390, 85, 90, 30))
+        self.label_philips.setObjectName('label_philips')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -228,4 +235,5 @@ class Ui_Dialog(object):
         self.label_santehnika_tut.setText(_translate('Dialog', 'СантехникаТут'))
         self.label_maxi_pro.setText(_translate('Dialog', 'МаксиПро'))
         self.label_interes_1c.setText(_translate('Dialog', '1С_Интерес'))
+        self.label_philips.setText(_translate('Dialog', 'Philips'))
 
