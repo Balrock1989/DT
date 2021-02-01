@@ -1,11 +1,14 @@
 import re
 from multiprocessing import Process
+from time import sleep
+
+from bs4 import BeautifulSoup
 
 import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Holodilnik_process(Process):
+class Interes_1c_process(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
@@ -13,31 +16,31 @@ class Holodilnik_process(Process):
         self.ignore = ignore
 
     def __str__(self):
-        return "Холодильник"
+        return "1С_Интерес"
 
     def run(self):
-        partner_name = 'Холодильник'
+        partner_name = '1С_Интерес'
         actions_data = []
-        page = helper.get_page_use_request('https://ulyanovsk.holodilnik.ru/action/')
-        divs = page.find_all("div", class_='col-4')
-        begin_url = 'https://holodilnik.ru'
+        page, driver = helper.get_page_use_webdriver('https://www.1c-interes.ru/special_actions/', quit=False)
+        for i in range(0, 5):
+            next_btn = helper.check_exists_by_css(driver, '.news-next-btn')
+            if next_btn:
+                next_btn.click()
+                sleep(1)
+        page = BeautifulSoup(driver.page_source, 'lxml')
+        divs = page.find_all("div", class_='main-holder')
+        begin_url = 'https://www.1c-interes.ru'
         self.queue.put(f'set {len(divs)}')
         for div in divs:
             url = begin_url + div.a.get('href').strip()
-            name = div.find('span', class_='link').text.strip()
-            date = div.find('span', class_='text-data').text.strip()
-            date = date.split(' - ')
-            if len(date[0]) > 1:
-                start = re.search(r'(\d+\.\d+\.\d+)', date[0]).group(1)
-            else:
-                print(f'{name} нет даты date')
-                self.queue.put('progress')
-                continue
-            if len(date) == 2:
-                end = re.search(r'(\d+\.\d+\.\d+)', date[1]).group(1)
-            else:
-                end = helper.get_date_month_ahead(start)
-            desc = name
+            name = div.h2.text.strip()
+            try:
+                date = div.find('div', class_='preorder-active-to').text.strip()
+                start, end = helper.get_do_period(date)
+            except:
+                start = helper.DATA_NOW
+                end = helper.get_date_end_month()
+            desc = div.find('div', class_='h2 tile-hide').text.strip()
             code = 'Не требуется'
             short_desc = ''
             action_type = helper.check_action_type(code, name, desc)

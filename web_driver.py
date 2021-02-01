@@ -73,7 +73,7 @@ class WebDriver:
         self.dt_window = self.driver.current_window_handle
         self.driver.find_element_by_id('username').send_keys(auth.username_dt)
         self.driver.find_element_by_id('password').send_keys(auth.password_dt)
-        self.driver.find_element_by_class_name("submit").click()
+        self.driver.find_element_by_class_name('submit').click()
         self.driver.execute_script('window.open('');')
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)

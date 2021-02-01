@@ -174,6 +174,13 @@ class Ui_Dialog(object):
         self.label_maxi_pro.setGeometry(QtCore.QRect(390, 45, 90, 30))
         self.label_maxi_pro.setObjectName('label_maxi_pro')
 
+        self.interes_1c = QtWidgets.QCheckBox(Dialog)
+        self.interes_1c.setGeometry(QtCore.QRect(370, 70, 20, 20))
+        self.interes_1c.setObjectName('interes_1c')
+        self.label_interes_1c = QtWidgets.QLabel(Dialog)
+        self.label_interes_1c.setGeometry(QtCore.QRect(390, 65, 90, 30))
+        self.label_interes_1c.setObjectName('label_interes_1c')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -220,4 +227,5 @@ class Ui_Dialog(object):
         self.label_labirint.setText(_translate('Dialog', 'Лабиринт'))
         self.label_santehnika_tut.setText(_translate('Dialog', 'СантехникаТут'))
         self.label_maxi_pro.setText(_translate('Dialog', 'МаксиПро'))
+        self.label_interes_1c.setText(_translate('Dialog', '1С_Интерес'))
 

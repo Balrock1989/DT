@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
+from parsers.process_1c_interes import Interes_1c_process
 from parsers.process_bethoven import Bethoven_process
 from parsers.process_butic import Butic_process
 from parsers.process_akusherstvo import Akusherstvo_process
@@ -87,6 +88,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Santehnika_tut_process))
         if self.maxi_pro.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Maxi_pro_process))
+        if self.interes_1c.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Interes_1c_process))
         [process.start() for process in processes]
         self.close()
 

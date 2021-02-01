@@ -11,10 +11,12 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 
 import requests
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 
 from helpers import win32
-
+##TODO создать классы для различных хелперов. даты /веб
+## В вебе сделать драйвер и юзать его для функций
 """Даты для преобразования 02 февраля в 02.02 и тд."""
 MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
               "05": "мая", "06": "июн", "07": "июл", "08": "авг",
@@ -288,7 +290,7 @@ def promotion_is_outdated(end):
 
 
 def get_range_date(text):
-    """ возвращает список [начало акции, конец акции] ищет текст в формате 1 по 20 февраля 2019 или 1 по 20февраля"""
+    """ возвращает список [начало акции, конец акции] ищет текст в формате 1 по 20 февраля 2019 или 1 по 20 февраля"""
     try:
         text = re.search(r'(\d+\sпо\s\d+\s\w+\s\d*)', text).group(1).strip()
         data = text.split('по')
@@ -308,17 +310,17 @@ def get_range_date(text):
 def get_do_period(text):
     """ Принимает текст в формате 'До 1 декабря', возвращает дату начала - сегодня, дату окончания 01.12.2020"""
     start = datetime.now()
-    result = re.search(r'(\d+)\s([а-яА-Я]+)', text)
+    result = re.search(r'(\d+)\s([а-яА-Я]+)\s?(\d{4})?', text)
     day = result.group(1).strip()
     month = result.group(2).strip().lower()
     for num, name in MONTH_NAME.items():
         if name in month:
             month = int(num)
             break
-    year = start.year
+    year = result.group(3).strip() if result.lastindex > 2 else start.year
     if start.month > 6 and month <= 6:
         year = year + 1
-    end = datetime(day=int(day), month=month, year=year).strftime('%d.%m.%Y')
+    end = datetime(day=int(day), month=month, year=int(year)).strftime('%d.%m.%Y')
     return start.strftime('%d.%m.%Y'), end
 
 
@@ -356,6 +358,17 @@ def search_data_in_text(text):
         income_data = re.findall(r'(\d+.\d+)', text)
         start = get_one_date(income_data[0])
         end = get_one_date(income_data[1])
+    return start, end
+
+def search_end_data_in_text(text):
+    """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и вовзращает их как старт и конец """
+    start = DATA_NOW
+    try:
+        income_data = re.findall(r'(\d+.\d+.\d+)', text)
+        end = income_data[0]
+    except:
+        income_data = re.findall(r'(\d+.\d+)', text)
+        end = get_one_date(income_data[0])
     return start, end
 
 def search_data_in_text_without_year(text):
@@ -437,4 +450,12 @@ def find_promo_code(text):
     except Exception:
         return 'Не требуется'
     return list[0] if list else 'Не требуется'
+
+def check_exists_by_css(driver, css):
+    elem = None
+    try:
+        elem = driver.find_element_by_css_selector(css)
+    except NoSuchElementException:
+        return False
+    return elem
 

@@ -16,7 +16,7 @@ from design.custom_design import Ui_MainWindow
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from image_sizer import Resizer
-from helpers import global_hotkey, logger, win32
+from helpers import global_hotkey, logger
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py

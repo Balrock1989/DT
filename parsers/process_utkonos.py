@@ -18,16 +18,24 @@ class Utkonos_process(Process):
         partner_name = 'Утконос'
         actions_data = []
         lock = threading.Lock()
-        page = helper.get_page_use_webdriver('https://www.utkonos.ru/action', True, hidden=True)
-        divs = page.find_all("utk-list-item", class_='list-group__item')
+        page = helper.get_page_use_request('https://www.utkonos.ru/action')
+        divs = page.find_all("utk-action-list-item")
         self.queue.put(f'set {len(divs)}')
         for div in divs:
-            name = div.find('div', class_='template__content-text').text.strip()
+            try:
+                name = div.find('div', class_='template__content-text').text.strip()
+            except AttributeError as exc:
+                self.queue.put(f'{exc}')
+                print('')
+                continue
             code = 'Не требуется'
             desc = ''
             url = 'https://www.utkonos.ru' + div.a.get('href')
-            incoming_date = div.find('div', class_='template__content-status').text.strip()
-            if incoming_date != "":
+            try:
+                incoming_date = div.find('div', class_='template__content-status').text.strip()
+            except:
+                incoming_date = ''
+            if incoming_date != '':
                 if "остал" in incoming_date.lower():
                     days = re.search(r'(\d+)', incoming_date.lower()).group(1)
                     start = helper.DATA_NOW
