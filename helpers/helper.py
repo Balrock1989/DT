@@ -107,7 +107,6 @@ def get_page_use_request(url):
     s.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
     request = s.get(url)
-    request.encoding = 'utf-8'
     return BeautifulSoup(request.text, 'lxml')
 
 

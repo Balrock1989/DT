@@ -27,7 +27,7 @@ class Bethoven_process(Process):
                 url = str(div.get('href'))
                 url = div.get('href') if 'www' in url else base_url + div.get('href')
             except TypeError:
-                print("Отсутствуют данные по акции")
+                self.queue.put('Отсутствуют данные по акции')
                 self.queue.put('progress')
                 continue
             name = div.find('img').get('title')

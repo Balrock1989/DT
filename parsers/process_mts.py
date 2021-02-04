@@ -22,7 +22,7 @@ class Mts_process(Process):
         actions_data = []
         base_url = 'https://shop.mts.ru'
         threads = []
-        for i in range(1, 4):
+        for i in range(1, 3):
             main_url = f'https://shop.mts.ru/actions/{i}/'
             try:
                 page = helper.get_page_use_request(main_url)
