@@ -23,6 +23,7 @@ from parsers.process_rozetka import Rozetka_process
 from parsers.process_santehnika_tut import Santehnika_tut_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
+from parsers.process_tddomovoy import Domovoy_process
 from parsers.process_toy import Toy_process
 from parsers.process_utkonos import Utkonos_process
 from parsers.process_vseintrumenti import Vseinstrumenti_process
@@ -93,6 +94,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Interes_1c_process))
         if self.philips.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Philips_process))
+        if self.domovoy.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, Domovoy_process))
         [process.start() for process in processes]
         self.close()
 
