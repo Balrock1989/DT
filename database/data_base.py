@@ -89,7 +89,7 @@ def show_actions():
 
 
 def actions_exists_in_db(partner, name, start_date, end_date):
-    """Если акции нет в базе то добавляем ее, если есть то пропускаем ее при надобности"""
+    """Если акции нет в базе то добавляем ее"""
     if check_actions_on_name(name) is None:
         add_to_database(partner, name, start_date, end_date)
         return False

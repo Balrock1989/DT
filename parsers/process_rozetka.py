@@ -29,20 +29,23 @@ class Rozetka_process(Process):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36',
             'Cookie': cookie
         })
+        s.cookies.set('slang', 'ru')
         for i in range(1, 21):
             main_url = f'https://rozetka.com.ua/news-articles-promotions/promotions/page={i}/'
             request = s.get(main_url)
             page = BeautifulSoup(request.text, 'lxml')
-            divs = page.find_all('div', class_='promo-cat-i')
+            divs = page.find_all('li', class_='promo-grid__cell')
             for div in divs:
                 if div.get('name') == 'more_promotions':
                     continue
                 url = div.find('a').get('href')
-                name = div.find('div', class_='promo-cat-i-summary').text.strip()
+                name = div.find('img', class_='promo-tile__picture').get('title').strip()
                 try:
-                    date = div.find('time', class_='promo-cat-i-date').text.strip()
+                    date = div.find('time', class_='promo-tile__period').text.strip()
                     date = re.sub(r'\xa0', ' ', date).strip()
-                    start, end = helper.search_data_in_text(date)
+                    date = date.split('—')
+                    start =helper.get_one_date(date[0])
+                    end = helper.get_one_date(date[1])
                 except:
                     start, end = helper.get_date_now_to_end_month()
                 code = "Не требуется"
