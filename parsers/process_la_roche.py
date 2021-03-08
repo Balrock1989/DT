@@ -20,7 +20,7 @@ class La_roche_process(Process):
         main_url = 'https://www.laroche-posay.ru/special-offers/'
         page = helper.get_page_use_request(main_url)
         divs1 = page.findAll('div', class_='special-offers-banner')
-        divs1 = divs1
+        divs1 = [div for div in divs1 if div.get('style') is None]
         self.queue.put(f'set {len(divs1)}')
         for div in divs1:
             url = main_url
@@ -49,7 +49,8 @@ class La_roche_process(Process):
             actions_data.append(action)
             self.queue.put('progress')
 
-        divs2 = page.findAll('div', class_='special-offers-promo__content')
+        divs2 = page.findAll('div', class_='special-offers-promo')
+        divs2 = [div for div in divs2 if div.get('style') is None]
         self.queue.put(f'set {len(divs2)}')
         for div in divs2:
             url = base_url + div.find('a').get('href')
