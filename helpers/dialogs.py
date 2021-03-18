@@ -11,11 +11,12 @@ from parsers.process_eldorado import Eldorado_process
 from parsers.process_holodilnik import Holodilnik_process
 from parsers.process_ildebote import Ildebote_process
 from parsers.process_kolesadarom import Kolesadarom_process
+from parsers.process_kotofoto import KotofotoProcess
 from parsers.process_kupivip import Kupivip_process
 from parsers.process_la_roche import La_roche_process
 from parsers.process_labirint import Labirint_process
 from parsers.process_maxi_pro import Maxi_pro_process
-from parsers.process_mts import Mts_process
+from parsers.process_mts import MtsProcess
 from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_respublica import Respublica_process
 from parsers.process_rivegauche import Rivegauche_process
@@ -71,7 +72,7 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         if self.pharmacosmetica.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Pharmacosmetica_process))
         if self.mts.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Mts_process))
+            processes.append(StartNewProcess(self.mainwindow, MtsProcess))
         if self.rivegauche.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Rivegauche_process))
         if self.la_roche.isChecked():
@@ -96,6 +97,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Philips_process))
         if self.domovoy.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Domovoy_process))
+        if self.kotofoto.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, KotofotoProcess))
         [process.start() for process in processes]
         self.close()
 

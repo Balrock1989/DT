@@ -6,7 +6,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Mts_process(Process):
+class MtsProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
@@ -30,14 +30,14 @@ class Mts_process(Process):
                 continue
             divs = page.find_all('div', class_='news-block')
             for div in divs:
-                threads.append(Holodilnik_thread(actions_data, lock, self.queue, base_url + div.find('a').get('href'),
-                                                 self.ignore))
+                threads.append(MtsThread(actions_data, lock, self.queue, base_url + div.find('a').get('href'),
+                                         self.ignore))
         self.queue.put(f'set {len(threads)}')
         helper.start_join_threads(threads)
         helper.filling_queue(self.queue, actions_data, partner_name)
 
 
-class Holodilnik_thread(Thread):
+class MtsThread(Thread):
 
     def __init__(self, actions_data, lock, queue, url, ignore):
         super().__init__()

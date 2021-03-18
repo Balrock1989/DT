@@ -195,6 +195,13 @@ class Ui_Dialog(object):
         self.label_domovoy.setGeometry(QtCore.QRect(390, 105, 90, 30))
         self.label_domovoy.setObjectName('label_domovoy')
 
+        self.kotofoto = QtWidgets.QCheckBox(Dialog)
+        self.kotofoto.setGeometry(QtCore.QRect(370, 130, 20, 20))
+        self.kotofoto.setObjectName('kotofoto')
+        self.label_kotofoto = QtWidgets.QLabel(Dialog)
+        self.label_kotofoto.setGeometry(QtCore.QRect(390, 125, 90, 30))
+        self.label_kotofoto.setObjectName('label_kotofoto')
+
         self.ok = QtWidgets.QPushButton(Dialog)
         self.ok.setGeometry(QtCore.QRect(300, 160, 90, 30))
         self.ok.setObjectName('ok')
@@ -244,4 +251,5 @@ class Ui_Dialog(object):
         self.label_interes_1c.setText(_translate('Dialog', '1С_Интерес'))
         self.label_philips.setText(_translate('Dialog', 'Philips'))
         self.label_domovoy.setText(_translate('Dialog', 'Домовой'))
+        self.label_kotofoto.setText(_translate('Dialog', 'Котофото'))
 

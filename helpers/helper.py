@@ -177,7 +177,7 @@ def one_date_return_two(incoming_date):
 
 
 def convert_text_date(incoming_date):
-    """ принимает текст с датами в формате '01.12 по 31.03' Возвращает 2 даты начала и окончания"""
+    """ принимает текст с датами в формате '01.12.21 по 31.03.21' Возвращает 2 даты начала и окончания"""
     date = re.findall(r'\d+\.\d+\.*\d*', incoming_date)
     start = get_one_date(date[0])
     end = get_one_date(date[1])
