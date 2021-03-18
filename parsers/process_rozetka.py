@@ -24,7 +24,8 @@ class Rozetka_process(Process):
         self.queue.put(f'set 20')
         s = requests.Session()
         cookie = s.get('https://rozetka.com.ua/news-articles-promotions/promotions/').request.headers.get(
-            'cookie').replace('slang=ua', 'slang=ru')
+            'cookie')
+        # .replace('slang=ua', 'slang=ru')
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36',
             'Cookie': cookie
@@ -44,7 +45,7 @@ class Rozetka_process(Process):
                     date = div.find('time', class_='promo-tile__period').text.strip()
                     date = re.sub(r'\xa0', ' ', date).strip()
                     date = date.split('—')
-                    start =helper.get_one_date(date[0])
+                    start = helper.get_one_date(date[0])
                     end = helper.get_one_date(date[1])
                 except:
                     start, end = helper.get_date_now_to_end_month()
@@ -57,7 +58,8 @@ class Rozetka_process(Process):
                 if not self.ignore:
                     if actions_exists_in_db(partner_name, name, start, end):
                         continue
-                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
+                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,
+                                                short_desc)
                 actions_data.append(action)
             self.queue.put('progress')
         helper.filling_queue(self.queue, actions_data, partner_name)
