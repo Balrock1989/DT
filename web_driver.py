@@ -64,7 +64,9 @@ class WebDriver:
         options.add_argument('--disable-extensions')
         options.add_argument('--disable-notifications')
         options.add_argument('--disable-gpu')
-        options.add_argument("--user-data-dir=selenium")
+        home_path = os.getenv('HOMEPATH')
+        selenium_path = os.path.join('C:\\', home_path, 'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Selenium')
+        options.add_argument(f"--user-data-dir={os.path.normpath(selenium_path)}")
         # options.add_argument("--user-data-dir=C:\\Users\\SMOKE\\AppData\\Local\\Google\\Chrome\\User Data")
         # options.add_argument("--profile-directory=Profile 5")
         self.driver = webdriver.Chrome(chrome_options=options)
@@ -78,6 +80,7 @@ class WebDriver:
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
         self.driver.get(auth.coupon_ad)
+
 
     @win32.show_window
     def add_banner(self):
