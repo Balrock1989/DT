@@ -36,10 +36,12 @@ class Utkonos_process(Process):
             except:
                 incoming_date = ''
             if incoming_date != '':
-                if "остал" in incoming_date.lower():
+                if 'остал' in incoming_date.lower():
                     days = re.search(r'(\d+)', incoming_date.lower()).group(1)
                     start = helper.DATA_NOW
                     end = helper.get_date_plus_days(int(days))
+                elif 'Акция' == incoming_date:
+                    start, end = helper.get_date_now_to_end_month()
                 else:
                     start, end = helper.get_do_period(incoming_date)
             else:
