@@ -338,7 +338,7 @@ def convert_list_to_date(my_list):
 
 def get_start_date_in_date(text, flag):
     """ Принимает текст, ищет даты в формате 20 февраля 2019 или 20 февраля, возвращает дату начала и конец месяца"""
-    start = re.search(r'(\d+\s\w+\s\d{4})', text).group(1).strip()
+    start = re.search(r'(\d+\s\w+(\s\d{4})?)', text).group(1).strip()
     start = get_one_date(start)
     end = get_date_end_month()
     if flag:
