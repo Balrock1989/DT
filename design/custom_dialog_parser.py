@@ -48,6 +48,13 @@ class Ui_Dialog(object):
         # self.label_akusherstvo.setGeometry(QtCore.QRect(30, 65, 90, 30))
         # self.label_akusherstvo.setObjectName('label_akusherstvo')
 
+        self.mixit = QtWidgets.QCheckBox(Dialog)
+        self.mixit.setGeometry(QtCore.QRect(10, 70, 20, 20))
+        self.mixit.setObjectName('mixit')
+        self.label_mixit = QtWidgets.QLabel(Dialog)
+        self.label_mixit.setGeometry(QtCore.QRect(30, 65, 90, 30))
+        self.label_mixit.setObjectName('label_mixit')
+
         self.utkonos = QtWidgets.QCheckBox(Dialog)
         self.utkonos.setGeometry(QtCore.QRect(10, 90, 20, 20))
         self.utkonos.setObjectName('utkonos')
@@ -242,7 +249,7 @@ class Ui_Dialog(object):
         # self.label_ildebote.setText(_translate('Dialog', 'Иль Дэ Ботэ'))
         self.label_thomas.setText(_translate('Dialog', 'Thomas-Munz'))
         self.label_braun.setText(_translate('Dialog', 'Braun'))
-        # self.label_akusherstvo.setText(_translate('Dialog', 'Акушерство'))
+        self.label_mixit.setText(_translate('Dialog', 'Mixit'))
         self.label_utkonos.setText(_translate('Dialog', 'Утконос'))
         self.label_vseinstrumenti.setText(_translate('Dialog', 'Все инструменты'))
         # self.label_butic.setText(_translate('Dialog', 'Бутик'))

@@ -78,6 +78,7 @@ def get_page_use_webdriver(url, scroll=False, quit=True, hidden=False):
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--headless")
+        ##TODO Добавить логгер на вывод в интерфейс, и сообщать о том что нужно обновить драйвер и при открытии браузера тоже
         driver = webdriver.Chrome(chrome_options=chrome_options)
     else:
         driver = webdriver.Chrome()
@@ -230,20 +231,8 @@ def get_one_date(text):
 def get_date_plus_days(count):
     """ Прибавляет к текущей дате count дней"""
     date_now = datetime.strptime(DATA_NOW, '%d.%m.%Y')
-    day_on_month = monthrange(year=int(date_now.year), month=int(date_now.month))[1]
-    if date_now.day + count > day_on_month:
-        count = abs(day_on_month - (date_now.day + count))
-        if date_now.month != 12:
-            day_on_next_month = monthrange(year=int(date_now.year), month=int(int(date_now.month + 1)))
-            if count > day_on_next_month[1]:
-                count = day_on_next_month[1]
-            date = datetime(day=int(count), month=int(date_now.month + 1), year=int(date_now.year))
-        else:
-            date = datetime(day=int(count), month=1, year=int(date_now.year + 1))
-    else:
-        date = datetime(day=int(date_now.day + count), month=int(date_now.month), year=int(date_now.year))
+    date = date_now + timedelta(days=count)
     return date.strftime('%d.%m.%Y')
-
 
 def get_date_now_to_end_month():
     """Возвращает start с текущего дня и end  конец текущего месяца"""

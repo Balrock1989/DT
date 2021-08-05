@@ -44,14 +44,13 @@ class MyQueue(QThread):
                 if 'set' in income_data:
                     value = income_data.split(' ')
                     self.mainwindow.change_progress_signal.emit(int(value[1]))
-                    continue
-                if 'progress' in income_data:
+                elif 'progress' in income_data:
                     self.change_progress_bar()
-                    continue
-                if 'clear' in income_data:
+                elif 'clear' in income_data:
                     self.mainwindow.reset_progress_signal.emit()
-                    continue
-                if income_data:
+                elif 'log' in income_data:
+                    self.mainwindow.log.info(income_data[4:])
+                elif income_data:
                     self.mainwindow.chat_print_signal.emit(income_data)
             else:
                 pass
