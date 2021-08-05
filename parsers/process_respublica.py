@@ -1,11 +1,10 @@
 import re
 import threading
-from pprint import pprint
-
-import requests
-from bs4 import BeautifulSoup
-from threading import Thread
 from multiprocessing import Process
+from threading import Thread
+
+from bs4 import BeautifulSoup
+
 import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
@@ -54,7 +53,7 @@ class Respulica_thread(Thread):
         partner_name = 'Республика'
         page = helper.get_page_use_request(self.link)
         common_block = page.findAll('div')[14]
-        test = re.sub(r'(?s)<script>.*?</script>', '',  str(common_block))
+        test = re.sub(r'(?s)<script>.*?</script>', '', str(common_block))
         page2 = BeautifulSoup(test, 'lxml')
         name = page2.find('div', class_='rd-promo-show_col-right').h1.text.strip()
         short_desc = page2.find('div', class_='rd-promo-show_title').text.strip()
@@ -79,4 +78,3 @@ class Respulica_thread(Thread):
         with self.lock:
             self.actions_data.append(action)
             self.queue.put('progress')
-

@@ -34,6 +34,13 @@ class Ui_Dialog(object):
         # self.label_kupivip.setGeometry(QtCore.QRect(30, 45, 90, 30))
         # self.label_kupivip.setObjectName('label_kupivip')
 
+        self.braun = QtWidgets.QCheckBox(Dialog)
+        self.braun.setGeometry(QtCore.QRect(10, 50, 20, 20))
+        self.braun.setObjectName('braun')
+        self.label_braun = QtWidgets.QLabel(Dialog)
+        self.label_braun.setGeometry(QtCore.QRect(30, 45, 90, 30))
+        self.label_braun.setObjectName('label_braun')
+
         # self.akusherstvo = QtWidgets.QCheckBox(Dialog)
         # self.akusherstvo.setGeometry(QtCore.QRect(10, 70, 20, 20))
         # self.akusherstvo.setObjectName('akusherstvo')
@@ -234,7 +241,7 @@ class Ui_Dialog(object):
         self.label_sephora.setText(_translate('Dialog', 'Sephora'))
         # self.label_ildebote.setText(_translate('Dialog', 'Иль Дэ Ботэ'))
         self.label_thomas.setText(_translate('Dialog', 'Thomas-Munz'))
-        # self.label_kupivip.setText(_translate('Dialog', 'КупиВип'))
+        self.label_braun.setText(_translate('Dialog', 'Braun'))
         # self.label_akusherstvo.setText(_translate('Dialog', 'Акушерство'))
         self.label_utkonos.setText(_translate('Dialog', 'Утконос'))
         self.label_vseinstrumenti.setText(_translate('Dialog', 'Все инструменты'))
