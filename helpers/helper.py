@@ -2,19 +2,20 @@ import csv
 import os
 import re
 import threading
-from calendar import monthrange
-from random import randint
-from datetime import datetime, timedelta
-from time import sleep
 import time
-from bs4 import BeautifulSoup
-from selenium import webdriver
+from calendar import monthrange
+from datetime import datetime, timedelta
+from random import randint
+from time import sleep
 
 import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 
 from helpers import win32
+
 ##TODO создать классы для различных хелперов. даты /веб
 ## В вебе сделать драйвер и юзать его для функций
 """Даты для преобразования 02 февраля в 02.02 и тд."""
@@ -39,6 +40,7 @@ def time_track(func):
         return result
 
     return surrogate
+
 
 def exception_hook(exctype, value, tb):
     """Переопределяем вывод ошибок"""
@@ -234,6 +236,7 @@ def get_date_plus_days(count):
     date = date_now + timedelta(days=count)
     return date.strftime('%d.%m.%Y')
 
+
 def get_date_now_to_end_month():
     """Возвращает start с текущего дня и end  конец текущего месяца"""
     date_start = DATA_NOW
@@ -295,6 +298,7 @@ def get_range_date(text):
                 data = text.split('-')
     return data
 
+
 def get_do_period(text):
     """ Принимает текст в формате 'До 1 декабря', возвращает дату начала - сегодня, дату окончания 01.12.2020"""
     start = datetime.now()
@@ -348,6 +352,7 @@ def search_data_in_text(text):
         end = get_one_date(income_data[1])
     return start, end
 
+
 def search_end_data_in_text(text):
     """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и вовзращает их как старт и конец """
     start = DATA_NOW
@@ -358,6 +363,7 @@ def search_end_data_in_text(text):
         income_data = re.findall(r'(\d+.\d+)', text)
         end = get_one_date(income_data[0])
     return start, end
+
 
 def search_data_in_text_without_year(text):
     """ Принимает текст, ищет 2 даты в формате 20.12 или в формате 20 декабря по 25 декабря, добавляет текущий год и вовзращает их как старт и конец """
@@ -409,6 +415,19 @@ def generate_action(partner_name, action_name, date_start, date_end, description
             'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}
 
 
+def generate_action_new(action):
+    """Сборка акции для дальнейшей записи в CSV"""
+    return {'Имя партнера': action.partner_name,
+            'Название акции': action.name,
+            'Дата начала': action.start,
+            'Дата окончания': action.end,
+            'Условия акции': action.desc,
+            'Купон': action.code,
+            'URL': action.url,
+            'Тип купона': action.action_type,
+            'Короткое описание': action.short_desc}
+
+
 def check_digit(text):
     """Принимает текст, ищет в нем все цифры и по одному слову слева и справа. Возвращает цифру по шаблону"""
     """ Возможные комбинации Скидка 1000 ₽, Скидка 1000₽, Скидка 1 000 руб, Скидка 1000 руб, Скидка 1000руб"""
@@ -439,6 +458,7 @@ def find_promo_code(text):
         return 'Не требуется'
     return list[0] if list else 'Не требуется'
 
+
 def check_exists_by_css(driver, css):
     elem = None
     try:
@@ -446,4 +466,3 @@ def check_exists_by_css(driver, css):
     except NoSuchElementException:
         return False
     return elem
-

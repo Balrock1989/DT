@@ -1,4 +1,3 @@
-import re
 from multiprocessing import Process
 
 import helpers.helper as helper
