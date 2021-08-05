@@ -27,7 +27,7 @@ class Mixit_process(Process):
             if div.select_one(self.link_selector) is None:
                 continue
             url = url_base + div.select_one(self.link_selector).get('href').strip()
-            name = div.select_one('.Media-picture').text.strip()
+            name = div.select_one('.Media-picture').get('alt').strip()
             start, end = helper.get_date_now_to_end_month()
             try:
                 date = div.select_one('.SpecialOfferPreview-expireCaption').text.strip()
