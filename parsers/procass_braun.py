@@ -19,6 +19,7 @@ class Braun_process(Process):
     def run(self):
         partner_name = 'Braun'
         actions_data = []
+        base_url = 'https://braun-russia.ru'
         page = helper.get_page_use_request('https://braun-russia.ru/actions')
         divs = page.select('.bm2-cat-item')
         self.queue.put(f'set {len(divs)}')
@@ -26,6 +27,8 @@ class Braun_process(Process):
             if div.select_one(self.link_selector) is None:
                 continue
             url = div.select_one(self.link_selector).get('href').strip()
+            if 'http' not in url:
+                url = base_url + url
             name = div.select_one(self.link_selector).get('title').strip()
             try:
                 date = div.select_one('.daysleft').text.strip()
