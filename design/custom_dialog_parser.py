@@ -76,6 +76,13 @@ class Ui_Dialog(object):
         # self.label_butic.setGeometry(QtCore.QRect(30, 125, 90, 30))
         # self.label_butic.setObjectName('label_butic')
 
+        self.miele_shop = QtWidgets.QCheckBox(Dialog)
+        self.miele_shop.setGeometry(QtCore.QRect(10, 130, 20, 20))
+        self.miele_shop.setObjectName('miele_shop')
+        self.label_miele_shop = QtWidgets.QLabel(Dialog)
+        self.label_miele_shop.setGeometry(QtCore.QRect(30, 125, 90, 30))
+        self.label_miele_shop.setObjectName('label_miele_shop')
+
         self.book = QtWidgets.QCheckBox(Dialog)
         self.book.setGeometry(QtCore.QRect(130, 10, 20, 20))
         self.book.setObjectName('book')
@@ -252,7 +259,7 @@ class Ui_Dialog(object):
         self.label_mixit.setText(_translate('Dialog', 'Mixit'))
         self.label_utkonos.setText(_translate('Dialog', 'Утконос'))
         self.label_vseinstrumenti.setText(_translate('Dialog', 'Все инструменты'))
-        # self.label_butic.setText(_translate('Dialog', 'Бутик'))
+        self.label_miele_shop.setText(_translate('Dialog', 'Miele_shop'))
         self.label_book.setText(_translate('Dialog', 'Book24'))
         self.label_holodilnik.setText(_translate('Dialog', 'Холодильник'))
         self.label_kolesadarom.setText(_translate('Dialog', 'Колеса даром'))

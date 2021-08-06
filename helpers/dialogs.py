@@ -3,9 +3,10 @@ from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from helpers.start_new_process import StartNewProcess
-from parsers.procass_braun import Braun_process
-from parsers.procass_mixit import Mixit_process
-from parsers.procass_philips import Philips_process
+from parsers.process_braun import Braun_process
+from parsers.process_miele_shop import MieleProcess
+from parsers.process_mixit import Mixit_process
+from parsers.process_philips import Philips_process
 from parsers.process_1c_interes import Interes_1c_process
 from parsers.process_bethoven import Bethoven_process
 from parsers.process_book import Book_process
@@ -52,8 +53,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, Utkonos_process))
         if self.vseinstrumenti.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Vseinstrumenti_process))
-        # if self.butic.isChecked():
-        #     processes.append(StartNewProcess(self.mainwindow, Butic_process))
+        if self.miele_shop.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, MieleProcess))
         if self.book.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Book_process))
         if self.holodilnik.isChecked():
