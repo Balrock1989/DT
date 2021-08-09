@@ -11,12 +11,12 @@ from PyQt5.QtWidgets import QFileDialog
 
 import web_driver
 from database.data_base import create_database, print_stat, delete_expired_actions
-from helpers.my_queue import MyQueue
+from helpers.MyQueue import MyQueue
 from design.custom_design import Ui_MainWindow
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from image_sizer import Resizer
-from helpers import global_hotkey, logger
+from helpers import GlobalHotKey, Logger
 import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
@@ -31,10 +31,10 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.dir_name = ''
-        self.log = logger.log
+        self.log = Logger.log
         self.web_thread = None
         self.sizer = None
-        self.ghk = global_hotkey.GlobalHotKey(self)
+        self.ghk = GlobalHotKey.GlobalHotKey(self)
         self.ghk.start()
         self.try_start_browser = 0
         self.browser = None
@@ -186,7 +186,7 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
 def main():
     # win32.close_all_chromedriver()
-    logger.configure_logging()
+    Logger.configure_logging()
     create_database()
     app = QtWidgets.QApplication(sys.argv)
     window = DT()

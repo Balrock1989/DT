@@ -14,7 +14,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 
-from helpers import win32
+from helpers import Win32
 
 ## TODO создать классы для различных хелперов. даты /веб В вебе сделать драйвер и юзать его для функций
 """Даты для преобразования 02 февраля в 02.02 и тд."""
@@ -84,7 +84,7 @@ def get_page_use_webdriver(url, scroll=False, quit=True, hidden=False):
         driver = webdriver.Chrome(chrome_options=chrome_options)
     else:
         driver = webdriver.Chrome()
-    win32.hide_all_chromedriver()
+    Win32.hide_all_chromedriver()
     driver.get(url)
     if scroll:
         scroll_script = \

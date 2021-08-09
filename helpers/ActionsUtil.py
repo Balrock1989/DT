@@ -10,7 +10,7 @@ from selenium import webdriver
 from selenium.common.exceptions import SessionNotCreatedException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 
-from helpers import win32
+from helpers import Win32
 from helpers.Paths import RESULT_PATH
 
 
@@ -56,7 +56,7 @@ class ActionsUtil:
                 self.queue.put('Необходимо обновить версию драйвера https://chromedriver.chromium.org/')
         else:
             driver = webdriver.Chrome()
-        win32.hide_all_chromedriver()
+        Win32.hide_all_chromedriver()
         driver.get(url)
         if scroll:
             scroll_script = \

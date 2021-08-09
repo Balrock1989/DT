@@ -21,7 +21,7 @@ import auth
 import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
-from helpers import win32
+from helpers import Win32
 
 
 class WebThread(QThread):
@@ -70,7 +70,7 @@ class WebDriver:
         # options.add_argument("--user-data-dir=C:\\Users\\SMOKE\\AppData\\Local\\Google\\Chrome\\User Data")
         # options.add_argument("--profile-directory=Profile 5")
         self.driver = webdriver.Chrome(chrome_options=options)
-        win32.hide_chrome_console()
+        Win32.hide_chrome_console()
         self.driver.get(auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
         self.driver.find_element_by_id('username').send_keys(auth.username_dt)
@@ -82,7 +82,7 @@ class WebDriver:
         self.driver.get(auth.coupon_ad)
 
 
-    @win32.show_window
+    @Win32.show_window
     def add_banner(self):
         """Загрузка баннеров на сервер"""
 
@@ -90,7 +90,7 @@ class WebDriver:
             for link in links:
                 if self.exit:
                     self.queue.put(f'Загрузка прервана пользователем')
-                    win32.show_process()
+                    Win32.show_process()
                     return
                 self.driver.get(link)
                 size = self.driver.find_element_by_css_selector('input[id*="geTitle"]').get_attribute('value')
@@ -126,7 +126,7 @@ class WebDriver:
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[href*="_____"]')))
         except TimeoutException:
             self.queue.put('Нужно зайти на страницу с баннерами')
-            win32.show_process()
+            Win32.show_process()
             return
         links = list(filter(lambda x: len(x.get_attribute('href')) > 150, links))
         links = set(map(lambda x: x.get_attribute('href'), links))
@@ -143,7 +143,7 @@ class WebDriver:
         thread.start()
         thread.join()
 
-    @win32.show_window
+    @Win32.show_window
     def parser(self):
         """Сбор и форамтирование информации об акциях"""
         self.driver.switch_to_window(self.dt_window)
@@ -203,7 +203,7 @@ class WebDriver:
         else:
             self.queue.put('Нужно зайти на страницу с акциями')
 
-    @win32.show_window
+    @Win32.show_window
     def add_actions(self):
         """Добавление акций на основе полученных данных"""
         def add():
@@ -217,7 +217,7 @@ class WebDriver:
                     url = self.driver.current_url
                     if self.exit:
                         self.queue.put('Процесс был прерван пользователем.')
-                        win32.show_process()
+                        Win32.show_process()
                         return
                     try:
                         id = re.search(r'Id=(\d+)', url).group(1)
@@ -226,7 +226,7 @@ class WebDriver:
                     except (NoSuchFrameException, NoSuchElementException, AttributeError):
                         self.queue.put('*' * 60)
                         self.queue.put(f'Парсер  AD запущен не на той странице')
-                        win32.show_process()
+                        Win32.show_process()
                         return
                     # Акции которые есть в CSV но не подходят по партнеру записываем во временный файл, чтобы сохранить.
                     if self.gui.partner_name.count() > 1 and action['Имя партнера'] != self.gui.partner_name.currentText() and self.gui.partner_name.currentText() != 'actions.csv':
@@ -249,13 +249,13 @@ class WebDriver:
             self.queue.put(f'Акции успешно добавлены ({count} шт.)') if count else \
                 self.queue.put('Нет акций выбранного партнера')
             self.gui.reset_progress_signal.emit()
-            win32.show_process()
+            Win32.show_process()
 
         helper.generate_temp_csv()
         self.driver.switch_to_window(self.dt_window)
         threading.Thread(target=add, args=(), daemon=True).start()
 
-    @win32.show_window
+    @Win32.show_window
     def download_banners(self):
         """Загрузка баннеров с сайта"""
         for window in self.driver.window_handles:
@@ -268,7 +268,7 @@ class WebDriver:
             links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a[class="banner_view"]')))
         except TimeoutException:
             self.queue.put('Нужно зайти на страницу с баннерами')
-            win32.show_process()
+            Win32.show_process()
             return
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)

@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QDialog
 
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
-from helpers.start_new_process import StartNewProcess
+from helpers.StartNewProcess import StartNewProcess
 from parsers.process_braun import BraunProcess
 from parsers.process_miele_shop import MieleProcess
 from parsers.process_mixit import MixitProcess
