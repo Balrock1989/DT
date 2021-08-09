@@ -4,7 +4,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Toy_process(Process):
+class ToyProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
@@ -15,7 +15,6 @@ class Toy_process(Process):
         return "Toy"
 
     def run(self):
-        partner_name = 'Toy'
         actions_data = []
         base_url = 'https://www.toy.ru'
         self.queue.put(f'set 10')
@@ -39,9 +38,9 @@ class Toy_process(Process):
                 if helper.promotion_is_outdated(end):
                     continue
                 if not self.ignore:
-                    if actions_exists_in_db(partner_name, name, start, end):
+                    if actions_exists_in_db(str(self), name, start, end):
                         continue
-                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
+                action = helper.generate_action(str(self), name, start, end, desc, code, url, action_type,short_desc)
                 actions_data.append(action)
             self.queue.put('progress')
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        helper.filling_queue(self.queue, actions_data, str(self))

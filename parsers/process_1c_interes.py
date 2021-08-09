@@ -20,7 +20,6 @@ class Interes_1c_process(Process):
         return "1С_Интерес"
 
     def run(self):
-        partner_name = '1С_Интерес'
         actions_data = []
         page, driver = self.utils.ACTIONS_UTIL.get_page_use_webdriver('https://www.1c-interes.ru/special_actions/',
                                                                       quit=False)
@@ -34,7 +33,7 @@ class Interes_1c_process(Process):
         begin_url = 'https://www.1c-interes.ru'
         self.queue.put(f'set {len(divs)}')
         for div in divs:
-            action = Action(partner_name)
+            action = Action(str(self))
             action.url = begin_url + div.a.get('href').strip()
             action.name = div.h2.text.strip()
             try:
@@ -56,4 +55,4 @@ class Interes_1c_process(Process):
                     continue
             actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
             self.queue.put('progress')
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

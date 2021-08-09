@@ -4,7 +4,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Pharmacosmetica_process(Process):
+class PharmacosmeticaProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()

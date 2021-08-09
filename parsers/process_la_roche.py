@@ -3,13 +3,13 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class La_roche_process(Process):
+class LaRocheProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
-
+## TODO посмотреть как записывается в таблицу
     def __str__(self):
         return "La Roche posay"
 

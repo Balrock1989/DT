@@ -9,7 +9,7 @@ from models.action import Action
 from database.data_base import actions_exists_in_db
 
 
-class Kolesadarom_process(Process):
+class KolesadaromProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()

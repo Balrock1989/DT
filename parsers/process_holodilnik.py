@@ -5,7 +5,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Holodilnik_process(Process):
+class HolodilnikProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()

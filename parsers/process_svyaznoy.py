@@ -8,7 +8,7 @@ from helpers.Utils import Utils
 from models.action import Action
 
 
-class Svyaznoy_process(Process):
+class SvyaznoyProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()

@@ -5,7 +5,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Philips_process(Process):
+class PhilipsProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()

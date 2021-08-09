@@ -4,7 +4,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Santehnika_tut_process(Process):
+class SantehnikaTutProcess(Process):
     def __init__(self, queue, ignore):
         super().__init__()
         self.queue = queue.queue

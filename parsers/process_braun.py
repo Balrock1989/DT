@@ -1,7 +1,7 @@
 import re
 from multiprocessing import Process
 
-from database.data_base import actions_exists_in_db
+from database.data_base import actions_exists_in_db_new
 from helpers.Utils import Utils
 from models.action import Action
 
@@ -19,7 +19,6 @@ class BraunProcess(Process):
         return "Braun"
 
     def run(self):
-        partner_name = 'Braun'
         actions_data = []
         base_url = 'https://braun-russia.ru'
         page = self.utils.ACTIONS_UTIL.get_page_use_request('https://braun-russia.ru/actions')
@@ -28,7 +27,7 @@ class BraunProcess(Process):
         for div in divs:
             if div.select_one(self.link_selector) is None:
                 continue
-            action = Action(partner_name)
+            action = Action(str(self))
             action.url = div.select_one(self.link_selector).get('href').strip()
             if 'http' not in action.url:
                 action.url = base_url + action.url
@@ -54,10 +53,10 @@ class BraunProcess(Process):
                 self.queue.put('progress')
                 continue
             if not self.ignore:
-                if actions_exists_in_db(action):
+                if actions_exists_in_db_new(action):
                     self.queue.put('progress')
                     continue
             action = self.utils.ACTIONS_UTIL.generate_action_new(action)
             actions_data.append(action)
             self.queue.put('progress')
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

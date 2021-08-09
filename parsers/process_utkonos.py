@@ -5,7 +5,7 @@ import helpers.helper as helper
 from database.data_base import *
 
 
-class Utkonos_process(Process):
+class UtkonosProcess(Process):
     def __init__(self, queue, ignore):
         super().__init__()
         self.queue = queue.queue

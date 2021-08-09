@@ -18,7 +18,6 @@ class ThomasProcess(Process):
         return "Thomas"
 
     def run(self):
-        partner_name = 'Thomas'
         actions_data = []
         base_url = 'https://thomas-muenz.ru'
         self.queue.put(f'set 2')
@@ -27,7 +26,7 @@ class ThomasProcess(Process):
             page = self.utils.ACTIONS_UTIL.get_page_use_request(main_url)
             divs = page.select('.promo-list__item')
             for div in divs:
-                action = Action(partner_name)
+                action = Action(str(self))
                 action.url = base_url + div.select_one('h2 a.link').get('href')
                 action.name = div.select_one('h2 a.link').text.strip()
                 date = div.select_one('.promo-alt-card__footer').text.strip()
@@ -49,4 +48,4 @@ class ThomasProcess(Process):
                         continue
                 actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
             self.queue.put('progress')
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

@@ -19,7 +19,6 @@ class MixitProcess(Process):
         return "Mixit"
 
     def run(self):
-        partner_name = 'Mixit'
         actions_data = []
         url_base = 'https://mixit.ru'
         page = self.utils.ACTIONS_UTIL.get_page_use_webdriver('https://mixit.ru/special-offers', hidden=True)
@@ -28,7 +27,7 @@ class MixitProcess(Process):
         for div in divs:
             if div.select_one(self.link_selector) is None:
                 continue
-            action = Action(partner_name)
+            action = Action(str(self))
             action.url = url_base + div.select_one(self.link_selector).get('href').strip()
             action.name = div.select_one('.Media-picture').get('alt').strip()
             action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
@@ -61,4 +60,4 @@ class MixitProcess(Process):
                     continue
             actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
             self.queue.put('progress')
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

@@ -8,7 +8,7 @@ import helpers.helper as helper
 from database.data_base import actions_exists_in_db
 
 
-class Sephora_process(Process):
+class SephoraProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
