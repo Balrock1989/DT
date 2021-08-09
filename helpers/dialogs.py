@@ -19,7 +19,7 @@ from parsers.process_maxi_pro import Maxi_pro_process
 from parsers.process_mts import MtsProcess
 from parsers.process_pharmacosmetica import Pharmacosmetica_process
 from parsers.process_rivegauche import RivegaucheProcess
-from parsers.process_rozetka import Rozetka_process
+from parsers.process_rozetka import RozetkaProcess
 from parsers.process_santehnika_tut import Santehnika_tut_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
@@ -76,7 +76,7 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         if self.la_roche.isChecked():
             processes.append(StartNewProcess(self.mainwindow, La_roche_process))
         if self.rozetka.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Rozetka_process))
+            processes.append(StartNewProcess(self.mainwindow, RozetkaProcess))
         # if self.eldorado.isChecked():
         #     processes.append(StartNewProcess(self.mainwindow, Eldorado_process))
         if self.bethoven.isChecked():

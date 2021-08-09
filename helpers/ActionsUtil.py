@@ -19,7 +19,6 @@ class ActionsUtil:
     def __init__(self, queue):
         self.queue = queue
 
-    @DeprecationWarning
     # TODO Удалить
     def check_action_type(self, code, name, desc):
         if 'требуется' not in code:

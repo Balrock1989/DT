@@ -87,7 +87,7 @@ def show_actions():
         row[5] = row[5].strftime('%d.%m.%Y')
         print(*row)
 
-@DeprecationWarning
+
 #TODO Удалить
 def actions_exists_in_db(partner, name, start_date, end_date):
     """Если акции нет в базе то добавляем ее"""
