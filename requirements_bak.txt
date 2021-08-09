@@ -35,7 +35,7 @@ PyScreeze==0.1.25
 pytest==5.3.2
 PyTweening==1.0.3
 PyVirtualDisplay==0.2.5
-pywin32==227
+pywin32==301
 pywin32-ctypes==0.2.0
 requests==2.22.0
 selenium==3.141.0
