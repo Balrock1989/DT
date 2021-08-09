@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QDialog
 from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
 from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from helpers.start_new_process import StartNewProcess
-from parsers.process_braun import Braun_process
+from parsers.process_braun import BraunProcess
 from parsers.process_miele_shop import MieleProcess
 from parsers.process_mixit import MixitProcess
 from parsers.process_philips import Philips_process
@@ -46,7 +46,7 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         if self.thomas.isChecked():
             processes.append(StartNewProcess(self.mainwindow, ThomasProcess))
         if self.braun.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Braun_process))
+            processes.append(StartNewProcess(self.mainwindow, BraunProcess))
         if self.mixit.isChecked():
             processes.append(StartNewProcess(self.mainwindow, MixitProcess))
         if self.utkonos.isChecked():

@@ -7,7 +7,7 @@ from time import sleep
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import SessionNotCreatedException
+from selenium.common.exceptions import SessionNotCreatedException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 
 from helpers import win32
@@ -19,6 +19,8 @@ class ActionsUtil:
     def __init__(self, queue):
         self.queue = queue
 
+    @DeprecationWarning
+    # TODO Удалить
     def check_action_type(self, code, name, desc):
         if 'требуется' not in code:
             action_type = 'купон'
@@ -165,3 +167,10 @@ class ActionsUtil:
         """Принимает текст, по слову промокод ищет код стоящий после слова"""
         promo = re.findall(r'\bпромокод[а-я]*?\b\s\"?\«?\'?(\w+)', text)
         return promo[0] if promo else 'Не требуется'
+
+    def check_exists_by_css(self, driver, css):
+        try:
+            elem = driver.find_element_by_css_selector(css)
+        except NoSuchElementException:
+            return False
+        return elem
