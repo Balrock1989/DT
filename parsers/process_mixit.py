@@ -1,17 +1,19 @@
 import re
 from multiprocessing import Process
 
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+from database.data_base import actions_exists_in_db_new
+from helpers.Utils import Utils
+from models.action import Action
 
 
-class Mixit_process(Process):
+class MixitProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
         self.link_selector = '.SpecialOfferPreview-media a'
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Mixit"
@@ -20,43 +22,43 @@ class Mixit_process(Process):
         partner_name = 'Mixit'
         actions_data = []
         url_base = 'https://mixit.ru'
-        page = helper.get_page_use_webdriver('https://mixit.ru/special-offers', hidden=True)
+        page = self.utils.ACTIONS_UTIL.get_page_use_webdriver('https://mixit.ru/special-offers', hidden=True)
         divs = page.select('.SpecialOfferList-item')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
             if div.select_one(self.link_selector) is None:
                 continue
-            url = url_base + div.select_one(self.link_selector).get('href').strip()
-            name = div.select_one('.Media-picture').get('alt').strip()
-            start, end = helper.get_date_now_to_end_month()
+            action = Action(partner_name)
+            action.url = url_base + div.select_one(self.link_selector).get('href').strip()
+            action.name = div.select_one('.Media-picture').get('alt').strip()
+            action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
             try:
                 date = div.select_one('.SpecialOfferPreview-expireCaption').text.strip()
                 if 'дне' in date:
                     day_end_action = re.search(r'(\d+)', date)
-                    end = helper.get_date_plus_days(int(day_end_action.group(1)))
+                    action.end = self.utils.DATE_UTIL.get_date_plus_days(int(day_end_action.group(1)))
                 elif 'месяц' in date:
                     month_end_action = re.search(r'(\d+)', date)
-                    end = helper.get_date_plus_days(int(month_end_action.group(1)) * 30)
+                    action.end = self.utils.DATE_UTIL.get_date_plus_days(int(month_end_action.group(1)) * 30)
             except AttributeError:
                 self.queue.put('log error when processing dates')
-            desc = div.select_one('.SpecialOfferPreview-description').text.strip()
-            if 'промокод' in name.lower():
+            action.desc = div.select_one('.SpecialOfferPreview-description').text.strip()
+            if 'промокод' in action.name.lower():
                 try:
-                    code = re.search(r'([A-Z0-9]+)', name).group(1)
+                    action.code = re.search(r'([A-Z0-9]+)', action.name).group(1)
                 except AttributeError:
-                    code = 'Не требуется'
+                    action.code = 'Не требуется'
             else:
-                code = 'Не требуется'
-            short_desc = ''
-            action_type = helper.check_action_type(code, name, desc)
-            if helper.promotion_is_outdated(end):
+                action.code = 'Не требуется'
+            action.short_desc = ''
+            action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+            if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                 self.queue.put('progress')
                 continue
             if not self.ignore:
-                if actions_exists_in_db(partner_name, name, start, end):
+                if actions_exists_in_db_new(action):
                     self.queue.put('progress')
                     continue
-            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
-            actions_data.append(action)
+            actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
             self.queue.put('progress')
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)

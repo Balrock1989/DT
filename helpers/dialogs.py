@@ -5,7 +5,7 @@ from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
 from helpers.start_new_process import StartNewProcess
 from parsers.process_braun import Braun_process
 from parsers.process_miele_shop import MieleProcess
-from parsers.process_mixit import Mixit_process
+from parsers.process_mixit import MixitProcess
 from parsers.process_philips import Philips_process
 from parsers.process_1c_interes import Interes_1c_process
 from parsers.process_bethoven import Bethoven_process
@@ -24,7 +24,7 @@ from parsers.process_santehnika_tut import Santehnika_tut_process
 from parsers.process_sephora import Sephora_process
 from parsers.process_svyaznoy import Svyaznoy_process
 from parsers.process_tddomovoy import Domovoy_process
-from parsers.process_thomas import Thomas_process
+from parsers.process_thomas import ThomasProcess
 from parsers.process_toy import Toy_process
 from parsers.process_utkonos import Utkonos_process
 from parsers.process_vseintrumenti import Vseinstrumenti_process
@@ -44,11 +44,11 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         if self.sephora.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Sephora_process))
         if self.thomas.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Thomas_process))
+            processes.append(StartNewProcess(self.mainwindow, ThomasProcess))
         if self.braun.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Braun_process))
         if self.mixit.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Mixit_process))
+            processes.append(StartNewProcess(self.mainwindow, MixitProcess))
         if self.utkonos.isChecked():
             processes.append(StartNewProcess(self.mainwindow, Utkonos_process))
         if self.vseinstrumenti.isChecked():

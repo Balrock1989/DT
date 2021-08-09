@@ -1,9 +1,9 @@
 import peewee
 from datetime import datetime, timedelta
 
-from helpers.helper import database_path
+from helpers.Paths import DATABASE_PATH
 
-database = peewee.SqliteDatabase(database_path, timeout=3, pragmas={'journal_mode': 'wal'})
+database = peewee.SqliteDatabase(DATABASE_PATH, timeout=3, pragmas={'journal_mode': 'wal'})
 
 
 class BaseTable(peewee.Model):
@@ -92,6 +92,15 @@ def actions_exists_in_db(partner, name, start_date, end_date):
     """Если акции нет в базе то добавляем ее"""
     if check_actions_on_name(name) is None:
         add_to_database(partner, name, start_date, end_date)
+        return False
+    else:
+        print('акция с таким названием есть в базе')
+        return True
+
+def actions_exists_in_db_new(action):
+    """Если акции нет в базе то добавляем ее"""
+    if check_actions_on_name(action.name) is None:
+        add_to_database(action.partner_name, action.name, action.start, action.end)
         return False
     else:
         print('акция с таким названием есть в базе')
