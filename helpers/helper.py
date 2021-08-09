@@ -16,8 +16,7 @@ from selenium.webdriver.chrome.options import Options
 
 from helpers import win32
 
-##TODO создать классы для различных хелперов. даты /веб
-## В вебе сделать драйвер и юзать его для функций
+## TODO создать классы для различных хелперов. даты /веб В вебе сделать драйвер и юзать его для функций
 """Даты для преобразования 02 февраля в 02.02 и тд."""
 MONTH_NAME = {"01": "янв", "02": "фев", "03": "мар", "04": "апр",
               "05": "мая", "06": "июн", "07": "июл", "08": "авг",
@@ -80,7 +79,8 @@ def get_page_use_webdriver(url, scroll=False, quit=True, hidden=False):
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--headless")
-        ##TODO Добавить логгер на вывод в интерфейс, и сообщать о том что нужно обновить драйвер и при открытии браузера тоже
+        # #TODO Добавить логгер на вывод в интерфейс, и сообщать о том что нужно обновить драйвер и при открытии
+        #  браузера тоже
         driver = webdriver.Chrome(chrome_options=chrome_options)
     else:
         driver = webdriver.Chrome()
@@ -88,13 +88,14 @@ def get_page_use_webdriver(url, scroll=False, quit=True, hidden=False):
     driver.get(url)
     if scroll:
         scroll_script = \
-            "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
-        lenOfPage = driver.execute_script(scroll_script)
+            "window.scrollTo(0, document.body.scrollHeight);var len_of_page=document.body.scrollHeight;return " \
+            "len_of_page; "
+        len_of_page = driver.execute_script(scroll_script)
         while True:
-            lastCount = lenOfPage
+            last_count = len_of_page
             sleep(1)
-            lenOfPage = driver.execute_script(scroll_script)
-            if lastCount == lenOfPage:
+            len_of_page = driver.execute_script(scroll_script)
+            if last_count == len_of_page:
                 break
     page = BeautifulSoup(driver.page_source, 'lxml')
     if quit:
@@ -111,13 +112,6 @@ def get_page_use_request(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
     request = s.get(url)
     return BeautifulSoup(request.text, 'lxml')
-
-
-# def get_page_use_html_request(url, encoding='utf-8'):
-#     session = HTMLSession()
-#     r = session.get(url)
-#     r.html.render(encoding=encoding)
-#     return BeautifulSoup(r.html.html, 'lxml')
 
 
 def generate_csv():
@@ -191,11 +185,11 @@ def get_double_date(first, second):
     """ принимает 2 даты в формате 1 февраля 2019, возвращает 2 даты в формате 01.02.2019 03.02.2019 """
     try:
         first = get_one_date(first)
-    except Exception:
+    except AttributeError:
         first = DATA_NOW
     try:
         second = get_one_date(second)
-    except Exception:
+    except AttributeError:
         second = datetime.strptime(first, '%d.%m.%Y')
         day_on_month = monthrange(year=int(second.year), month=int(second.month))
         second = datetime(day=day_on_month[1], month=second.month, year=second.year).strftime('%d.%m.%Y')
@@ -207,13 +201,13 @@ def get_one_date(text):
     flag = False
     try:
         text = re.search(r'(\d+\s\w+\s?\d*)', text).group(1)
-    except Exception:
+    except AttributeError:
         text = re.search(r'(\d+.\w+.\d*)', text).group(1)
         text = text.replace('.', ' ')
     text = re.sub(r'\xa0', ' ', text).strip()
     try:
         day, month, year = text.split(' ')
-    except Exception:
+    except ValueError:
         day, month = text.split(" ")
         year = datetime.now().year
         flag = True
@@ -285,15 +279,15 @@ def get_range_date(text):
     try:
         text = re.search(r'(\d+\sпо\s\d+\s\w+\s\d*)', text).group(1).strip()
         data = text.split('по')
-    except Exception:
+    except AttributeError:
         try:
             text = re.search(r'(\d+\sи\s\d+\s\w+\s\d*)', text).group(1).strip()
             data = text.split('и')
-        except Exception:
+        except AttributeError:
             try:
                 text = re.search(r'(\d+\s\w+\s\d*.*по\s\d+\s\w+\s\d*)', text).group(1).strip()
                 data = text.split('по')
-            except Exception:
+            except AttributeError:
                 text = re.search(r'(\d+-\d+\s\w+\s\d*)', text).group(1).strip()
                 data = text.split('-')
     return data
@@ -341,7 +335,8 @@ def get_start_date_in_date(text, flag):
 
 
 def search_data_in_text(text):
-    """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и вовзращает их как старт и конец """
+    """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и
+    вовзращает их как старт и конец """
     try:
         income_data = re.findall(r'(\d+.\d+.\d+)', text)
         start = income_data[0]
@@ -354,7 +349,8 @@ def search_data_in_text(text):
 
 
 def search_end_data_in_text(text):
-    """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и вовзращает их как старт и конец """
+    """ Принимает текст, ищет 2 даты в формате 20.12.2020 или в формате 20 декабря 2020 по 25 декабря 2020 и
+    вовзращает их как старт и конец """
     start = DATA_NOW
     try:
         income_data = re.findall(r'(\d+.\d+.\d+)', text)
@@ -366,7 +362,8 @@ def search_end_data_in_text(text):
 
 
 def search_data_in_text_without_year(text):
-    """ Принимает текст, ищет 2 даты в формате 20.12 или в формате 20 декабря по 25 декабря, добавляет текущий год и вовзращает их как старт и конец """
+    """ Принимает текст, ищет 2 даты в формате 20.12 или в формате 20 декабря по 25 декабря, добавляет текущий год
+    и вовзращает их как старт и конец """
     income_data = re.findall(r'(\d+.\d+)', text)
     start = income_data[0] + '.' + str(datetime.now().year)
     end = income_data[1] + '.' + str(datetime.now().year)
@@ -394,8 +391,8 @@ def banner_downloader(links, queue):
 def downloader_run(link, queue):
     """Принимает ссылку на баннер http"//......jpg и скачивает ее, запускается из banner_downloader в потоках"""
     name = randint(1000000, 9999999)
-    format = re.search(r'(\w+)$', link).group(1)
-    name = str(name) + "." + format
+    file_format = re.search(r'(\w+)$', link).group(1)
+    name = str(name) + "." + file_format
     path = os.path.join(result_path, name)
     try:
         p = requests.get(link, timeout=5)
@@ -452,15 +449,11 @@ def check_digit(text):
 
 def find_promo_code(text):
     """Принимает текст, по слову промокод ищет код стоящий после слова"""
-    try:
-        list = re.findall(r'\bпромокод[а-я]*?\b\s\"?\«?\'?(\w+)', text)
-    except Exception:
-        return 'Не требуется'
-    return list[0] if list else 'Не требуется'
+    promo = re.findall(r'\bпромокод[а-я]*?\b\s\"?\«?\'?(\w+)', text)
+    return promo[0] if promo else 'Не требуется'
 
 
 def check_exists_by_css(driver, css):
-    elem = None
     try:
         elem = driver.find_element_by_css_selector(css)
     except NoSuchElementException:
