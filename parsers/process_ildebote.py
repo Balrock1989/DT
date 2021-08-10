@@ -1,47 +1,50 @@
-import threading
-from datetime import datetime, timedelta
-from multiprocessing import Process
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
-
-
-class IldeboteProcess(Process):
-    def __init__(self, queue, ignore):
-        super().__init__()
-        self.queue = queue.queue
-        self.ignore = ignore
-
-    def __str__(self):
-        return "ИльДэБотэ"
-
-    def run(self):
-        partner_name = 'ИльДэБотэ'
-        actions_data = []
-        lock = threading.Lock()
-        url = 'https://iledebeaute.ru/company/actions'
-        page = helper.get_page_use_request(url)
-        divs = page.find_all("div", class_='news_block')
-        self.queue.put(f'set {len(divs)}')
-        for div in divs:
-            name = div.h2.text
-            try:
-                start = helper.get_start_date_in_date(div.find("p", class_='date').text.strip(), False)
-            except Exception:
-                start = helper.DATA_NOW
-            end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
-            desc = div.find("p", class_='desc').text.strip()
-            code = 'Не требуется'
-            if helper.promotion_is_outdated(end):
-                self.queue.put('progress')
-                continue
-            short_desc = ''
-            action_type = helper.check_action_type(code, name, desc)
-            if not self.ignore:
-                with lock:
-                    if actions_exists_in_db(partner_name, name, start, end):
-                        self.queue.put('progress')
-                        continue
-            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
-            actions_data.append(action)
-            self.queue.put('progress')
-        helper.filling_queue(self.queue, actions_data, partner_name)
+# import threading
+# from datetime import datetime, timedelta
+# from multiprocessing import Process
+#
+# from database.data_base import actions_exists_in_db_new
+# from helpers.Utils import Utils
+# from models.action import Action
+#
+#
+# class IldeboteProcess(Process):
+#     def __init__(self, queue, ignore):
+#         super().__init__()
+#         self.queue = queue.queue
+#         self.ignore = ignore
+#         self.utils = Utils(self.queue)
+#
+#     def __str__(self):
+#         return "ИльДэБотэ"
+#
+#     def run(self):
+#         actions_data = []
+#         lock = threading.Lock()
+#         url = 'https://iledebeaute.ru/company/actions'
+#         page = self.utils.ACTIONS_UTIL.get_page_use_request(url)
+#         divs = page.find_all("div", class_='news_block')
+#         self.queue.put(f'set {len(divs)}')
+#         for div in divs:
+#             action = Action(str(self))
+#             action.name = div.h2.text
+#             try:
+#                 action.start = self.utils.DATE_UTIL.get_start_date_in_date(div.find("p", class_='date').text.strip(),
+#                                                                            False)
+#             except AttributeError:
+#                 action.start = self.utils.DATE_UTIL.DATA_NOW
+#             action.end = (datetime.now() + timedelta(days=3)).strftime('%d.%m.%Y')
+#             action.desc = div.find("p", class_='desc').text.strip()
+#             action.code = 'Не требуется'
+#             if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
+#                 self.queue.put('progress')
+#                 continue
+#             action.short_desc = ''
+#             action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+#             if not self.ignore:
+#                 with lock:
+#                     if actions_exists_in_db_new(action):
+#                         self.queue.put('progress')
+#                         continue
+#             actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
+#             self.queue.put('progress')
+#         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

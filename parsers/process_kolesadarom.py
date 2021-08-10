@@ -1,12 +1,14 @@
 import re
 import threading
+from multiprocessing import Process
+from threading import Thread
+
 import requests
 from bs4 import BeautifulSoup
-from threading import Thread
-from multiprocessing import Process
-import helpers.helper as helper
+
+from database.data_base import actions_exists_in_db_new
+from helpers.Utils import Utils
 from models.action import Action
-from database.data_base import actions_exists_in_db
 
 
 class KolesadaromProcess(Process):
@@ -15,42 +17,43 @@ class KolesadaromProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Колеса Даром"
 
     def run(self):
-        partner_name = 'Колеса Даром'
-
         actions_data = []
         lock = threading.Lock()
-        page = helper.get_page_use_webdriver('https://www.kolesa-darom.ru/actions/', hidden=True)
+        page = self.utils.ACTIONS_UTIL.get_page_use_webdriver('https://www.kolesa-darom.ru/actions/', hidden=True)
         divs = page.find_all("div", class_='tiles__item-inner')
         threads = []
         for div in divs:
-            action = Action('Колеса Даром')
+            action = Action(str(self))
             begin_url = 'https://www.kolesa-darom.ru'
             action.name = div.find('a', class_='tiles__link').text.strip()
             action.url = begin_url + div.find('a', class_='tiles__link').get('href')
             try:
                 period = div.find('div', class_='tiles__period-date').text.strip()
-                action.end = helper.get_one_date(period)
-            except Exception:
-                action.end = helper.get_date_half_year_ahead(helper.DATA_NOW)
-            threads.append(Kolesadarom_thread(actions_data, lock, self.queue, action, self.ignore))
+                action.end = self.utils.DATE_UTIL.get_one_date(period)
+            except AttributeError:
+                action.end = self.utils.DATE_UTIL.get_date_half_year_ahead(self.utils.DATE_UTIL.DATA_NOW)
+            threads.append(KolesadaromThread(actions_data, lock, self.queue, action, self.ignore, self.utils))
         self.queue.put(f'set {len(threads)}')
-        helper.start_join_threads(threads)
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.ACTIONS_UTIL.start_join_threads(threads)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))
 
-class Kolesadarom_thread(Thread):
 
-    def __init__(self, actions_data, lock, queue, action, ignore):
+class KolesadaromThread(Thread):
+
+    def __init__(self, actions_data, lock, queue, action, ignore, utils):
         super().__init__()
         self.actions_data = actions_data
         self.lock = lock
         self.queue = queue
         self.action = action
         self.ignore = ignore
+        self.utils = utils
 
     def run(self):
         s = requests.Session()
@@ -71,19 +74,18 @@ class Kolesadarom_thread(Thread):
         self.action.desc = re.sub(r'\s{2,}', ' ', self.action.desc).strip()
         self.action.desc = re.sub(r'\xa0', '\n', self.action.desc).strip()
         self.action.desc = re.sub(r'&nbsp;', ' ', self.action.desc).strip()
-        self.action.start = helper.DATA_NOW
+        self.action.start = self.utils.DATE_UTIL.DATA_NOW
         self.action.code = 'Не требуется'
-        if helper.promotion_is_outdated(self.action.end):
+        if self.utils.DATE_UTIL.promotion_is_outdated(self.action.end):
             self.queue.put('progress')
             return
         self.action.short_desc = ''
-        self.action.action_type = helper.check_action_type(self.action.code, self.action.name, self.action.desc)
+        self.action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(self.action)
         if not self.ignore:
             with self.lock:
-                if actions_exists_in_db(self.action.partner_name, self.action.name, self.action.start, self.action.end):
+                if actions_exists_in_db_new(self.action):
                     self.queue.put('progress')
                     return
-        action = helper.generate_action_new(self.action)
         with self.lock:
-            self.actions_data.append(action)
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(self.action))
             self.queue.put('progress')

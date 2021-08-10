@@ -13,12 +13,10 @@ class DateUtil:
     def one_date_return_two(self, incoming_date):
         """ принимает дату в формате 1 февраля 2019, возвращает 2 даты в формате 01.02.2019 и до конца месяца """
         day, month, year = incoming_date.split(" ")
-        for num, name in self.MONTH_NAME.items():
-            if name in month.lower():
-                month = num
-        date_start = datetime(day=int(day), month=int(month), year=int(year)).strftime('%d.%m.%Y')
-        day_on_month = monthrange(year=int(year), month=int(month))
-        end_data = datetime(day=day_on_month[1], month=int(month), year=int(year)).strftime('%d.%m.%Y')
+        month = self.convert_month_name(month)
+        date_start = datetime(day=int(day), month=month, year=int(year)).strftime('%d.%m.%Y')
+        day_on_month = monthrange(year=int(year), month=month)
+        end_data = datetime(day=day_on_month[1], month=month, year=int(year)).strftime('%d.%m.%Y')
         return date_start, end_data
 
     def convert_text_date(self, incoming_date):
@@ -57,16 +55,14 @@ class DateUtil:
             day, month = text.split(" ")
             year = datetime.now().year
             flag = True
-        for num, name in self.MONTH_NAME.items():
-            if name in month.lower():
-                month = num
+        month = self.convert_month_name(month)
         date = datetime(day=int(day), month=int(month), year=int(year))
         if flag:
             if (date - datetime.now()).days > 200:
                 if datetime.now().month > 6:
-                    date = datetime(day=int(day), month=int(month), year=int(year) + 1)
+                    date = datetime(day=int(day), month=month, year=int(year) + 1)
                 else:
-                    date = datetime(day=int(day), month=int(month), year=int(year) - 1)
+                    date = datetime(day=int(day), month=month, year=int(year) - 1)
         return date.strftime('%d.%m.%Y')
 
     def get_date_plus_days(self, count):
@@ -136,15 +132,12 @@ class DateUtil:
         result = re.search(r'(\d+)\s([а-яА-Я]+)\s?(\d{4})?', text)
         day = result.group(1).strip()
         month = result.group(2).strip().lower()
-        for num, name in self.MONTH_NAME.items():
-            if name in month:
-                month = int(num)
-                break
+        month = self.convert_month_name(month)
         year = result.group(3).strip() if result.lastindex > 2 else start.year
-        if start.month > 6 and month <= 6:
-            year = year + 1
         end = datetime(day=int(day), month=month, year=int(year)).strftime('%d.%m.%Y')
         return start.strftime('%d.%m.%Y'), end
+
+
 
     def convert_list_to_date(self, my_list):
         """принимает не отформатированный список [дата начала, дата окончания] [1, 20 февраля] [1 марта, 20 марта 2020]"""
@@ -200,3 +193,10 @@ class DateUtil:
         start = income_data[0] + '.' + str(datetime.now().year)
         end = income_data[1] + '.' + str(datetime.now().year)
         return start, end
+
+    def convert_month_name(self, month):
+        for num, name in self.MONTH_NAME.items():
+            if name in month.lower():
+                month = int(num)
+                break
+        return month
