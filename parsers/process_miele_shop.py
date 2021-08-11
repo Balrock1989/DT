@@ -31,8 +31,7 @@ class MieleProcess(Process):
         driver = self.utils.ACTIONS_UTIL.get_webdriver()
         for i in range(1, self.count_page + 1):
             main_url = f'https://www.miele-shop.ru/news/special/?PAGEN_1={i}'
-            driver.get(main_url)
-            page = BeautifulSoup(driver.page_source, 'lxml')
+            page = self.utils.ACTIONS_UTIL.get_page_with_driver(driver, main_url)
             divs = page.select('.preview-full__container')
             for div in divs:
                 action = Action(str(self))
@@ -62,8 +61,7 @@ class MieleThread(Thread):
         self.driver = driver
 
     def run(self):
-        self.driver.get(self.action.url)
-        page = BeautifulSoup(self.driver.page_source, 'lxml')
+        page = self.utils.ACTIONS_UTIL.get_page_with_driver(self.driver, self.action.url)
         try:
             self.action.start, self.action.end = self.utils.DATE_UTIL.convert_list_to_date(
                 self.utils.DATE_UTIL.get_range_date(page.select_one('.content').text.strip()))

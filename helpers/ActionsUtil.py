@@ -92,6 +92,12 @@ class ActionsUtil:
         Win32.hide_all_chromedriver()
         return driver
 
+    def get_page_with_driver(self, driver, main_url):
+        driver.get(main_url)
+        page = BeautifulSoup(driver.page_source, 'lxml')
+        return page
+
+
     def get_page_use_request(self, url):
         """Делает запрос на URL и возвращает BS объект страницы используя библиотеку request"""
         s = requests.Session()

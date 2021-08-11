@@ -2,8 +2,12 @@ import threading
 from multiprocessing import Process
 from threading import Thread
 
+from bs4 import BeautifulSoup
+
 import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+from database.data_base import actions_exists_in_db, actions_exists_in_db_new
+from helpers.Utils import Utils
+from models.action import Action
 
 
 class MtsProcess(Process):
@@ -12,62 +16,65 @@ class MtsProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "МТС"
 
     def run(self):
-        partner_name = 'МТС'
         lock = threading.Lock()
         actions_data = []
         base_url = 'https://shop.mts.ru'
         threads = []
+        driver = self.utils.ACTIONS_UTIL.get_webdriver(hidden=False)
         for i in range(1, 3):
             main_url = f'https://shop.mts.ru/actions/{i}/'
-            try:
-                page = helper.get_page_use_request(main_url)
-            except:
-                continue
+            page = self.utils.ACTIONS_UTIL.get_page_with_driver(driver, main_url)
             divs = page.find_all('div', class_='news-block')
             for div in divs:
                 threads.append(MtsThread(actions_data, lock, self.queue, base_url + div.find('a').get('href'),
-                                         self.ignore))
+                                         self.ignore, self.utils, driver))
         self.queue.put(f'set {len(threads)}')
-        helper.start_join_threads(threads)
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.ACTIONS_UTIL.start_join_threads(threads)
+        driver.quit()
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))
 
 
 class MtsThread(Thread):
 
-    def __init__(self, actions_data, lock, queue, url, ignore):
+    def __str__(self):
+        return "МТС"
+
+    def __init__(self, actions_data, lock, queue, url, ignore, utils, driver):
         super().__init__()
         self.actions_data = actions_data
         self.lock = lock
         self.queue = queue
         self.url = url
         self.ignore = ignore
+        self.utils = utils
+        self.driver = driver
 
     def run(self):
-        partner_name = 'МТС'
-        page = helper.get_page_use_request(self.url)
-        name = page.h1.text.strip()
+        page = self.utils.ACTIONS_UTIL.get_page_with_driver(self.driver, self.url)
+        action = Action(str(self))
+        action.name = page.h1.text.strip()
         try:
             data_text = page.find_all('div', class_='wrapper')[0].find('p').text.strip()
-            start, end = helper.search_data_in_text(data_text)
-        except:
-            start, end = helper.get_date_now_to_end_month()
-        desc = name
-        code = 'Не требуется'
-        short_desc = ''
-        action_type = helper.check_action_type(code, name, desc)
-        if helper.promotion_is_outdated(end):
+            action.start, action.end = self.utils.DATE_UTIL.search_data_in_text(data_text)
+        except (AttributeError, ValueError, IndexError):
+            action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
+        action.desc = action.name
+        action.code = 'Не требуется'
+        action.short_desc = ''
+        action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+        if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
             self.queue.put('progress')
             return
         if not self.ignore:
-            if actions_exists_in_db(partner_name, name, start, end):
+            if actions_exists_in_db_new(action):
                 self.queue.put('progress')
                 return
-        action = helper.generate_action(partner_name, name, start, end, desc, code, self.url, action_type,short_desc)
         with self.lock:
-            self.actions_data.append(action)
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
             self.queue.put('progress')
