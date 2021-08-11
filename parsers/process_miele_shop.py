@@ -28,7 +28,7 @@ class MieleProcess(Process):
         lock = threading.Lock()
         base_url = 'https://www.miele-shop.ru'
         self.queue.put(f'set {self.count_page}')
-        driver = self.utils.ACTIONS_UTIL.get_webdriver(hidden=False)
+        driver = self.utils.ACTIONS_UTIL.get_webdriver()
         for i in range(1, self.count_page + 1):
             main_url = f'https://www.miele-shop.ru/news/special/?PAGEN_1={i}'
             driver.get(main_url)
