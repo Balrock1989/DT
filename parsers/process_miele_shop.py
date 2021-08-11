@@ -2,11 +2,10 @@ import threading
 from multiprocessing import Process
 from threading import Thread
 
-import requests
 from bs4 import BeautifulSoup
 
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+from database.data_base import actions_exists_in_db_new
+from helpers.Utils import Utils
 from models.action import Action
 
 
@@ -18,67 +17,67 @@ class MieleProcess(Process):
         self.ignore = ignore
         self.count_page = 2
         self.link_selector = '.SpecialOfferPreview-media a'
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Miele-shop"
 
     def run(self):
-        partner_name = 'Miele-shop'
         actions_data = []
         threads = []
         lock = threading.Lock()
         base_url = 'https://www.miele-shop.ru'
         self.queue.put(f'set {self.count_page}')
+        driver = self.utils.ACTIONS_UTIL.get_webdriver(hidden=False)
         for i in range(1, self.count_page + 1):
             main_url = f'https://www.miele-shop.ru/news/special/?PAGEN_1={i}'
-            page = helper.get_page_use_request(main_url)
+            driver.get(main_url)
+            page = BeautifulSoup(driver.page_source, 'lxml')
             divs = page.select('.preview-full__container')
             for div in divs:
-                action = Action(partner_name)
+                action = Action(str(self))
                 action.url = base_url + div.select_one('a.preview-full__wrap').get('href')
                 action.name = div.select_one('.preview-full__title').text.strip()
                 action.code = "Не требуется"
                 action.desc = div.select_one('.preview-full__text').text.strip()
                 action.short_desc = ''
-                action.action_type = helper.check_action_type(action.code, action.name, action.desc)
-                threads.append(MieleThread(actions_data, lock, self.queue, action, self.ignore))
-            self.queue.put(f'set {len(threads)}')
-            helper.start_join_threads(threads)
-            helper.filling_queue(self.queue, actions_data, partner_name)
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action.code, action.name, action.desc)
+                threads.append(MieleThread(actions_data, lock, self.queue, action, self.ignore, self.utils, driver))
+        self.queue.put(f'set {len(threads)}')
+        self.utils.ACTIONS_UTIL.start_join_threads(threads)
+        driver.quit()
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))
 
 
 class MieleThread(Thread):
 
-    def __init__(self, actions_data, lock, queue, action, ignore):
+    def __init__(self, actions_data, lock, queue, action, ignore, utils, driver):
         super().__init__()
         self.actions_data = actions_data
         self.lock = lock
         self.queue = queue
         self.action = action
         self.ignore = ignore
+        self.utils = utils
+        self.driver = driver
 
     def run(self):
-        s = requests.Session()
-        s.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'}
+        self.driver.get(self.action.url)
+        page = BeautifulSoup(self.driver.page_source, 'lxml')
         try:
-            request = s.get(self.action.url, timeout=3)
-        except Exception:
-            self.queue.put('progress')
+            self.action.start, self.action.end = self.utils.DATE_UTIL.convert_list_to_date(
+                self.utils.DATE_UTIL.get_range_date(page.select_one('.content').text.strip()))
+        except AttributeError:
+            self.queue.put(f'Не удалось загрузить данные для "{self.action.name}" из за проблем с датой')
             return
-        page = BeautifulSoup(request.text, 'lxml')
-        self.action.start, self.action.end = helper.convert_list_to_date(
-            helper.get_range_date(page.select_one('.content').text.strip()))
-        if helper.promotion_is_outdated(self.action.end):
+        if self.utils.DATE_UTIL.promotion_is_outdated(self.action.end):
             self.queue.put('progress')
             return
         if not self.ignore:
             with self.lock:
-                if actions_exists_in_db(self.action.partner_name, self.action.name, self.action.start,
-                                        self.action.end):
+                if actions_exists_in_db_new(self.action):
                     self.queue.put('progress')
                     return
-        action = helper.generate_action_new(self.action)
         with self.lock:
-            self.actions_data.append(action)
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(self.action))
             self.queue.put('progress')

@@ -1,7 +1,8 @@
 from multiprocessing import Process
 
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+from database.data_base import actions_exists_in_db_new
+from helpers.Utils import Utils
+from models.action import Action
 
 
 class LabirintProcess(Process):
@@ -10,34 +11,34 @@ class LabirintProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Labirint"
 
     def run(self):
-        partner_name = 'Labirint'
         actions_data = []
         base_url = 'https://www.labirint.ru'
         self.queue.put(f'set 2')
         for i in range(1, 3):
             main_url = f'https://www.labirint.ru/actions/?page={i}'
-            page = helper.get_page_use_request(main_url)
+            page = self.utils.ACTIONS_UTIL.get_page_use_request(main_url)
             divs = page.find_all('div', class_='need-watch')
             for div in divs:
-                url = base_url + div.find('a').get('href')
-                name = div.find('a').get('title').strip()
+                action = Action(str(self))
+                action.url = base_url + div.find('a').get('href')
+                action.name = div.find('a').get('title').strip()
                 date = div.find('div', class_='news-item__dates').text.strip()
-                start, end = helper.search_data_in_text(date)
-                code = "Не требуется"
-                desc = div.find('div', class_='news-item__anons').text.strip()
-                short_desc = ''
-                action_type = helper.check_action_type(code, name, desc)
-                if helper.promotion_is_outdated(end):
+                action.start, action.end = self.utils.DATE_UTIL.search_data_in_text(date)
+                action.code = "Не требуется"
+                action.desc = div.find('div', class_='news-item__anons').text.strip()
+                action.short_desc = ''
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+                if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                     continue
                 if not self.ignore:
-                    if actions_exists_in_db(partner_name, name, start, end):
+                    if actions_exists_in_db_new(action):
                         continue
-                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type,short_desc)
-                actions_data.append(action)
+                actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
             self.queue.put('progress')
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

@@ -75,6 +75,23 @@ class ActionsUtil:
         else:
             return page, driver
 
+    def get_webdriver(self, hidden=True):
+        """Делает запрос на URL и возвращает BS объект страницы используя webdriver, с возможностью скролить страницу"""
+        driver = None
+        if hidden:
+            chrome_options = Options()
+            chrome_options.add_argument("--disable-extensions")
+            chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--headless")
+            try:
+                driver = webdriver.Chrome(chrome_options=chrome_options)
+            except SessionNotCreatedException:
+                self.queue.put('Необходимо обновить версию драйвера https://chromedriver.chromium.org/')
+        else:
+            driver = webdriver.Chrome()
+        Win32.hide_all_chromedriver()
+        return driver
+
     def get_page_use_request(self, url):
         """Делает запрос на URL и возвращает BS объект страницы используя библиотеку request"""
         s = requests.Session()
