@@ -15,15 +15,15 @@ class RozetkaProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.count_page = 20
         self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Розетка"
 
     def run(self):
-        partner_name = 'Розетка'
         actions_data = []
-        self.queue.put(f'set 20')
+        self.queue.put(f'set {self.count_page}')
         s = requests.Session()
         cookie = s.get('https://rozetka.com.ua/news-articles-promotions/promotions/').request.headers.get(
             'cookie')
@@ -33,7 +33,7 @@ class RozetkaProcess(Process):
             'Cookie': cookie
         })
         s.cookies.set('slang', 'ru')
-        for i in range(1, 21):
+        for i in range(1, self.count_page + 1):
             main_url = f'https://rozetka.com.ua/news-articles-promotions/promotions/page={i}/'
             request = s.get(main_url)
             page = BeautifulSoup(request.text, 'lxml')
@@ -41,7 +41,7 @@ class RozetkaProcess(Process):
             for div in divs:
                 if div.get('name') == 'more_promotions':
                     continue
-                action = Action(partner_name)
+                action = Action(str(self))
                 action.url = div.find('a').get('href')
                 action.name = div.find('img', class_='promo-tile__picture').get('title').strip()
                 try:
@@ -55,12 +55,12 @@ class RozetkaProcess(Process):
                 action.code = "Не требуется"
                 action.desc = action.name
                 action.short_desc = ''
-                action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
                 if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                     continue
                 if not self.ignore:
                     if actions_exists_in_db_new(action):
                         continue
-                actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
+                actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

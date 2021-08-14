@@ -12,6 +12,7 @@ class ThomasProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.count_page = 2
         self.utils = Utils(self.queue)
 
     def __str__(self):
@@ -20,8 +21,8 @@ class ThomasProcess(Process):
     def run(self):
         actions_data = []
         base_url = 'https://thomas-muenz.ru'
-        self.queue.put(f'set 2')
-        for i in range(1, 3):
+        self.queue.put(f'set {self.count_page}')
+        for i in range(1, self.count_page + 1):
             main_url = f'https://thomas-muenz.ru/actions/?PAGEN_1={i}'
             page = self.utils.ACTIONS_UTIL.get_page_use_request(main_url)
             divs = page.select('.promo-list__item')
@@ -40,12 +41,12 @@ class ThomasProcess(Process):
                 action.code = "Не требуется"
                 action.desc = div.select_one('.promo-alt-card__text').text.strip()
                 action.short_desc = ''
-                action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
                 if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                     continue
                 if not self.ignore:
                     if actions_exists_in_db_new(action):
                         continue
-                actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
+                actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

@@ -2,8 +2,6 @@ import threading
 from multiprocessing import Process
 from threading import Thread
 
-from bs4 import BeautifulSoup
-
 from database.data_base import actions_exists_in_db_new
 from helpers.Utils import Utils
 from models.action import Action
@@ -40,7 +38,7 @@ class MieleProcess(Process):
                 action.code = "Не требуется"
                 action.desc = div.select_one('.preview-full__text').text.strip()
                 action.short_desc = ''
-                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action.code, action.name, action.desc)
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
                 threads.append(MieleThread(actions_data, lock, self.queue, action, self.ignore, self.utils, driver))
         self.queue.put(f'set {len(threads)}')
         self.utils.ACTIONS_UTIL.start_join_threads(threads)
@@ -77,5 +75,5 @@ class MieleThread(Thread):
                     self.queue.put('progress')
                     return
         with self.lock:
-            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(self.action))
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action(self.action))
             self.queue.put('progress')

@@ -1,8 +1,10 @@
 import re
 import threading
 from multiprocessing import Process
-import helpers.helper as helper
+
 from database.data_base import *
+from helpers.Utils import Utils
+from models.action import Action
 
 
 class UtkonosProcess(Process):
@@ -10,53 +12,52 @@ class UtkonosProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Утконос"
 
     def run(self):
-        partner_name = 'Утконос'
         actions_data = []
         lock = threading.Lock()
-        page = helper.get_page_use_request('https://www.utkonos.ru/action')
+        page = self.utils.ACTIONS_UTIL.get_page_use_request('https://www.utkonos.ru/action')
         divs = page.find_all("utk-action-list-item")
         self.queue.put(f'set {len(divs)}')
         for div in divs:
+            action = Action(str(self))
             try:
-                name = div.find('div', class_='template__content-text').text.strip()
+                action.name = div.find('div', class_='template__content-text').text.strip()
             except AttributeError as exc:
                 self.queue.put(f'{exc}')
-                print('')
                 continue
-            code = 'Не требуется'
-            desc = ''
-            url = 'https://www.utkonos.ru' + div.a.get('href')
+            action.code = 'Не требуется'
+            action.desc = ''
+            action.url = 'https://www.utkonos.ru' + div.a.get('href')
             try:
                 incoming_date = div.find('div', class_='template__content-status').text.strip()
-            except:
+            except (AttributeError, ValueError):
                 incoming_date = ''
             if incoming_date != '':
                 if 'остал' in incoming_date.lower():
                     days = re.search(r'(\d+)', incoming_date.lower()).group(1)
-                    start = helper.DATA_NOW
-                    end = helper.get_date_plus_days(int(days))
+                    action.start = self.utils.DATE_UTIL.DATA_NOW
+                    action.end = self.utils.DATE_UTIL.get_date_plus_days(int(days))
                 elif 'Акция' == incoming_date:
-                    start, end = helper.get_date_now_to_end_month()
+                    action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
                 else:
-                    start, end = helper.get_do_period(incoming_date)
+                    action.start, action.end = self.utils.DATE_UTIL.get_do_period(incoming_date)
             else:
-                start, end = helper.get_date_now_to_end_month()
-            if helper.promotion_is_outdated(end):
+                action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
+            if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                 self.queue.put('progress')
                 continue
-            short_desc = ''
-            action_type = helper.check_action_type(code, name, desc)
+            action.short_desc = ''
+            action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
             if not self.ignore:
                 with lock:
-                    if actions_exists_in_db(partner_name, name, start, end):
+                    if actions_exists_in_db_new(action):
                         self.queue.put('progress')
                         continue
-            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
-            actions_data.append(action)
+            actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

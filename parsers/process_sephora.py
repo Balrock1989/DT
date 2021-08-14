@@ -1,11 +1,14 @@
 import re
 import threading
+from multiprocessing import Process
+from threading import Thread
+
 import requests
 from bs4 import BeautifulSoup
-from threading import Thread
-from multiprocessing import Process
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+
+from database.data_base import actions_exists_in_db_new
+from helpers.Utils import Utils
+from models.action import Action
 
 
 class SephoraProcess(Process):
@@ -14,26 +17,30 @@ class SephoraProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "Сефора"
 
     def run(self):
-        partner_name = 'Sephora'
         actions_data = []
         lock = threading.Lock()
         main_url = 'https://sephora.ru/news/'
-        page = helper.get_page_use_request(main_url)
+        page = self.utils.ACTIONS_UTIL.get_page_use_request(main_url)
         links = page.find_all("a", class_='b-news-thumb__title')
-        threads = [Sephora_thread(actions_data, main_url, link, lock, self.queue, self.ignore) for link in links]
+        threads = [SephoraThread(actions_data, main_url, link, lock, self.queue, self.ignore, self.utils) for link in
+                   links]
         self.queue.put(f'set {len(threads)}')
-        helper.start_join_threads(threads)
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.ACTIONS_UTIL.start_join_threads(threads)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))
 
 
-class Sephora_thread(Thread):
+class SephoraThread(Thread):
 
-    def __init__(self, actions_data, main_url, link, lock, print_queue, ignore):
+    def __str__(self):
+        return "Сефора"
+
+    def __init__(self, actions_data, main_url, link, lock, print_queue, ignore, utils):
         super().__init__()
         self.actions_data = actions_data
         self.main_url = main_url
@@ -41,6 +48,7 @@ class Sephora_thread(Thread):
         self.lock = lock
         self.queue = print_queue
         self.ignore = ignore
+        self.utils = utils
 
     def run(self):
         link = self.main_url[:-5] + self.link['href'][1:]
@@ -48,41 +56,42 @@ class Sephora_thread(Thread):
         page = BeautifulSoup(request.text, 'lxml')
         div = page.find('div', class_='b-news-detailed')
         if div:
+            action = Action(str(self))
             all_p = page.find_all('p')
-            desc = ''
+            action.desc = ''
             for p in all_p:
-                desc += p.text
-            desc = re.sub(r'\s{2,}', '\n', desc).strip()
-            desc = re.sub(r'\xa0', '\n', desc).strip()
-            if len(desc) < 2500:
+                action.desc += p.text
+            action.desc = re.sub(r'\s{2,}', '\n', action.desc).strip()
+            action.desc = re.sub(r'\xa0', '\n', action.desc).strip()
+            if len(action.desc) < 2500:
                 try:
-                    range = helper.get_range_date(desc)
-                    start, end = helper.convert_list_to_date(range)
-                except Exception:
+                    date_range = self.utils.DATE_UTIL.get_range_date(action.desc)
+                    action.start, action.end = self.utils.DATE_UTIL.convert_list_to_date(date_range)
+                except (AttributeError, ValueError):
                     try:
-                        start, end = helper.get_start_date_in_date(desc, True)
-                    except Exception:
+                        action.start, action.end = self.utils.DATE_UTIL.get_start_date_in_date(action.desc, True)
+                    except (AttributeError, ValueError):
                         self.queue.put('progress')
                         return
-                url = link
-                name = page.h1.text
-                desc = desc.replace("На этот номер телефона будет отправлено sms с кодом восстановления:Войди или"
-                                    " зарегистрируйся, чтобы получить все преимущества постоянного покупателя!", '').strip()
-                partner_name = 'Sephora'
-                code = "Не требуется"
-                if helper.promotion_is_outdated(end):
+                action.url = link
+                action.name = page.h1.text
+                action.desc = action.desc.replace(
+                    "На этот номер телефона будет отправлено sms с кодом восстановления:Войди или"
+                    " зарегистрируйся, чтобы получить все преимущества постоянного покупателя!",
+                    '').strip()
+                action.code = "Не требуется"
+                if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                     self.queue.put('progress')
                     return
-                short_desc = ''
-                action_type = helper.check_action_type(code, name, desc)
+                action.short_desc = ''
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
                 if not self.ignore:
                     with self.lock:
-                        if actions_exists_in_db(partner_name, name, start, end):
+                        if actions_exists_in_db_new(action):
                             self.queue.put('progress')
                             return
-                action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
                 with self.lock:
-                    self.actions_data.append(action)
+                    self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
                     self.queue.put('progress')
             else:
                 self.queue.put('progress')

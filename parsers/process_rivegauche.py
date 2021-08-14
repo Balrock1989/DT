@@ -23,7 +23,6 @@ class RivegaucheProcess(Process):
         return "Ривгош"
 
     def run(self):
-        partner_name = 'Ривгош'
         actions_data = []
         threads = []
         lock = threading.Lock()
@@ -32,7 +31,7 @@ class RivegaucheProcess(Process):
         page = self.utils.ACTIONS_UTIL.get_page_use_webdriver(main_url, scroll=True, hidden=True)
         divs = page.select('.b-promo-item')
         for div in divs:
-            action = Action(partner_name)
+            action = Action(str(self))
             action.url = base_url + div.find('a').get('href')
             action.start = self.utils.DATE_UTIL.get_first_day_month()
             action.end = self.utils.DATE_UTIL.get_date_end_month()
@@ -44,7 +43,7 @@ class RivegaucheProcess(Process):
             threads.append(RivegaucheThread(actions_data, lock, self.queue, action, self.ignore, self.utils))
         self.queue.put(f'set {len(threads)}')
         self.utils.ACTIONS_UTIL.start_join_threads(threads)
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))
 
 
 class RivegaucheThread(Thread):
@@ -71,12 +70,12 @@ class RivegaucheThread(Thread):
         self.action.name = page.select_one(
             '[data-smartedit-component-id="ngVerticalCategoryMenuComponent"] .b-label__title').text.strip()
         self.action.desc = self.action.name
-        self.action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(self.action)
+        self.action.action_type = self.utils.ACTIONS_UTIL.check_action_type(self.action)
         if not self.ignore:
             with self.lock:
                 if actions_exists_in_db_new(self.action):
                     self.queue.put('progress')
                     return
         with self.lock:
-            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(self.action))
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action(self.action))
             self.queue.put('progress')

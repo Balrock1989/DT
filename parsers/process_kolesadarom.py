@@ -80,12 +80,12 @@ class KolesadaromThread(Thread):
             self.queue.put('progress')
             return
         self.action.short_desc = ''
-        self.action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(self.action)
+        self.action.action_type = self.utils.ACTIONS_UTIL.check_action_type(self.action)
         if not self.ignore:
             with self.lock:
                 if actions_exists_in_db_new(self.action):
                     self.queue.put('progress')
                     return
         with self.lock:
-            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(self.action))
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action(self.action))
             self.queue.put('progress')

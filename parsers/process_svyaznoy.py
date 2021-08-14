@@ -20,7 +20,6 @@ class SvyaznoyProcess(Process):
         return "Связной"
 
     def run(self):
-        partner_name = 'Связной'
         actions_data = []
         main_url = 'https://www.svyaznoy.ru/special-offers'
         page, driver = self.utils.ACTIONS_UTIL.get_page_use_webdriver(main_url, quit=False)
@@ -32,7 +31,7 @@ class SvyaznoyProcess(Process):
         for link in links:
             driver.get(link)
             page = BeautifulSoup(driver.page_source, 'lxml')
-            action = Action(partner_name)
+            action = Action(str(self))
             action.name = page.h1.text
             date = page.find('div', class_='b-event-info__item').find_all('span', class_='b-event-info__date')
             if len(date) == 2:
@@ -48,7 +47,7 @@ class SvyaznoyProcess(Process):
             action.desc = re.sub(r'\s{2,}', ' ', action.desc).strip()
             action.code = self.utils.ACTIONS_UTIL.find_promo_code(action.desc)
             action.short_desc = ''
-            action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+            action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
             if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                 self.queue.put('progress')
                 continue
@@ -56,7 +55,7 @@ class SvyaznoyProcess(Process):
                 if actions_exists_in_db_new(action):
                     self.queue.put('progress')
                     continue
-            actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
+            actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
         driver.quit()
-        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

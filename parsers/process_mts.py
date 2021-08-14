@@ -2,10 +2,7 @@ import threading
 from multiprocessing import Process
 from threading import Thread
 
-from bs4 import BeautifulSoup
-
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db, actions_exists_in_db_new
+from database.data_base import actions_exists_in_db_new
 from helpers.Utils import Utils
 from models.action import Action
 
@@ -67,7 +64,7 @@ class MtsThread(Thread):
         action.desc = action.name
         action.code = 'Не требуется'
         action.short_desc = ''
-        action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+        action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
         if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
             self.queue.put('progress')
             return
@@ -76,5 +73,5 @@ class MtsThread(Thread):
                 self.queue.put('progress')
                 return
         with self.lock:
-            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
+            self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')

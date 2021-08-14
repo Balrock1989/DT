@@ -13,6 +13,7 @@ import web_driver
 from database.data_base import create_database, print_stat, delete_expired_actions
 from helpers.MyQueue import MyQueue
 from design.custom_design import Ui_MainWindow
+from helpers.Utils import Utils
 from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
 from rename_image import Rename
 from image_sizer import Resizer
@@ -21,7 +22,7 @@ import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
 # pyinstaller main_window.spec --noconfirm
-sys.excepthook = helper.exception_hook
+sys.excepthook = Utils().exception_hook
 
 
 class DT(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -40,8 +41,10 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
         self.browser = None
         self.queue = MyQueue(self)
         self.queue.start()
+        self.utils = Utils(self.queue)
         self.init_buttons()
         self.init_signals()
+
 
     set_partner_name_signal = pyqtSignal(str)
     chat_print_signal = pyqtSignal(str)
@@ -112,8 +115,8 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def init_buttons(self):
         """Инициализация кнопок интерфейса"""
-        helper.generate_csv()
-        self.date_start.append(helper.DATA_NOW)
+        self.utils.CSV_UTIL.generate_csv()
+        self.date_start.append(self.utils.DATE_UTIL.DATA_NOW)
         self.path_buttom.clicked.connect(self.get_path)
         self.rename_button.clicked.connect(self.rename)
         self.run_browser.clicked.connect(self.launch_thread_dt)

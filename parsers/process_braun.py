@@ -48,7 +48,7 @@ class BraunProcess(Process):
             else:
                 action.code = 'Не требуется'
             action.short_desc = ''
-            action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+            action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
             if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                 self.queue.put('progress')
                 continue
@@ -56,7 +56,7 @@ class BraunProcess(Process):
                 if actions_exists_in_db_new(action):
                     self.queue.put('progress')
                     continue
-            action = self.utils.ACTIONS_UTIL.generate_action_new(action)
+            action = self.utils.ACTIONS_UTIL.generate_action(action)
             actions_data.append(action)
             self.queue.put('progress')
         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

@@ -1,8 +1,10 @@
 import re
 import threading
 from multiprocessing import Process
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+
+from database.data_base import actions_exists_in_db_new
+from helpers.Utils import Utils
+from models.action import Action
 
 
 class VseinstrumentiProcess(Process):
@@ -10,49 +12,50 @@ class VseinstrumentiProcess(Process):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
+        self.utils = Utils(self.queue)
 
     def __str__(self):
         return "ВсеИнструменты"
 
     def run(self):
-        partner_name = 'Все инструменты'
         actions_data = []
-        page = helper.get_page_use_webdriver('https://www.vseinstrumenti.ru/our_actions/aktsii')
+        page = self.utils.ACTIONS_UTIL.get_page_use_webdriver('https://www.vseinstrumenti.ru/our_actions/aktsii')
         divs = page.find_all("div", class_='action_main')
         lock = threading.Lock()
         self.queue.put(f'set {len(divs)}')
         for div in divs:
-            name = div.find('div', class_='action_header').a.text.strip()
-            code = 'Не требуется'
-            url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
+            action = Action(str(self))
+            action.name = div.find('div', class_='action_header').a.text.strip()
+            action.code = 'Не требуется'
+            action.url = 'https://www.vseinstrumenti.ru/our_actions/aktsii'
             try:
-                desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
-            except:
+                action.desc = div.find('div', class_='act_descr').find_all('p')[3].text.strip()
+            except AttributeError:
                 try:
-                    desc = div.find('div', class_='act_descr').text.strip()
-                    desc = re.search(r'.*\n.*\n.*\n(.*)', desc).group(1).strip()
-                except:
-                    desc = div.find('div', class_='act_descr').find('p').text.strip()
+                    action.desc = div.find('div', class_='act_descr').text.strip()
+                    action.desc = re.search(r'.*\n.*\n.*\n(.*)', action.desc).group(1).strip()
+                except AttributeError:
+                    action.desc = div.find('div', class_='act_descr').find('p').text.strip()
             try:
                 incoming_date = div.find('div', class_='act_descr').find_all('p')[0].text.strip()
-            except:
+            except AttributeError:
                 incoming_date = div.find('div', class_='act_descr').find_all('div')[0].text.strip()
             incoming_date = re.search(r'(\d.*)\–\s(.*)', incoming_date.lower())
             try:
-                start, end = helper.get_double_date(incoming_date.group(1), incoming_date.group(2))
-            except:
-                start, end = helper.get_date_now_to_end_month()
-            if helper.promotion_is_outdated(end):
+                action.start, action.end = self.utils.DATE_UTIL.get_double_date(incoming_date.group(1),
+                                                                                incoming_date.group(2))
+            except (AttributeError, ValueError):
+                action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
+            if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                 self.queue.put('progress')
                 continue
-            short_desc = ''
-            action_type = helper.check_action_type(code, name, desc)
+            action.short_desc = ''
+            action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
             if not self.ignore:
                 with lock:
-                    if actions_exists_in_db(partner_name, name, start, end):
+                    if actions_exists_in_db_new(action):
                         self.queue.put('progress')
                         continue
-            action = helper.generate_action(partner_name, name, start, end, desc, code, url, action_type, short_desc)
-            actions_data.append(action)
+            actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
-        helper.filling_queue(self.queue, actions_data, partner_name)
+        self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

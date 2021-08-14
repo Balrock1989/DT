@@ -19,19 +19,7 @@ class ActionsUtil:
     def __init__(self, queue):
         self.queue = queue
 
-    # TODO Удалить
-    def check_action_type(self, code, name, desc):
-        if 'требуется' not in code:
-            action_type = 'купон'
-        elif 'подарок' in name.lower() or 'подарок' in desc.lower():
-            action_type = 'подарок'
-        elif 'доставка' in desc.lower() or 'доставка' in desc.lower():
-            action_type = 'доставка'
-        else:
-            action_type = 'скидка'
-        return action_type
-
-    def check_action_type_new(self, action):
+    def check_action_type(self, action):
         if 'требуется' not in action.code:
             action_type = 'купон'
         elif 'подарок' in action.name.lower() or 'подарок' in action.desc.lower():
@@ -44,6 +32,7 @@ class ActionsUtil:
 
     def get_page_use_webdriver(self, url, scroll=False, quit=True, hidden=False):
         """Делает запрос на URL и возвращает BS объект страницы используя webdriver, с возможностью скролить страницу"""
+        driver = None
         if hidden:
             chrome_options = Options()
             chrome_options.add_argument("--disable-extensions")
@@ -145,14 +134,7 @@ class ActionsUtil:
             queue.put(f'Не удалось скачать баннер: {link}')
             print(exc)
 
-    def generate_action(self, partner_name, action_name, date_start, date_end, description, code, url, action_type,
-                        short_desc):
-        """Сборка акции для дальнейшей записи в CSV"""
-        return {'Имя партнера': partner_name, 'Название акции': action_name, 'Дата начала': date_start,
-                'Дата окончания': date_end, 'Условия акции': description,
-                'Купон': code, 'URL': url, 'Тип купона': action_type, 'Короткое описание': short_desc}
-
-    def generate_action_new(self, action):
+    def generate_action(self, action):
         """Сборка акции для дальнейшей записи в CSV"""
         return {'Имя партнера': action.partner_name,
                 'Название акции': action.name,

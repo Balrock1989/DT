@@ -40,12 +40,12 @@ class MaxiProProcess(Process):
                 self.queue.put('progress')
                 continue
             action.short_desc = ''
-            action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+            action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
             if not self.ignore:
                 with lock:
                     if actions_exists_in_db_new(action):
                         self.queue.put('progress')
                         continue
-            actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
+            actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

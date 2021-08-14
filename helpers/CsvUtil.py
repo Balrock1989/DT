@@ -7,7 +7,8 @@ from helpers.Paths import HOME_PATH
 
 
 class CsvUtil:
-    HEADERS = ['Тип купона', 'Название акции', 'Дата начала', 'Дата окончания', 'Условия акции', 'Купон', 'URL', 'Имя партнера', 'Короткое описание']
+    HEADERS = ['Тип купона', 'Название акции', 'Дата начала', 'Дата окончания', 'Условия акции', 'Купон', 'URL',
+               'Имя партнера', 'Короткое описание']
 
     def __init__(self):
         self.actions_csv_path = os.path.join('C:\\', HOME_PATH, 'Desktop', "actions.csv")

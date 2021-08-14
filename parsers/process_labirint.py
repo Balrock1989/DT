@@ -33,12 +33,12 @@ class LabirintProcess(Process):
                 action.code = "Не требуется"
                 action.desc = div.find('div', class_='news-item__anons').text.strip()
                 action.short_desc = ''
-                action.action_type = self.utils.ACTIONS_UTIL.check_action_type_new(action)
+                action.action_type = self.utils.ACTIONS_UTIL.check_action_type(action)
                 if self.utils.DATE_UTIL.promotion_is_outdated(action.end):
                     continue
                 if not self.ignore:
                     if actions_exists_in_db_new(action):
                         continue
-                actions_data.append(self.utils.ACTIONS_UTIL.generate_action_new(action))
+                actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

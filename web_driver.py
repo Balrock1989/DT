@@ -3,25 +3,24 @@ import os
 import re
 import shutil
 import threading
-from http.cookiejar import Cookie
+from datetime import datetime, timedelta
 from time import sleep
 
 from PyQt5.QtCore import QThread
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from datetime import datetime, timedelta
-from selenium.webdriver.support.select import Select
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutException, \
     NoSuchFrameException, NoSuchElementException
-import auth
-import helpers.helper as helper
-from database.data_base import actions_exists_in_db
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.ui import WebDriverWait
 
+import auth
+from database.data_base import actions_exists_in_db_new
 from helpers import Win32
+from helpers.Utils import Utils
+from models.action import Action
+from selenium import webdriver
 
 
 class WebThread(QThread):
@@ -56,6 +55,7 @@ class WebDriver:
         self.gui = gui
         self.ignore = gui.ignore_database
         self.queue = gui.queue.queue
+        self.utils = Utils(self.queue)
 
     def auth(self):
         """Запуск браузера и авторизация на сайтах"""
@@ -80,7 +80,6 @@ class WebDriver:
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
         self.driver.get(auth.coupon_ad)
-
 
     @Win32.show_window
     def add_banner(self):
@@ -137,7 +136,7 @@ class WebDriver:
         self.queue.put(f'В работе "{len(links)}" баннер(ов) из папки: {dir_name}')
         self.queue.put(f'Дата начала акции:{self.start_data}, Дата окончания акции:{self.end_data}, url: {self.url}')
         if not self.start_data:
-            self.start_data = helper.DATA_NOW
+            self.start_data = self.utils.DATE_UTIL.DATA_NOW
         self.gui.change_progress_signal.emit(len(links))
         thread = threading.Thread(target=run, args=(links,), daemon=True)
         thread.start()
@@ -161,38 +160,38 @@ class WebDriver:
             self.gui.change_progress_signal.emit(len(actions))
             for act in actions:
                 partner = act.findAll('b', text=True)[1].text.strip()
-                name = act.find('p', {'class': 'h3-name'}).text.strip()
+                action = Action(partner)
+                action.name = act.find('p', {'class': 'h3-name'}).text.strip()
                 now = datetime.now()
                 try:
                     full_date = act.find("b", text=re.compile('.*\s*(\d+.\d+.\d+)')).text.strip()
                 except AttributeError:
-                    end = now + timedelta(days=180)
-                    full_date = str(now.strftime('%d.%m.%Y')) + "-" + end.strftime('%d.%m.%Y')
+                    action.end = now + timedelta(days=180)
+                    full_date = str(now.strftime('%d.%m.%Y')) + "-" + action.end.strftime('%d.%m.%Y')
                 temp = ''.join(str(full_date).split())
-                url = ''
-                code = 'Не требуется'
-                short_desc = ''
-                start = datetime.strptime(re.search(r'^(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
-                end = datetime.strptime(re.search(r'-(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
-                diff_date = end - start
+                action.url = ''
+                action.code = 'Не требуется'
+                action.short_desc = ''
+                action.start = datetime.strptime(re.search(r'^(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
+                action.end = datetime.strptime(re.search(r'-(\d+.\d+.\d{4})', temp).group(1), '%d.%m.%Y')
+                diff_date = action.end - action.start
                 if diff_date.days > 180:
-                    end = start + timedelta(days=180)
-                start = start.strftime('%d.%m.%Y')
-                end = end.strftime('%d.%m.%Y')
-                action_type = 'скидка'
-                desc = act.findAll('p', text=True)[1].text.strip() if \
+                    action.end = action.start + timedelta(days=180)
+                action.start = action.start.strftime('%d.%m.%Y')
+                action.end = action.end.strftime('%d.%m.%Y')
+                action.action_type = 'скидка'
+                action.desc = act.findAll('p', text=True)[1].text.strip() if \
                     len(act.findAll('p', text=True)) > 1 else ''
                 if not self.ignore.isChecked():
                     with lock:
-                        if actions_exists_in_db(partner, name, start, end):
+                        if actions_exists_in_db_new(action):
                             continue
-                action = helper.generate_action(partner, name, start, end, desc, code, url, action_type, short_desc)
-                self.actions_data.append(action)
+                self.actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
                 self.queue.put('progress')
             if len(self.actions_data) == 0:
                 self.queue.put(f'Акции по {partner} не найдены ')
             else:
-                self.queue.put(helper.write_csv(self.actions_data))
+                self.queue.put(self.utils.CSV_UTIL.write_csv(self.actions_data))
                 self.queue.put((partner,))
                 self.queue.put(self.actions_data)
             if self.driver.current_window_handle != self.ad_window and \
@@ -206,11 +205,12 @@ class WebDriver:
     @Win32.show_window
     def add_actions(self):
         """Добавление акций на основе полученных данных"""
+
         def add():
             partner_name = ''
-            count = helper.get_count_suitable_actions(self.gui)
+            count = self.utils.CSV_UTIL.get_count_suitable_actions(self.gui)
             self.gui.change_progress_signal.emit(count)
-            with open(helper.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
+            with open(self.utils.CSV_UTIL.actions_csv_path, 'r', encoding='utf-8', newline='') as csv_file:
                 csv_data = csv.DictReader(csv_file, delimiter=';')
                 for action in csv_data:
                     self.driver.switch_to_window(self.dt_window)
@@ -229,9 +229,10 @@ class WebDriver:
                         Win32.show_process()
                         return
                     # Акции которые есть в CSV но не подходят по партнеру записываем во временный файл, чтобы сохранить.
-                    if self.gui.partner_name.count() > 1 and action['Имя партнера'] != self.gui.partner_name.currentText() and self.gui.partner_name.currentText() != 'actions.csv':
+                    if self.gui.partner_name.count() > 1 and action[
+                        'Имя партнера'] != self.gui.partner_name.currentText() and self.gui.partner_name.currentText() != 'actions.csv':
                         with open("actions_temp.csv", "a", newline="", encoding="utf-8") as csv_file:
-                            writer = csv.DictWriter(csv_file, fieldnames=helper.HEADERS, delimiter=";")
+                            writer = csv.DictWriter(csv_file, fieldnames=self.utils.CSV_UTIL.HEADERS, delimiter=";")
                             writer.writerow(action)
                         continue
                     form = self.driver.find_element_by_css_selector('form[id="createVoucherForm"]')
@@ -243,15 +244,15 @@ class WebDriver:
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
                     self.driver.get(auth.coupun_url + id)
                     self.gui.queue.queue.put('progress')
-            os.remove(helper.actions_csv_path)
-            shutil.move('actions_temp.csv', helper.actions_csv_path)
+            os.remove(self.utils.CSV_UTIL.actions_csv_path)
+            shutil.move('actions_temp.csv', self.utils.CSV_UTIL.actions_csv_path)
             self.gui.del_partner_name_signal.emit(partner_name)
             self.queue.put(f'Акции успешно добавлены ({count} шт.)') if count else \
                 self.queue.put('Нет акций выбранного партнера')
             self.gui.reset_progress_signal.emit()
             Win32.show_process()
 
-        helper.generate_temp_csv()
+        self.utils.CSV_UTIL.generate_temp_csv()
         self.driver.switch_to_window(self.dt_window)
         threading.Thread(target=add, args=(), daemon=True).start()
 
@@ -272,7 +273,7 @@ class WebDriver:
             return
         links = set(map(lambda x: x.get_attribute('href'), links))
         links = list(links)
-        helper.banner_downloader(links, self.gui.queue.queue)
+        self.utils.ACTIONS_UTIL.banner_downloader(links, self.gui.queue.queue)
 
     def fill_field_actions(self, action, header):
 
@@ -308,8 +309,8 @@ class WebDriver:
         end_date.send_keys(action['Дата окончания'])
         short_description.send_keys(action['Короткое описание'] + '!') if action['Короткое описание'] \
             else short_description.send_keys(action['Название акции'] + '!')
-        digit_in_name = helper.check_digit(action['Название акции'])
-        digit_in_desc = helper.check_digit(action['Условия акции'])
+        digit_in_name = self.utils.ACTIONS_UTIL.check_digit(action['Название акции'])
+        digit_in_desc = self.utils.ACTIONS_UTIL.check_digit(action['Условия акции'])
         if action['Условия акции']:
             description.send_keys(action['Условия акции'] + '!')
         else:
