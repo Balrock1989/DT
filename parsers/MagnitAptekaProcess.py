@@ -20,10 +20,8 @@ class MagnitAptekaProcess(Process):
         actions_data = []
         actions = []
         base_url = 'https://apteka.magnit.ru'
-
-        driver = self.utils.ACTIONS_UTIL.get_webdriver(hidden=False)
         main_url = f'https://apteka.magnit.ru/actions/'
-        page = self.utils.ACTIONS_UTIL.get_page_with_driver(driver, main_url)
+        page = self.utils.ACTIONS_UTIL.get_page_use_request(main_url)
         divs = page.select('.action-item')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
@@ -34,7 +32,7 @@ class MagnitAptekaProcess(Process):
             actions.append(action)
         self.queue.put(f'set {len(actions)}')
         for action in actions:
-            page = self.utils.ACTIONS_UTIL.get_page_with_driver(driver, action.url)
+            page = self.utils.ACTIONS_UTIL.get_page_use_request(action.url)
             action.name = page.select_one('.promo-page__title').text.strip()
             action.code = "Не требуется"
             action.desc = page.select_one('.promo-page__main-text').text.strip()
@@ -52,5 +50,4 @@ class MagnitAptekaProcess(Process):
                     continue
             actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
             self.queue.put('progress')
-        driver.quit()
         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))
