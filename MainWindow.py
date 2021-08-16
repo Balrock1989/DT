@@ -9,18 +9,18 @@ from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QDir, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
-import web_driver
-from database.data_base import create_database, print_stat, delete_expired_actions
+import WebDriver
+from database.DataBase import create_database, print_stat, delete_expired_actions
 from helpers.MyQueue import MyQueue
 from design.UiMainWindow import UiMainWindow
 from helpers.Utils import Utils
 from helpers.CustomDialogParser import CustomDialogResizer, CustomDialogParser
-from rename_image import Rename
-from image_sizer import Resizer
+from RenameImage import RenameImage
+from ImageSizer import ImageSizer
 from helpers import GlobalHotKey, Logger
 import helpers.helper as helper
 
-# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." main_window.py
+# pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." MainWindow.py
 # pyinstaller main_window.spec --noconfirm
 sys.excepthook = Utils().exception_hook
 
@@ -136,14 +136,14 @@ class DT(QtWidgets.QMainWindow, UiMainWindow):
 
     def rename(self):
         """Вызов функции для переименовывания баннеров"""
-        rename = Rename()
+        rename = RenameImage()
         rename.rename_image(gui=self,
                             end_data=self.date_end.toPlainText(),
                             checkbox=self.rename_checbox.isChecked())
 
     def resizer(self):
         """Вызов функции для изменения размера баннеров"""
-        self.sizer = Resizer()
+        self.sizer = ImageSizer()
         self.sizer.exit = False
         self.sizer.resize_image(gui=self, end_data=self.date_end.toPlainText())
 
@@ -151,7 +151,7 @@ class DT(QtWidgets.QMainWindow, UiMainWindow):
         """Запуск потока для браузера"""
         # win32.close_all_chromedriver()
         if self.web_thread is None:
-            self.web_thread = web_driver.WebThread(mainwindow=self)
+            self.web_thread = WebDriver.WebThread(mainwindow=self)
             self.web_thread.start()
         else:
             self.try_start_browser += 1

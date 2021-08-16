@@ -4,31 +4,31 @@ from design.UiDialogParser import UiDialogParser as Ui_Dialog_parser
 from design.UiDialogResizer import UiDialogResizer as Ui_Dialog_resizer
 from helpers.StartNewProcess import StartNewProcess
 from parsers.MagnitAptekaProcess import MagnitAptekaProcess
-from parsers.process_braun import BraunProcess
-from parsers.process_miele_shop import MieleProcess
-from parsers.process_mixit import MixitProcess
-from parsers.process_philips import PhilipsProcess
-from parsers.InteresProcess import Interes_1c_process
+from parsers.BraunProcess import BraunProcess
+from parsers.MieleProcess import MieleProcess
+from parsers.MixitProcess import MixitProcess
+from parsers.PhilipsProcess import PhilipsProcess
+from parsers.InteresProcess import InteresProcess
 from parsers.BethovenProcess import BethovenProcess
-from parsers.process_book import BookProcess
-from parsers.process_holodilnik import HolodilnikProcess
-from parsers.process_kolesadarom import KolesadaromProcess
-from parsers.process_kotofoto import KotofotoProcess
-from parsers.process_la_roche import LaRocheProcess
-from parsers.process_labirint import LabirintProcess
-from parsers.process_maxi_pro import MaxiProProcess
-from parsers.process_mts import MtsProcess
-from parsers.process_pharmacosmetica import PharmacosmeticaProcess
-from parsers.process_rivegauche import RivegaucheProcess
-from parsers.process_rozetka import RozetkaProcess
-from parsers.process_santehnika_tut import SantehnikaTutProcess
-from parsers.process_sephora import SephoraProcess
-from parsers.process_svyaznoy import SvyaznoyProcess
-from parsers.process_tddomovoy import DomovoyProcess
-from parsers.process_thomas import ThomasProcess
-from parsers.process_toy import ToyProcess
-from parsers.process_utkonos import UtkonosProcess
-from parsers.process_vseintrumenti import VseinstrumentiProcess
+from parsers.BookProcess import BookProcess
+from parsers.HolodilnikProcess import HolodilnikProcess
+from parsers.KolesadaromProcess import KolesadaromProcess
+from parsers.KotofotoProcess import KotofotoProcess
+from parsers.LaRocheProcess import LaRocheProcess
+from parsers.LabirintProcess import LabirintProcess
+from parsers.MaxiProProcess import MaxiProProcess
+from parsers.MtsProcess import MtsProcess
+from parsers.PharmacosmeticaProcess import PharmacosmeticaProcess
+from parsers.RivegaucheProcess import RivegaucheProcess
+from parsers.RozetkaProcess import RozetkaProcess
+from parsers.SantehnikaTutProcess import SantehnikaTutProcess
+from parsers.SephoraProcess import SephoraProcess
+from parsers.SvyaznoyProcess import SvyaznoyProcess
+from parsers.DomovoyProcess import DomovoyProcess
+from parsers.ThomasProcess import ThomasProcess
+from parsers.ToyProcess import ToyProcess
+from parsers.UtkonosProcess import UtkonosProcess
+from parsers.VseinstrumentiProcess import VseinstrumentiProcess
 
 
 class CustomDialogParser(QDialog, Ui_Dialog_parser):
@@ -91,7 +91,7 @@ class CustomDialogParser(QDialog, Ui_Dialog_parser):
         if self.maxi_pro.isChecked():
             processes.append(StartNewProcess(self.mainwindow, MaxiProProcess))
         if self.interes_1c.isChecked():
-            processes.append(StartNewProcess(self.mainwindow, Interes_1c_process))
+            processes.append(StartNewProcess(self.mainwindow, InteresProcess))
         if self.philips.isChecked():
             processes.append(StartNewProcess(self.mainwindow, PhilipsProcess))
         if self.domovoy.isChecked():

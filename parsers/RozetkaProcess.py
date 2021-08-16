@@ -4,9 +4,9 @@ from multiprocessing import Process
 import requests
 from bs4 import BeautifulSoup
 
-from database.data_base import actions_exists_in_db_new
+from database.DataBase import actions_exists_in_db_new
 from helpers.Utils import Utils
-from models.action import Action
+from models.Action import Action
 
 
 class RozetkaProcess(Process):

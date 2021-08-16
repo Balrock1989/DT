@@ -2,9 +2,9 @@ import re
 import threading
 from multiprocessing import Process
 
-from database.data_base import *
+from database.DataBase import *
 from helpers.Utils import Utils
-from models.action import Action
+from models.Action import Action
 
 
 class UtkonosProcess(Process):

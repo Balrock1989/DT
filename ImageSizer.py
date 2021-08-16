@@ -4,7 +4,7 @@ from PIL import Image
 # Нужно ставить Pillow
 
 
-class Resizer:
+class ImageSizer:
     def __init__(self):
         self.basewidth = 0
         self.baseheight = 0

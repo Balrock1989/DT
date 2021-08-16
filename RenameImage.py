@@ -6,7 +6,7 @@ from random import randint
 from PIL import Image
 # Нужно ставить Pillow
 
-class Rename:
+class RenameImage:
 
     def rename_image(self, gui, end_data, checkbox):
         """Обработка загруженных баннеров, форматирование имени"""

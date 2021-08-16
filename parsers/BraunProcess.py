@@ -1,47 +1,45 @@
 import re
 from multiprocessing import Process
 
-from database.data_base import actions_exists_in_db_new
+from database.DataBase import actions_exists_in_db_new
 from helpers.Utils import Utils
-from models.action import Action
+from models.Action import Action
 
 
-class MixitProcess(Process):
+class BraunProcess(Process):
 
     def __init__(self, queue, ignore):
         super().__init__()
         self.queue = queue.queue
         self.ignore = ignore
-        self.link_selector = '.SpecialOfferPreview-media a'
+        self.link_selector = '.imageBlock a'
         self.utils = Utils(self.queue)
 
     def __str__(self):
-        return "Mixit"
+        return "Braun"
 
     def run(self):
         actions_data = []
-        url_base = 'https://mixit.ru'
-        page = self.utils.ACTIONS_UTIL.get_page_use_webdriver('https://mixit.ru/special-offers', hidden=True)
-        divs = page.select('.SpecialOfferList-item')
+        base_url = 'https://braun-russia.ru'
+        page = self.utils.ACTIONS_UTIL.get_page_use_request('https://braun-russia.ru/actions')
+        divs = page.select('.bm2-cat-item')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
             if div.select_one(self.link_selector) is None:
                 continue
             action = Action(str(self))
-            action.url = url_base + div.select_one(self.link_selector).get('href').strip()
-            action.name = div.select_one('.Media-picture').get('alt').strip()
-            action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
+            action.url = div.select_one(self.link_selector).get('href').strip()
+            if 'http' not in action.url:
+                action.url = base_url + action.url
+            action.name = div.select_one(self.link_selector).get('title').strip()
             try:
-                date = div.select_one('.SpecialOfferPreview-expireCaption').text.strip()
-                if 'дне' in date:
-                    day_end_action = re.search(r'(\d+)', date)
-                    action.end = self.utils.DATE_UTIL.get_date_plus_days(int(day_end_action.group(1)))
-                elif 'месяц' in date:
-                    month_end_action = re.search(r'(\d+)', date)
-                    action.end = self.utils.DATE_UTIL.get_date_plus_days(int(month_end_action.group(1)) * 30)
+                date = div.select_one('.daysleft').text.strip()
+                date_end_action = re.search(r'(\d+)', date)
+                action.start = self.utils.DATE_UTIL.DATA_NOW
+                action.end = self.utils.DATE_UTIL.get_date_plus_days(int(date_end_action.group(1)))
             except AttributeError:
-                self.queue.put('log error when processing dates')
-            action.desc = div.select_one('.SpecialOfferPreview-description').text.strip()
+                action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
+            action.desc = div.select_one('.teaser').text.strip()
             if 'промокод' in action.name.lower():
                 try:
                     action.code = re.search(r'([A-Z0-9]+)', action.name).group(1)
@@ -58,6 +56,7 @@ class MixitProcess(Process):
                 if actions_exists_in_db_new(action):
                     self.queue.put('progress')
                     continue
-            actions_data.append(self.utils.ACTIONS_UTIL.generate_action(action))
+            action = self.utils.ACTIONS_UTIL.generate_action(action)
+            actions_data.append(action)
             self.queue.put('progress')
         self.utils.CSV_UTIL.filling_queue(self.queue, actions_data, str(self))

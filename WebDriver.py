@@ -15,11 +15,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-import auth
-from database.data_base import actions_exists_in_db_new
+import Auth
+from database.DataBase import actions_exists_in_db_new
 from helpers import Win32
 from helpers.Utils import Utils
-from models.action import Action
+from models.Action import Action
 from selenium import webdriver
 
 
@@ -71,15 +71,15 @@ class WebDriver:
         # options.add_argument("--profile-directory=Profile 5")
         self.driver = webdriver.Chrome(chrome_options=options)
         Win32.hide_chrome_console()
-        self.driver.get(auth.auth_url_dt)
+        self.driver.get(Auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
-        self.driver.find_element_by_id('username').send_keys(auth.username_dt)
-        self.driver.find_element_by_id('password').send_keys(auth.password_dt)
+        self.driver.find_element_by_id('username').send_keys(Auth.username_dt)
+        self.driver.find_element_by_id('password').send_keys(Auth.password_dt)
         self.driver.find_element_by_class_name('submit').click()
         self.driver.execute_script('window.open('');')
         self.ad_window = self.driver.window_handles[1]
         self.driver.switch_to_window(self.ad_window)
-        self.driver.get(auth.coupon_ad)
+        self.driver.get(Auth.coupon_ad)
 
     @Win32.show_window
     def add_banner(self):
@@ -242,7 +242,7 @@ class WebDriver:
                     self.driver.switch_to_default_content()
                     sleep(1)
                     self.driver.find_element_by_id('VOUCHERS_MERCHANT_AD_MANAGEMENT_VOUCHERS_CREATE').click()
-                    self.driver.get(auth.coupun_url + id)
+                    self.driver.get(Auth.coupun_url + id)
                     self.gui.queue.queue.put('progress')
             os.remove(self.utils.CSV_UTIL.actions_csv_path)
             shutil.move('actions_temp.csv', self.utils.CSV_UTIL.actions_csv_path)
