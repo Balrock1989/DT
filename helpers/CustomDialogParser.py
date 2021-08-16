@@ -1,14 +1,15 @@
 from PyQt5.QtWidgets import QDialog
 
-from design.custom_dialog_parser import Ui_Dialog as Ui_Dialog_parser
-from design.custom_dialog_resizer import Ui_Dialog as Ui_Dialog_resizer
+from design.UiDialogParser import UiDialogParser as Ui_Dialog_parser
+from design.UiDialogResizer import UiDialogResizer as Ui_Dialog_resizer
 from helpers.StartNewProcess import StartNewProcess
+from parsers.MagnitAptekaProcess import MagnitAptekaProcess
 from parsers.process_braun import BraunProcess
 from parsers.process_miele_shop import MieleProcess
 from parsers.process_mixit import MixitProcess
 from parsers.process_philips import PhilipsProcess
-from parsers.process_1c_interes import Interes_1c_process
-from parsers.process_bethoven import BethovenProcess
+from parsers.InteresProcess import Interes_1c_process
+from parsers.BethovenProcess import BethovenProcess
 from parsers.process_book import BookProcess
 from parsers.process_holodilnik import HolodilnikProcess
 from parsers.process_kolesadarom import KolesadaromProcess
@@ -30,7 +31,7 @@ from parsers.process_utkonos import UtkonosProcess
 from parsers.process_vseintrumenti import VseinstrumentiProcess
 
 
-class CustomDialog_parser(QDialog, Ui_Dialog_parser):
+class CustomDialogParser(QDialog, Ui_Dialog_parser):
     """Класс для кастомизации диалогового окна"""
 
     def __init__(self, mainwindow):
@@ -61,8 +62,8 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
             processes.append(StartNewProcess(self.mainwindow, HolodilnikProcess))
         if self.kolesadarom.isChecked():
             processes.append(StartNewProcess(self.mainwindow, KolesadaromProcess))
-        # if self.volt.isChecked():
-        #     processes.append(StartNewProcess(self.mainwindow, Volt_process))
+        if self.magnit_apteka.isChecked():
+            processes.append(StartNewProcess(self.mainwindow, MagnitAptekaProcess))
         # if self.respublica.isChecked():
         #     processes.append(StartNewProcess(self.mainwindow, Respublica_process))
         if self.svyaznoy.isChecked():
@@ -104,7 +105,7 @@ class CustomDialog_parser(QDialog, Ui_Dialog_parser):
         self.close()
 
 
-class CustomDialog_resizer(QDialog, Ui_Dialog_resizer):
+class CustomDialogResizer(QDialog, Ui_Dialog_resizer):
     """Класс для кастомизации диалогового окна"""
 
     def __init__(self, sizer, message, size):

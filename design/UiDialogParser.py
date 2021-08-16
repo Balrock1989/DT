@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Dialog(object):
+class UiDialogParser(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName('Dialog')
         Dialog.resize(500, 200)
@@ -110,6 +110,13 @@ class Ui_Dialog(object):
         # self.label_volt = QtWidgets.QLabel(Dialog)
         # self.label_volt.setGeometry(QtCore.QRect(150, 65, 90, 30))
         # self.label_volt.setObjectName('label_volt')
+
+        self.magnit_apteka = QtWidgets.QCheckBox(Dialog)
+        self.magnit_apteka.setGeometry(QtCore.QRect(130, 70, 20, 20))
+        self.magnit_apteka.setObjectName('magnit_apteka')
+        self.label_magnit_apteka = QtWidgets.QLabel(Dialog)
+        self.label_magnit_apteka.setGeometry(QtCore.QRect(150, 65, 90, 30))
+        self.label_magnit_apteka.setObjectName('label_magnit_apteka')
 
         # self.respublica = QtWidgets.QCheckBox(Dialog)
         # self.respublica.setGeometry(QtCore.QRect(130, 90, 20, 20))
@@ -263,7 +270,7 @@ class Ui_Dialog(object):
         self.label_book.setText(_translate('Dialog', 'Book24'))
         self.label_holodilnik.setText(_translate('Dialog', 'Холодильник'))
         self.label_kolesadarom.setText(_translate('Dialog', 'Колеса даром'))
-        # self.label_volt.setText(_translate('Dialog', '220 Volt'))
+        self.label_magnit_apteka.setText(_translate('Dialog', 'Магнит-аптека'))
         # self.label_respublica.setText(_translate('Dialog', 'Республика'))
         self.label_svyaznoy.setText(_translate('Dialog', 'Связной'))
         self.label_pharmacosmetica.setText(_translate('Dialog', 'ФармКосметика'))

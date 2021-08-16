@@ -122,7 +122,7 @@ class DateUtil:
                     text = re.search(r'(\d+\s\w+\s\d*.*по\s\d+\s\w+\s\d*)', text).group(1).strip()
                     data = text.split('по')
                 except AttributeError:
-                    text = re.search(r'(\d+-\d+\s\w+\s\d*)', text).group(1).strip()
+                    text = re.search(r'(\d+\s?\w*\s?\d*?-\s?\d+\s?\w*\s?\d*?)', text).group(1).strip()
                     data = text.split('-')
         return data
 

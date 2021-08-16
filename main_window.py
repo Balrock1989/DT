@@ -12,9 +12,9 @@ from PyQt5.QtWidgets import QFileDialog
 import web_driver
 from database.data_base import create_database, print_stat, delete_expired_actions
 from helpers.MyQueue import MyQueue
-from design.custom_design import Ui_MainWindow
+from design.UiMainWindow import UiMainWindow
 from helpers.Utils import Utils
-from helpers.dialogs import CustomDialog_resizer, CustomDialog_parser
+from helpers.CustomDialogParser import CustomDialogResizer, CustomDialogParser
 from rename_image import Rename
 from image_sizer import Resizer
 from helpers import GlobalHotKey, Logger
@@ -25,7 +25,7 @@ import helpers.helper as helper
 sys.excepthook = Utils().exception_hook
 
 
-class DT(QtWidgets.QMainWindow, Ui_MainWindow):
+class DT(QtWidgets.QMainWindow, UiMainWindow):
     """Основной поток для работы интерфейса"""
 
     def __init__(self):
@@ -168,21 +168,21 @@ class DT(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def show_dialog_width(self):
         """Открытие диалога для смены размера по высоте"""
-        dialog = CustomDialog_resizer(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
-                                      size=f'{self.sizer.w} x {self.sizer.h}')
+        dialog = CustomDialogResizer(self.sizer, message=f'{self.sizer.count}Введите ШИРИНУ:',
+                                     size=f'{self.sizer.w} x {self.sizer.h}')
         dialog.show()
         dialog.exec_()
 
     def show_dialog_heigth(self):
         """Открытие диалога для смены размера по ширине"""
-        dialog = CustomDialog_resizer(self.sizer, message=f'{self.sizer.count}Введите ВЫСОТУ:',
-                                      size=f'{self.sizer.w} x {self.sizer.h}')
+        dialog = CustomDialogResizer(self.sizer, message=f'{self.sizer.count}Введите ВЫСОТУ:',
+                                     size=f'{self.sizer.w} x {self.sizer.h}')
         dialog.show()
         dialog.exec_()
 
     def show_parser_checklist(self):
         """Открытие диалога для выбора парсеров"""
-        dialog = CustomDialog_parser(self)
+        dialog = CustomDialogParser(self)
         dialog.show()
         dialog.exec_()
 

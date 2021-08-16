@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QProgressBar
 from helpers.Paths import RESULT_PATH
 
 
-class Ui_MainWindow(object):
+class UiMainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName('DTMainWindow')
         MainWindow.resize(869, 500)
