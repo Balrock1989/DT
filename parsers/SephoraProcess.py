@@ -3,9 +3,6 @@ import threading
 from multiprocessing import Process
 from threading import Thread
 
-import requests
-from bs4 import BeautifulSoup
-
 from database.DataBase import actions_exists_in_db_new
 from helpers.Utils import Utils
 from models.Action import Action
@@ -52,8 +49,7 @@ class SephoraThread(Thread):
 
     def run(self):
         link = self.main_url[:-5] + self.link['href'][1:]
-        request = requests.get(link)
-        page = BeautifulSoup(request.text, 'lxml')
+        page = self.utils.ACTIONS_UTIL.get_page_use_request(link)
         div = page.find('div', class_='b-news-detailed')
         if div:
             action = Action(str(self))

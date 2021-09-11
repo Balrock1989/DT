@@ -18,10 +18,9 @@ from helpers.CustomDialogParser import CustomDialogResizer, CustomDialogParser
 from RenameImage import RenameImage
 from ImageSizer import ImageSizer
 from helpers import GlobalHotKey, Logger
-import helpers.helper as helper
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." MainWindow.py
-# pyinstaller main_window.spec --noconfirm
+# pyinstaller MainWindow.spec --noconfirm
 sys.excepthook = Utils().exception_hook
 
 

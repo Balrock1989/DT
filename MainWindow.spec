@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['main_window.py'],
+a = Analysis(['MainWindow.py'],
              pathex=['C:\\Users\\SMOKE\\PycharmProjects\\DT'],
              binaries=[],
              datas=[('chromedriver.exe', '.'), ('icon.png', '.')],
@@ -21,7 +21,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='main_window',
+          name='MainWindow',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -34,4 +34,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='main_window')
+               name='MainWindow')

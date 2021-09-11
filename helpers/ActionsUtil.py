@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import SessionNotCreatedException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
+from urllib3.exceptions import RequestError
 
 from helpers import Win32
 from helpers.Paths import RESULT_PATH
@@ -86,13 +87,16 @@ class ActionsUtil:
         page = BeautifulSoup(driver.page_source, 'lxml')
         return page
 
-
     def get_page_use_request(self, url):
         """Делает запрос на URL и возвращает BS объект страницы используя библиотеку request"""
         s = requests.Session()
         s.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0', })
-        request = s.get(url)
+        try:
+            request = s.get(url, timeout=3)
+        except RequestError as exc:
+            print(f'Не удалось выполнить запрос к {url}')
+            raise exc
         return BeautifulSoup(request.text, 'lxml')
 
     def start_join_threads(self, threads):
