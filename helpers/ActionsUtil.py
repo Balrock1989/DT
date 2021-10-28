@@ -10,6 +10,7 @@ from selenium import webdriver
 from selenium.common.exceptions import SessionNotCreatedException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from urllib3.exceptions import RequestError
+from webdriver_manager.chrome import ChromeDriverManager
 
 from helpers import Win32
 from helpers.Paths import RESULT_PATH
@@ -40,11 +41,11 @@ class ActionsUtil:
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--headless")
             try:
-                driver = webdriver.Chrome(chrome_options=chrome_options)
+                driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
             except SessionNotCreatedException:
                 self.queue.put('Необходимо обновить версию драйвера https://chromedriver.chromium.org/')
         else:
-            driver = webdriver.Chrome()
+            driver = webdriver.Chrome(ChromeDriverManager().install(), )
         Win32.hide_all_chromedriver()
         driver.get(url)
         if scroll:
@@ -74,11 +75,11 @@ class ActionsUtil:
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--headless")
             try:
-                driver = webdriver.Chrome(chrome_options=chrome_options)
+                driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
             except SessionNotCreatedException:
                 self.queue.put('Необходимо обновить версию драйвера https://chromedriver.chromium.org/')
         else:
-            driver = webdriver.Chrome()
+            driver = webdriver.Chrome(ChromeDriverManager().install(), )
         Win32.hide_all_chromedriver()
         return driver
 

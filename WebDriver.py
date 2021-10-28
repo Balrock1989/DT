@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 import Auth
 from database.DataBase import actions_exists_in_db_new
@@ -69,7 +70,7 @@ class WebDriver:
         options.add_argument(f"--user-data-dir={os.path.normpath(selenium_path)}")
         # options.add_argument("--user-data-dir=C:\\Users\\SMOKE\\AppData\\Local\\Google\\Chrome\\User Data")
         # options.add_argument("--profile-directory=Profile 5")
-        self.driver = webdriver.Chrome(chrome_options=options)
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         Win32.hide_chrome_console()
         self.driver.get(Auth.auth_url_dt)
         self.dt_window = self.driver.current_window_handle
