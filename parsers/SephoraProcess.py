@@ -24,7 +24,7 @@ class SephoraProcess(Process):
         lock = threading.Lock()
         main_url = 'https://sephora.ru/news/'
         page = self.utils.ACTIONS_UTIL.get_page_use_request(main_url)
-        links = page.find_all("a", class_='b-news-thumb__title')
+        links = page.select('.b-news-thumb__image a[href*="actions"]')
         threads = [SephoraThread(actions_data, main_url, link, lock, self.queue, self.ignore, self.utils) for link in
                    links]
         self.queue.put(f'set {len(threads)}')
@@ -50,7 +50,7 @@ class SephoraThread(Thread):
     def run(self):
         link = self.main_url[:-5] + self.link['href'][1:]
         page = self.utils.ACTIONS_UTIL.get_page_use_request(link)
-        div = page.find('div', class_='b-news-detailed')
+        div = page.select_one('.b-news-detailed')
         if div:
             action = Action(str(self))
             all_p = page.find_all('p')
@@ -67,8 +67,7 @@ class SephoraThread(Thread):
                     try:
                         action.start, action.end = self.utils.DATE_UTIL.get_start_date_in_date(action.desc, True)
                     except (AttributeError, ValueError):
-                        self.queue.put('progress')
-                        return
+                        action.start, action.end = self.utils.DATE_UTIL.get_date_now_to_end_month()
                 action.url = link
                 action.name = page.h1.text
                 action.desc = action.desc.replace(
