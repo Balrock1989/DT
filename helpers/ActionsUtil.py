@@ -75,6 +75,7 @@ class ActionsUtil:
         while True:
             before_scroll = driver.execute_script("return document.querySelectorAll('" + elem_locator + "').length;")
             driver.execute_script(scroll_script)
+            sleep(1)
             after_scroll = driver.execute_script("return document.querySelectorAll('" + elem_locator + "').length;")
             if before_scroll == after_scroll:
                 break
