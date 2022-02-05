@@ -66,6 +66,21 @@ class ActionsUtil:
         else:
             return page, driver
 
+    def get_page_use_webdriver_with_scroll_into_elem(self, url, elem_locator):
+        """Делает запрос на URL и возвращает BS объект страницы используя webdriver, с возможностью скролить страницу"""
+        driver = webdriver.Chrome(ChromeDriverManager().install(), )
+        Win32.hide_all_chromedriver()
+        driver.get(url)
+        scroll_script = "document.querySelectorAll('utk-action-list-item').forEach(e => { e.scrollIntoView(); })"
+        while True:
+            before_scroll = driver.execute_script("return document.querySelectorAll('" + elem_locator + "').length;")
+            driver.execute_script(scroll_script)
+            after_scroll = driver.execute_script("return document.querySelectorAll('" + elem_locator + "').length;")
+            if before_scroll == after_scroll:
+                break
+        page = BeautifulSoup(driver.page_source, 'lxml').find_all(elem_locator)
+        return page
+
     def get_webdriver(self, hidden=True):
         """Делает запрос на URL и возвращает BS объект страницы используя webdriver, с возможностью скролить страницу"""
         driver = None

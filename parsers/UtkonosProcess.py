@@ -20,8 +20,7 @@ class UtkonosProcess(Process):
     def run(self):
         actions_data = []
         lock = threading.Lock()
-        page = self.utils.ACTIONS_UTIL.get_page_use_request('https://www.utkonos.ru/action')
-        divs = page.find_all("utk-action-list-item")
+        divs = self.utils.ACTIONS_UTIL.get_page_use_webdriver_with_scroll_into_elem('https://www.utkonos.ru/action',                                                                        'utk-action-list-item')
         self.queue.put(f'set {len(divs)}')
         for div in divs:
             action = Action(str(self))

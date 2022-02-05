@@ -20,7 +20,7 @@ from ImageSizer import ImageSizer
 from helpers import GlobalHotKey, Logger
 
 # pyinstaller --onedir --noconsole --add-data "chromedriver.exe;." --add-data "icon.png;." MainWindow.py
-# pyinstaller MainWindow.spec --noconfirm
+# pyinstaller mainwindow.spec --noconfirm
 sys.excepthook = Utils().exception_hook
 
 
